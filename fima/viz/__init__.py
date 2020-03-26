@@ -1,5 +1,6 @@
 from .tfr_chan import plot_tfr
 from .tfr_time import plot_tfr_time
+from .surf import plot_surf
 
 from plotly.offline import plot, get_plotlyjs
 
