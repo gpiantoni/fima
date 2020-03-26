@@ -1,0 +1,6 @@
+P = dict(
+    colorscale='jet',
+    )
+
+
+
