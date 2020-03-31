@@ -2,7 +2,7 @@ from pathlib import Path
 
 PROJ_DIR = Path('/Fridge/users/giovanni/projects/')
 PROJ_DIR = Path('/home/gio/projects/')
-RESULTS_DIR = PROJ_DIR / 'finger_mapping/results/spectrogram/'
+SPECTRUM_DIR = PROJ_DIR / 'finger_mapping/results/spectrum_interactive/'
 BIDS_DIR = PROJ_DIR / 'finger_mapping/subjects'
 FREESURFER_DIR = PROJ_DIR / 'finger_mapping/freesurfer/'
 
