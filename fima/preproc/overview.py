@@ -1,114 +1,114 @@
 from wonambi import Dataset
+from wonambi.datatype import Data
 from wonambi.trans import montage, frequency
-from numpy import arange, array, histogram, log10
+from numpy import arange, array, histogram, log10, empty, copy
 import plotly.graph_objects as go
-from pathlib import Path
 
 from .read import select_events
 from ..viz import to_div, to_html
+from ..utils import make_name
+from ..parameters import OVERVIEW_DIR
 
 
 def plot_raw_overview(filename):
-    event_list = 'all'
+    event_type = 'all'
+
+    if filename.name.startswith('sub-drouwen'):
+        CHANS = ['IH01', ]
+    elif filename.name.startswith('sub-vledder'):
+        CHANS = ['chan1', 'chan64']
+    elif '_acq-blackrock_' in filename.name:
+        CHANS = ['chan1', 'chan128']
+    else:
+        print('you need to specify reference channel for this test')
+        return
 
     d = Dataset(filename, bids=True)
-    event_names, event_onsets = select_events(d, event_list)
+    event_names, event_onsets = select_events(d, event_type)
 
     is_ecog = d.dataset.task.channels.tsv['type'] == 'ECOG'
     is_seeg = d.dataset.task.channels.tsv['type'] == 'SEEG'
     chans = array(d.header['chan_name'])[is_ecog | is_seeg]
     data = d.read_data(begtime=event_onsets[0], endtime=event_onsets[-1], chan=list(chans))
 
-    data = montage(data, ref_chan=['chan1', 'chan64'])  # which chans?
+    data = montage(data, ref_chan=CHANS)
     freq = frequency(data, taper='hann', duration=2, overlap=0.5)
 
-    print('*' * data.number_of('chan')[0])
+    hist = make_histogram(data, max=250, step=10)
     divs = []
-    for one_chan in data.chan[0]:
-        print('.', end='')
-        fig = plot_raw_one_chan(data, freq, one_chan)
-        divs.append(to_div(fig))
+    fig = plot_hist(hist)
+    divs.append(to_div(fig))
+    fig = plot_freq(freq)
+    divs.append(to_div(fig))
 
-    to_html(divs, Path('/Fridge/users/giovanni/projects/finger_mapping/results/overview/vledder_blackrock_run-1.html'))
+    to_html(divs, OVERVIEW_DIR / make_name(filename, event_type))
 
 
-def plot_raw_one_chan(data, freq, chan):
-    v, h = histogram(
-        data(trial=0, chan=chan),
-        bins=arange(-250, 250 + 10, 10),
-        density=True)
-
-    trace1 = go.Scatter(
-        x=data.time[0],
-        y=data(trial=0, chan=chan),
-        line=dict(
-            color='black',
+def plot_hist(hist):
+    fig = go.Figure(
+        go.Heatmap(
+            y=hist.bins[0],
+            z=hist(trial=0).T,
+            zmin=0,
+            zmax=1,
+            colorscale='YlOrRd',
+        ),
+        layout=go.Layout(
+            xaxis=dict(
+                title='channels',
+                tickmode='array',
+                tickvals=arange(hist.number_of('chan')[0]),
+                ticktext=hist.chan[0],
             ),
-        xaxis="x",
-        yaxis="y"
-        )
-
-    trace2 = go.Bar(
-        x=h + 10 / 2,
-        y=v,
-        xaxis="x2",
-        yaxis="y2",
-        marker=dict(
-            color='black',
+            yaxis=dict(
+                title='voltage bins',
+            ),
             ),
         )
-
-    trace3 = go.Scatter(
-        x=freq.freq[0],
-        y=freq(trial=0, chan=chan),
-        line=dict(
-            color='black',
-            ),
-        xaxis="x3",
-        yaxis="y3"
-        )
-
-    layout = go.Layout(
-        title=chan,
-        showlegend=False,
-        xaxis=dict(
-            title=dict(
-                text='time (s)',
-                standoff=0,
-                ),
-            domain=[0, 1],
-            ),
-        yaxis=dict(
-            title='amplitude (μV)',
-            range=(-250, 250),
-            domain=[0.55, 1],
-            ),
-        xaxis2=dict(
-            title='amplitude (μV)',
-            domain=[0, 0.45],
-            anchor='y2',
-            ),
-        yaxis2=dict(
-            title='density',
-            range=(0, 0.01),
-            domain=[0, 0.45],
-            anchor='x2',
-            ),
-        xaxis3=dict(
-            title='frequency (Hz)',
-            type='log',
-            range=(log10(1), log10(200)),
-            domain=[0.55, 1],
-            anchor='y3',
-            ),
-        yaxis3=dict(
-            title='amplitude (μV²/Hz)',
-            type='log',
-            range=(log10(0.01), log10(1000)),
-            domain=[0, 0.45],
-            anchor='x3',
-            ),
-        )
-
-    fig = go.Figure(data=[trace1, trace2, trace3], layout=layout)
     return fig
+
+
+def plot_freq(freq):
+    fig = go.Figure(
+        go.Heatmap(
+            y=freq.freq[0],
+            z=10 * log10(freq.data[0].T),
+            colorscale='jet',
+        ),
+        layout=go.Layout(
+            xaxis=dict(
+                title='channels',
+                tickmode='array',
+                tickvals=arange(freq.number_of('chan')[0]),
+                ticktext=freq.chan[0],
+            ),
+            yaxis=dict(
+                title='frequency (Hz)',
+                type='log',
+                range=(log10(1), log10(200)),
+            ),
+            ),
+        )
+    return fig
+
+
+def make_histogram(data, max=250, step=10):
+    output = Data()
+    output.axis['chan'] = copy(data.axis['chan'])
+    output.axis['bins'] = empty(data.number_of('trial'), dtype='O')
+    output.data = empty(data.number_of('trial'), dtype='O')
+
+    bins = arange(-max, max + step, step)
+
+    X = empty((data.number_of('chan')[0], len(bins) - 1))
+    for i, chan in enumerate(data.chan[0]):
+        v, h = histogram(
+            data(trial=0, chan=chan),
+            bins=bins,
+            density=True)
+        X[i, :] = v * 100
+
+    output.axis['bins'][0] = bins[:-1] + step / 2
+    output.data[0] = X
+
+    return output
