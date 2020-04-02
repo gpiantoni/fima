@@ -18,7 +18,7 @@ def plot_raw_overview(filename):
 
     if filename.name.startswith('sub-drouwen'):
         CHANS = ['IH01', ]
-    elif filename.name.startswith('sub-vledder'):
+    elif filename.name.startswith('sub-vledder') or filename.name.startswith('sub-ommen') :
         CHANS = ['chan1', 'chan64']
     elif '_acq-blackrock_' in filename.name:
         CHANS = ['chan1', 'chan128']
@@ -72,7 +72,7 @@ def plot_raw_overview(filename):
         algorithm.negative_outlier_factor_,
         prediction,
         yaxis_title='distance',
-        yaxis_type='log')
+        yaxis_type='linear')
     divs.append(to_div(fig))
 
     to_html(divs, OVERVIEW_DIR / make_name(filename, event_type))
