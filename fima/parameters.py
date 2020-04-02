@@ -11,6 +11,14 @@ SPECTRUM_DIR = RESULTS_DIR / 'spectrum_interactive/'
 
 
 P = dict(
+    data_quality=dict(
+        histogram=dict(
+            contamination=0.04,
+            ),
+        spectrum=dict(
+            n_neighbors=20,
+            ),
+        ),
     viz=dict(
         colorscale='jet',
         tfr=dict(

@@ -4,10 +4,13 @@ from wonambi.trans import montage, frequency
 from numpy import arange, array, histogram, log10, empty, copy
 import plotly.graph_objects as go
 
+from sklearn.covariance import EllipticEnvelope
+from sklearn.neighbors import LocalOutlierFactor
+
 from .read import select_events
 from ..viz import to_div, to_html
 from ..utils import make_name
-from ..parameters import OVERVIEW_DIR
+from ..parameters import OVERVIEW_DIR, P
 
 
 def plot_raw_overview(filename):
@@ -38,10 +41,45 @@ def plot_raw_overview(filename):
     divs = []
     fig = plot_hist(hist)
     divs.append(to_div(fig))
+
+    algorithm = EllipticEnvelope(
+        contamination=P['data_quality']['histogram']['contamination'])
+    prediction = algorithm.fit(hist.data[0]).predict(hist.data[0])
+    bad_chans = set(data.chan[0][prediction == -1])
+    print('bad channels with histogram / elliptic envelope: ' + ', '.join(bad_chans))
+
+    fig = plot_outliers(
+        hist.chan[0],
+        algorithm.dist_,
+        prediction,
+        yaxis_title='distance',
+        yaxis_type='log')
+    divs.append(to_div(fig))
+
     fig = plot_freq(freq)
     divs.append(to_div(fig))
 
+    algorithm = LocalOutlierFactor(
+        n_neighbors=P['data_quality']['spectrum']['n_neighbors'])
+    prediction = algorithm.fit_predict(freq.data[0])
+
+    new_bad_chans = set(data.chan[0][prediction == -1])
+    print('bad channels with spectrum / local outlier factor: ' + ', '.join(new_bad_chans))
+    bad_chans |= new_bad_chans
+    fig = plot_outliers(
+        freq.chan[0],
+        algorithm.negative_outlier_factor_,
+        prediction,
+        yaxis_title='distance',
+        yaxis_type='log')
+    divs.append(to_div(fig))
+
     to_html(divs, OVERVIEW_DIR / make_name(filename, event_type))
+
+    # we use again the reference channel. Ref channel was handpicked but it might have a weird spectrum
+    bad_chans -= CHANS
+
+    return bad_chans
 
 
 def plot_hist(hist):
@@ -112,3 +150,43 @@ def make_histogram(data, max=250, step=10):
     output.data[0] = X
 
     return output
+
+
+def plot_outliers(chans, metric, prediction, yaxis_title, yaxis_type='linear'):
+    tickvals = arange(chans.shape[0])
+
+    fig = go.Figure([
+        go.Scatter(
+            x=tickvals[prediction == 1],
+            y=metric[prediction == 1],
+            name='inlier',
+            mode='markers',
+            marker=dict(
+                color='black',
+                ),
+            ),
+        go.Scatter(
+            x=tickvals[prediction == -1],
+            y=metric[prediction == -1],
+            name='outlier',
+            mode='markers',
+            marker=dict(
+                color='red',
+                ),
+            ),
+        ],
+        layout=go.Layout(
+            xaxis=dict(
+                title='channels',
+                tickmode='array',
+                tickvals=tickvals,
+                ticktext=chans,
+                range=(0, len(chans)),
+                ),
+            yaxis=dict(
+                title=yaxis_title,
+                type=yaxis_type,
+                ),
+            ),
+        )
+    return fig
