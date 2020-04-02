@@ -45,8 +45,9 @@ def plot_raw_overview(filename):
     algorithm = EllipticEnvelope(
         contamination=P['data_quality']['histogram']['contamination'])
     prediction = algorithm.fit(hist.data[0]).predict(hist.data[0])
-    bad_chans = set(data.chan[0][prediction == -1])
-    print('bad channels with histogram / elliptic envelope: ' + ', '.join(bad_chans))
+    new_bad_chans = data.chan[0][prediction == -1]
+    print('bad channels with histogram / elliptic envelope: ' + ', '.join(new_bad_chans))
+    bad_chans = set(new_bad_chans)
 
     fig = plot_outliers(
         hist.chan[0],
@@ -63,9 +64,9 @@ def plot_raw_overview(filename):
         n_neighbors=P['data_quality']['spectrum']['n_neighbors'])
     prediction = algorithm.fit_predict(freq.data[0])
 
-    new_bad_chans = set(data.chan[0][prediction == -1])
+    new_bad_chans = data.chan[0][prediction == -1]
     print('bad channels with spectrum / local outlier factor: ' + ', '.join(new_bad_chans))
-    bad_chans |= new_bad_chans
+    bad_chans |= set(new_bad_chans)
     fig = plot_outliers(
         freq.chan[0],
         algorithm.negative_outlier_factor_,
@@ -77,7 +78,7 @@ def plot_raw_overview(filename):
     to_html(divs, OVERVIEW_DIR / make_name(filename, event_type))
 
     # we use again the reference channel. Ref channel was handpicked but it might have a weird spectrum
-    bad_chans -= CHANS
+    bad_chans -= set(CHANS)
 
     return bad_chans
 
