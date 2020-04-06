@@ -8,17 +8,20 @@ from sklearn.covariance import EllipticEnvelope
 from sklearn.neighbors import LocalOutlierFactor
 
 from .read import select_events
-from ..viz import to_div, to_html
-from ..utils import make_name
-from ..parameters import OVERVIEW_DIR, P
+from ..viz import to_div
+from ..parameters import P
 
 
 def plot_raw_overview(filename):
     event_type = 'all'
 
     if filename.name.startswith('sub-drouwen'):
-        CHANS = ['IH01', ]
-    elif filename.name.startswith('sub-vledder') or filename.name.startswith('sub-ommen') :
+        CHANS = [f'IH0{x + 1}' for x in range(8)]
+    elif filename.name.startswith('sub-lemmer'):
+        CHANS = [f'IH{x + 1}' for x in range(8)]
+    elif filename.name.startswith('sub-som705'):
+        CHANS = [f'GA0{x + 1}' for x in range(8)]  # a bit random
+    elif filename.name.startswith('sub-vledder') or filename.name.startswith('sub-ommen'):
         CHANS = ['chan1', 'chan64']
     elif '_acq-blackrock_' in filename.name:
         CHANS = ['chan1', 'chan128']
@@ -75,12 +78,11 @@ def plot_raw_overview(filename):
         yaxis_type='linear')
     divs.append(to_div(fig))
 
-    to_html(divs, OVERVIEW_DIR / make_name(filename, event_type))
 
     # we use again the reference channel. Ref channel was handpicked but it might have a weird spectrum
     bad_chans -= set(CHANS)
 
-    return bad_chans
+    return bad_chans, divs
 
 
 def plot_hist(hist):

@@ -5,6 +5,7 @@ from ..utils import make_name
 from ..viz import to_div, to_html
 from ..parameters import BIDS_DIR, DATAGLOVE_DIR
 
+
 def pipeline_dataglove():
     for physio_tsv in BIDS_DIR.rglob('*_rec-dataglove_physio.tsv.gz'):
         print(physio_tsv.stem)
