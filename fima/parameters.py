@@ -6,7 +6,8 @@ BIDS_DIR = PROJ_DIR / 'subjects'
 FREESURFER_DIR = PROJ_DIR / 'freesurfer/'
 
 RESULTS_DIR = PROJ_DIR / 'results'
-OVERVIEW_DIR = RESULTS_DIR / 'overview'
+DATAGLOVE_DIR = RESULTS_DIR / 'dataglove'
+OVERVIEW_DIR = RESULTS_DIR / 'data_quality'
 SPECTRUM_DIR = RESULTS_DIR / 'spectrum_interactive/'
 
 
