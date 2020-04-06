@@ -1,7 +1,7 @@
 from wonambi import Dataset
 from wonambi.datatype import Data
 from wonambi.trans import montage, frequency
-from numpy import arange, array, histogram, log10, empty, copy
+from numpy import arange, array, histogram, log10, empty, copy, isnan
 import plotly.graph_objects as go
 
 from sklearn.covariance import EllipticEnvelope
@@ -11,23 +11,28 @@ from .read import select_events
 from ..viz import to_div
 from ..parameters import P
 
+AUTOMATIC = False
 
 def plot_raw_overview(filename):
     event_type = 'all'
 
     if filename.name.startswith('sub-drouwen'):
         CHANS = [f'IH0{x + 1}' for x in range(8)]
+    elif filename.name.startswith('sub-itens'):
+        CHANS = [f'C0{x + 1}' for x in range(8)]
     elif filename.name.startswith('sub-lemmer'):
         CHANS = [f'IH{x + 1}' for x in range(8)]
     elif filename.name.startswith('sub-som705'):
         CHANS = [f'GA0{x + 1}' for x in range(8)]  # a bit random
+    elif filename.name.startswith('sub-ommen'):
+        CHANS = ['chan1', 'chan2']  # I dont 'understand why I cannot use 'chan64'
     elif filename.name.startswith('sub-vledder') or filename.name.startswith('sub-ommen'):
         CHANS = ['chan1', 'chan64']
     elif '_acq-blackrock_' in filename.name:
         CHANS = ['chan1', 'chan128']
     else:
         print('you need to specify reference channel for this test')
-        return
+        return None, None
 
     d = Dataset(filename, bids=True)
     event_names, event_onsets = select_events(d, event_type)
@@ -36,6 +41,7 @@ def plot_raw_overview(filename):
     is_seeg = d.dataset.task.channels.tsv['type'] == 'SEEG'
     chans = array(d.header['chan_name'])[is_ecog | is_seeg]
     data = d.read_data(begtime=event_onsets[0], endtime=event_onsets[-1], chan=list(chans))
+    data.data[0][isnan(data.data[0])] = 0  # ignore nan
 
     data = montage(data, ref_chan=CHANS)
     freq = frequency(data, taper='hann', duration=2, overlap=0.5)
@@ -45,42 +51,45 @@ def plot_raw_overview(filename):
     fig = plot_hist(hist)
     divs.append(to_div(fig))
 
-    algorithm = EllipticEnvelope(
-        contamination=P['data_quality']['histogram']['contamination'])
-    prediction = algorithm.fit(hist.data[0]).predict(hist.data[0])
-    new_bad_chans = data.chan[0][prediction == -1]
-    print('bad channels with histogram / elliptic envelope: ' + ', '.join(new_bad_chans))
-    bad_chans = set(new_bad_chans)
+    bad_chans = None
 
-    fig = plot_outliers(
-        hist.chan[0],
-        algorithm.dist_,
-        prediction,
-        yaxis_title='distance',
-        yaxis_type='log')
-    divs.append(to_div(fig))
+    if AUTOMATIC:
+        algorithm = EllipticEnvelope(
+            contamination=P['data_quality']['histogram']['contamination'])
+        prediction = algorithm.fit(hist.data[0]).predict(hist.data[0])
+        new_bad_chans = data.chan[0][prediction == -1]
+        print('bad channels with histogram / elliptic envelope: ' + ', '.join(new_bad_chans))
+        bad_chans = set(new_bad_chans)
+
+        fig = plot_outliers(
+            hist.chan[0],
+            algorithm.dist_,
+            prediction,
+            yaxis_title='distance',
+            yaxis_type='log')
+        divs.append(to_div(fig))
 
     fig = plot_freq(freq)
     divs.append(to_div(fig))
 
-    algorithm = LocalOutlierFactor(
-        n_neighbors=P['data_quality']['spectrum']['n_neighbors'])
-    prediction = algorithm.fit_predict(freq.data[0])
+    if AUTOMATIC:
+        algorithm = LocalOutlierFactor(
+            n_neighbors=P['data_quality']['spectrum']['n_neighbors'])
+        prediction = algorithm.fit_predict(freq.data[0])
 
-    new_bad_chans = data.chan[0][prediction == -1]
-    print('bad channels with spectrum / local outlier factor: ' + ', '.join(new_bad_chans))
-    bad_chans |= set(new_bad_chans)
-    fig = plot_outliers(
-        freq.chan[0],
-        algorithm.negative_outlier_factor_,
-        prediction,
-        yaxis_title='distance',
-        yaxis_type='linear')
-    divs.append(to_div(fig))
+        new_bad_chans = data.chan[0][prediction == -1]
+        print('bad channels with spectrum / local outlier factor: ' + ', '.join(new_bad_chans))
+        bad_chans |= set(new_bad_chans)
+        fig = plot_outliers(
+            freq.chan[0],
+            algorithm.negative_outlier_factor_,
+            prediction,
+            yaxis_title='distance',
+            yaxis_type='linear')
+        divs.append(to_div(fig))
 
-
-    # we use again the reference channel. Ref channel was handpicked but it might have a weird spectrum
-    bad_chans -= set(CHANS)
+        # we use again the reference channel. Ref channel was handpicked but it might have a weird spectrum
+        bad_chans -= set(CHANS)
 
     return bad_chans, divs
 

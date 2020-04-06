@@ -9,5 +9,7 @@ def pipeline_dataquality():
         print(filename.stem)
 
         divs = plot_raw_overview(filename)[1]
+        if divs is None:
+            continue
         fig_name = make_name(filename, 'dataquality')
         to_html(divs, OVERVIEW_DIR / fig_name)
