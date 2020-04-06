@@ -44,6 +44,8 @@ def _plot_dataglove(tsv, events):
     fig
     for ev in events:
         tt = ev['trial_type']
+        if tt == 'n/a':
+            continue
         finger, movement = tt.split(' ')[:2]
         if finger not in FINGERS:
             continue
