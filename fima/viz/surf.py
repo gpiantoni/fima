@@ -16,14 +16,14 @@ AXIS = dict(
 
 def plot_surf(data, elec, pial=None):
 
-    right_or_left = (elec['x'] > 0).sum() / elec.shape[0] - .5
+    right_or_left = sign((elec['x'] > 0).sum() / elec.shape[0] - .5)
 
     traces = []
     if pial is not None:
         pial_mesh = go.Mesh3d(
-            x=pial.vert[:, 0],
+            x=pial.vert[:, 0] + right_or_left,
             y=pial.vert[:, 1],
-            z=pial.vert[:, 2],
+            z=pial.vert[:, 2] + 0.5,
             i=pial.tri[:, 0],
             j=pial.tri[:, 1],
             k=pial.tri[:, 2],
@@ -80,7 +80,7 @@ def plot_surf(data, elec, pial=None):
                 zaxis=AXIS,
                 camera=dict(
                     eye=dict(
-                        x=sign(right_or_left),
+                        x=right_or_left,
                         y=0,
                         z=0.5,
                     ),
