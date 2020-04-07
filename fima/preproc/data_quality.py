@@ -4,8 +4,6 @@ from wonambi.trans import montage, frequency
 from numpy import arange, array, histogram, log10, empty, copy, isnan
 import plotly.graph_objects as go
 
-from sklearn.covariance import EllipticEnvelope
-from sklearn.neighbors import LocalOutlierFactor
 
 from .read import select_events
 from ..viz import to_div
@@ -54,6 +52,8 @@ def plot_raw_overview(filename):
     bad_chans = None
 
     if AUTOMATIC:
+        from sklearn.covariance import EllipticEnvelope
+
         algorithm = EllipticEnvelope(
             contamination=P['data_quality']['histogram']['contamination'])
         prediction = algorithm.fit(hist.data[0]).predict(hist.data[0])
@@ -73,6 +73,8 @@ def plot_raw_overview(filename):
     divs.append(to_div(fig))
 
     if AUTOMATIC:
+        from sklearn.neighbors import LocalOutlierFactor
+
         algorithm = LocalOutlierFactor(
             n_neighbors=P['data_quality']['spectrum']['n_neighbors'])
         prediction = algorithm.fit_predict(freq.data[0])
