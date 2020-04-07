@@ -1,7 +1,10 @@
 from pathlib import Path
+from platform import node
 
-PROJ_DIR = Path('/home/gio/projects/finger_mapping')
-PROJ_DIR = Path('/Fridge/users/giovanni/projects/finger_mapping')
+if node() == 'archxps':
+    PROJ_DIR = Path('/home/gio/projects/finger_mapping')
+else:
+    PROJ_DIR = Path('/Fridge/users/giovanni/projects/finger_mapping')
 BIDS_DIR = PROJ_DIR / 'subjects'
 FREESURFER_DIR = PROJ_DIR / 'freesurfer/'
 
