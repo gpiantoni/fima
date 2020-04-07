@@ -30,6 +30,18 @@ def plot_surf(data, elec, pial=None):
             color='pink',
             hoverinfo='skip',
             flatshading=False,
+            lighting=dict(
+                ambient=0.18,
+                diffuse=1,
+                fresnel=0.1,
+                specular=1,
+                roughness=0.1,
+                ),
+            lightposition=dict(
+                x=0,
+                y=0,
+                z=-1,
+                ),
             )
         traces.append(pial_mesh)
 
