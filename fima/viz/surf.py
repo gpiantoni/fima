@@ -21,9 +21,9 @@ def plot_surf(data, elec, pial=None):
     traces = []
     if pial is not None:
         pial_mesh = go.Mesh3d(
-            x=pial.vert[:, 0] + right_or_left,
+            x=pial.vert[:, 0],
             y=pial.vert[:, 1],
-            z=pial.vert[:, 2] + 0.5,
+            z=pial.vert[:, 2],
             i=pial.tri[:, 0],
             j=pial.tri[:, 1],
             k=pial.tri[:, 2],
@@ -54,9 +54,9 @@ def plot_surf(data, elec, pial=None):
 
     traces.append(
         go.Scatter3d(
-            x=elec['x'],
+            x=elec['x'] + right_or_left,
             y=elec['y'],
-            z=elec['z'],
+            z=elec['z'] + .5,
             text=labels,
             mode='markers',
             hoverinfo='text',
