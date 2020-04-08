@@ -1,6 +1,9 @@
 from pathlib import Path
 from platform import node
 
+
+NYU_DIR = Path('/Fridge/R01_BAIR/data/nyu/scitran/bair/nyu')
+
 if node() == 'archxps':
     PROJ_DIR = Path('/home/gio/projects/finger_mapping')
 else:
