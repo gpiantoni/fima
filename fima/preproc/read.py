@@ -2,8 +2,6 @@ from wonambi import Dataset
 from wonambi.trans import montage
 from numpy import array
 
-from .bad_chan import find_good_channels
-
 
 FINGERS_OPEN = [
     'thumb open',
@@ -43,12 +41,14 @@ def read_data(filename, event='all'):
     else:
         event_list = FINGERS[event]
 
-    d = Dataset(filename, bids=True)
+    d = BIDSEEG(filename)
     event_names, event_onsets = select_events(d, event_list)
 
-    is_ecog = d.dataset.task.channels.tsv['type'] == 'ECOG'
-    is_seeg = d.dataset.task.channels.tsv['type'] == 'SEEG'
-    chans = array(d.header['chan_name'])[is_ecog | is_seeg]
+    channels = d.channels[
+        (self.channels['status'] == 'good') &
+        ((self.channels['type'] == 'ECOG') |
+         (self.channels['type'] == 'SEEG') )
+        ]
     data = d.read_data(
         begtime=event_onsets[0],
         endtime=event_onsets[-1],
