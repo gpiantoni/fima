@@ -1,6 +1,5 @@
-from wonambi import Dataset
+from wonambi.bids.structure import BIDSEEG
 from wonambi.trans import montage
-from numpy import array
 
 
 FINGERS_OPEN = [
@@ -44,16 +43,11 @@ def read_data(filename, event='all'):
     d = BIDSEEG(filename)
     event_names, event_onsets = select_events(d, event_list)
 
-    channels = d.channels[
-        (self.channels['status'] == 'good') &
-        ((self.channels['type'] == 'ECOG') |
-         (self.channels['type'] == 'SEEG') )
+    chans = d.channels[
+        (d.channels['status'] == 'good') &
+        ((d.channels['type'] == 'ECOG') |
+         (d.channels['type'] == 'SEEG'))
         ]
-    data = d.read_data(
-        begtime=event_onsets[0],
-        endtime=event_onsets[-1],
-        chan=list(chans))
-    chans = find_good_channels(data)
 
     data = d.read_data(events=event_onsets, pre=0.5, post=2, chan=list(chans))
     data = montage(data, ref_to_avg=True)
