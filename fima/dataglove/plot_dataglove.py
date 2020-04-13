@@ -41,7 +41,7 @@ def _plot_dataglove(tsv, events):
         i += 1
 
     fig = go.Figure(traces)
-    fig
+
     for ev in events:
         tt = ev['trial_type']
         if tt == 'n/a':

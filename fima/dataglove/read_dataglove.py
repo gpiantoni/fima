@@ -13,7 +13,8 @@ def _read_physio(physio_tsv):
 
 
 def _read_events(physio_tsv):
-    events_tsv = physio_tsv.parent / (physio_tsv.name[:-28] + '_events.tsv')
+    print('only run-1!!!!')
+    events_tsv = physio_tsv.parent / (physio_tsv.name[:-34] + '_run-1_events.tsv')
     dtypes = [
         ('onset', 'float'),
         ('duration', 'float'),
