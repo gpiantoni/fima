@@ -10,7 +10,7 @@ DASH = {
 FINGERS = {
     'thumb': 'red',
     'index': 'orange',
-    'middle': 'yellow',
+    'middle': 'black',
     'ring': 'green',
     'little': 'blue',
 }
