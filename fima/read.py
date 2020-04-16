@@ -11,6 +11,7 @@ def load(what, subject, run=None, acq=None):
       - 'data' returns: ChanTime, event_names
       - 'events' returns: ndarray
       - 'dataglove' returns: ndarray
+      - 'movements' returns: ndarray
 
     """
     if run is None:
