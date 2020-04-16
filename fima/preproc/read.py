@@ -49,7 +49,7 @@ def read_data(filename, event='all'):
          (d.channels['type'] == 'SEEG'))
         ]
 
-    data = d.read_data(events=event_onsets, pre=0.5, post=2, chan=list(chans))
+    data = d.read_data(events=event_onsets, pre=0.5, post=2, chan=list(chans['name']))
     data = montage(data, ref_to_avg=True)
 
     return data, event_names
@@ -59,10 +59,10 @@ def select_events(d, events):
 
     onsets = []
     names = []
-    for evt in d.read_markers():
+    for evt in d.events:
         for event_name in events:
-            if evt['name'].startswith(event_name):
-                onsets.append(evt['start'])
-                names.append(' '.join(evt['name'].split(' ')[:2]))
+            if evt['trial_type'].startswith(event_name):
+                onsets.append(evt['onset'])
+                names.append(' '.join(evt['trial_type'].split(' ')[:2]))
 
     return names, onsets
