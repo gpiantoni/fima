@@ -4,8 +4,8 @@ import plotly.graph_objects as go
 normalize = lambda x: (x - min(x)) / ptp(x)
 
 DASH = {
-    'open': 'solid',
-    'close': 'dot',
+    'open': 'dot',
+    'close': 'solid',
     }
 FINGERS = {
     'thumb': 'red',

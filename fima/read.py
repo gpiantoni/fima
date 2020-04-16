@@ -39,6 +39,7 @@ def load(what, subject, run=None, acq=None):
         folder = SCRIPTS_DIR / 'movements'
 
     found = list(folder.rglob(pattern))
+
     if len(found) == 0:
         raise ValueError('Could not find any file')
     elif len(found) > 1:
