@@ -1,7 +1,5 @@
-from numpy import min, ptp
 import plotly.graph_objects as go
 
-normalize = lambda x: (x - min(x)) / ptp(x)
 
 DASH = {
     'open': 'dot',
@@ -39,8 +37,30 @@ def _plot_dataglove(tsv, events):
                 ),
             ))
         i += 1
+    traces.append(
+      go.Scatter(
+                x=mov['onset'],
+                y=y,
+                mode='markers',
+                  marker=dict(
+                    color=circle_color,
+                    size=10,
+                    symbol=symbol,
+                ),
+            ))
 
-    fig = go.Figure(traces)
+    fig = go.Figure(
+        traces,
+        layout=go.Layout(
+            showlegend=False,
+            xaxis=dict(
+                title='time (s)',
+            ),
+            yaxis=dict(
+                tickvals=[.5, -.5, -1.5, -2.5, -3.5],
+                ticktext=list(FINGERS),
+            )
+        ))
 
     for ev in events:
         tt = ev['trial_type']
@@ -66,3 +86,22 @@ def _plot_dataglove(tsv, events):
                 )
             ))
     return fig
+
+
+def _plot_movements():
+    y = []
+    circle_color = []
+    symbol = []
+    for m in mov:
+        finger, action = m['trial_type'].split()
+        i_min = argmin(abs(m['onset'] - tsv['time']))
+        y.append(
+            (tsv[finger] - list(FINGERS).index(finger))[i_min]
+        )
+        circle_color.append(
+            FINGERS[finger]
+        )
+        if action == 'flexion':
+            symbol.append('circle')
+        else:
+            symbol.append('circle-open')
