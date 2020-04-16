@@ -2,7 +2,7 @@ from numpy import genfromtxt
 
 from .preproc import read_data
 from .dataglove.read_dataglove import read_physio
-from .parameters import BIDS_DIR
+from .parameters import BIDS_DIR, SCRIPTS_DIR
 
 
 def load(what, subject, run=None, acq=None):
@@ -16,18 +16,29 @@ def load(what, subject, run=None, acq=None):
     """
     if run is None:
         run = '*'
+    else:
+        run = str(run)
 
     if acq is None:
         acq = '*'
 
     if what == 'data':
         pattern = f'sub-{subject}_*_acq-{acq}_run-{run}_ieeg.eeg'
-    elif what == 'dataglove':
-        pattern = f'sub-{subject}_*_rec-dataglove_run-{run}_physio.tsv.gz'
+        folder = BIDS_DIR
+
     elif what == 'events':
         pattern = f'sub-{subject}_*_run-{run}_events.tsv'
+        folder = BIDS_DIR
 
-    found = list(BIDS_DIR.rglob(pattern))
+    elif what == 'dataglove':
+        pattern = f'sub-{subject}_*_rec-dataglove_run-{run}_physio.tsv.gz'
+        folder = BIDS_DIR
+
+    elif what == 'movements':
+        pattern = f'{subject}_run-{run}_dataglove.tsv'
+        folder = SCRIPTS_DIR / 'movements'
+
+    found = list(folder.rglob(pattern))
     if len(found) == 0:
         raise ValueError('Could not find any file')
     elif len(found) > 1:
@@ -39,6 +50,14 @@ def load(what, subject, run=None, acq=None):
 
     elif what == 'dataglove':
         return read_physio(filename)
+
+    elif what == 'movements':
+        dtypes = [
+            ('onset', 'float'),
+            ('duration', 'float'),
+            ('trial_type', 'U4096'),
+            ]
+        return genfromtxt(filename, delimiter='\t', skip_header=1, dtype=dtypes)
 
     elif what == 'events':
         dtypes = [

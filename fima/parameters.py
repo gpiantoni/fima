@@ -8,6 +8,8 @@ if node() == 'archxps':
     PROJ_DIR = Path('/home/gio/projects/finger_mapping')
 else:
     PROJ_DIR = Path('/Fridge/users/giovanni/projects/finger_mapping')
+
+SCRIPTS_DIR = PROJ_DIR / 'scripts'
 BIDS_DIR = PROJ_DIR / 'subjects'
 FREESURFER_DIR = PROJ_DIR / 'freesurfer/'
 
