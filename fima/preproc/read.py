@@ -29,20 +29,9 @@ FINGERS = {
     }
 
 
-def read_data(filename, event='all'):
-
-    if event == 'all':
-        event_list = FINGERS_OPEN + FINGERS_CLOSED
-    elif event == 'open':
-        event_list = FINGERS_OPEN
-    elif event == 'closed':
-        event_list = FINGERS_CLOSED
-    else:
-        event_list = FINGERS[event]
+def read_data(filename, event_onsets):
 
     d = BIDSEEG(filename)
-    event_names, event_onsets = select_events(d, event_list)
-
     chans = d.channels[
         (d.channels['status'] == 'good') &
         ((d.channels['type'] == 'ECOG') |
@@ -52,11 +41,29 @@ def read_data(filename, event='all'):
     data = d.read_data(events=event_onsets, pre=0.5, post=2, chan=list(chans['name']))
     data = montage(data, ref_to_avg=True)
 
-    return data, event_names
+    return data
 
 
 def select_events(d, events):
 
+    """
+    Events : str
+        - cues : all cues (to open and close)
+        - open : cues to open fingers
+        - close : cues to close fingers
+        - movements : all actual movements (from dataglove)
+        - extension : actual extension of all fingers
+        - flexion : actual flexion of all fingers
+    """
+
+    if event == 'all':
+        event_list = FINGERS_OPEN + FINGERS_CLOSED
+    elif event == 'open':
+        event_list = FINGERS_OPEN
+    elif event == 'closed':
+        event_list = FINGERS_CLOSED
+    else:
+        event_list = FINGERS[event]
     onsets = []
     names = []
     for evt in d.events:

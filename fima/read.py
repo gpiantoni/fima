@@ -5,7 +5,7 @@ from .dataglove.read_dataglove import read_physio
 from .parameters import BIDS_DIR, SCRIPTS_DIR
 
 
-def load(what, subject, run=None, acq=None):
+def load(what, subject, run=None, acq=None, event=None):
     """
     WHAT:
       - 'data' returns: ChanTime, event_names
@@ -41,13 +41,13 @@ def load(what, subject, run=None, acq=None):
     found = list(folder.rglob(pattern))
 
     if len(found) == 0:
-        raise ValueError('Could not find any file')
+        raise FileNotFoundError('Could not find any file')
     elif len(found) > 1:
         raise ValueError('You need to specify more parameters')
     filename = found[0]
 
     if what == 'data':
-        return read_data(filename)
+        return read_data(filename, event=event)
 
     elif what == 'dataglove':
         return read_physio(filename)

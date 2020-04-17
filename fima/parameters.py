@@ -18,6 +18,22 @@ DATAGLOVE_DIR = RESULTS_DIR / 'dataglove'
 OVERVIEW_DIR = RESULTS_DIR / 'data_quality'
 SPECTRUM_DIR = RESULTS_DIR / 'spectrum_interactive/'
 
+SUBJECTS = {
+    'drouwen': [1, ],
+    'duiven': [1, 2],
+    'franeker': [1, 2],
+    'heek': [1, 2],
+    'intraop008': [1, ],
+    'intraop013': [1, 2],
+    'intraop016': [1, ],
+    'itens': [1, 2, 3],
+    'lemmer': [1, 2],
+    'ommen': [1, 2],
+    'vledder': [2, 3],
+    'warmond': [1, 2],
+    'som705': [1, ],
+    }
+
 
 P = dict(
     data_quality=dict(
