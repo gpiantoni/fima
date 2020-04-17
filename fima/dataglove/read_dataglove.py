@@ -18,7 +18,7 @@ def read_physio(physio_tsv):
     return tsv
 
 
-def normalize(x, q=5):
+def normalize(x, q=1):
     perc_min = percentile(x, q)
     perc_max = percentile(x, 100 - q)
 

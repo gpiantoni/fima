@@ -2,7 +2,7 @@ onset	duration	trial_type
 12.212	0.000	little flexion
 17.662	0.000	middle flexion
 20.762	0.000	index flexion
-23.512	0.000	thumb extension
+23.512	0.000	thumb flexion
 28.812	0.000	thumb extension
 31.662	0.000	index extension
 34.463	0.000	middle extension
@@ -12,7 +12,7 @@ onset	duration	trial_type
 48.612	0.000	index flexion
 51.712	0.000	middle flexion
 54.662	0.000	ring flexion
-57.513	0.000	little extension
+57.513	0.000	little flexion
 62.562	0.000	little extension
 68.612	0.000	middle extension
 71.662	0.000	index extension
@@ -20,7 +20,7 @@ onset	duration	trial_type
 79.962	0.000	little flexion
 85.762	0.000	middle flexion
 88.562	0.000	index flexion
-91.512	0.000	thumb extension
+91.512	0.000	thumb flexion
 96.813	0.000	thumb extension
 99.562	0.000	index extension
 102.662	0.000	middle extension
@@ -30,7 +30,7 @@ onset	duration	trial_type
 116.662	0.000	index flexion
 119.712	0.000	middle flexion
 122.712	0.000	ring flexion
-125.562	0.000	little extension
+125.562	0.000	little flexion
 130.612	0.000	little extension
 136.563	0.000	middle extension
 139.512	0.000	index extension
@@ -39,7 +39,7 @@ onset	duration	trial_type
 150.712	0.000	ring flexion
 153.712	0.000	middle flexion
 156.612	0.000	index flexion
-159.662	0.000	thumb extension
+159.662	0.000	thumb flexion
 164.662	0.000	thumb extension
 167.563	0.000	index extension
 170.612	0.000	middle extension
@@ -49,7 +49,7 @@ onset	duration	trial_type
 184.612	0.000	index flexion
 187.812	0.000	middle flexion
 190.662	0.000	ring flexion
-193.612	0.000	little extension
+193.612	0.000	little flexion
 198.612	0.000	little extension
 204.462	0.000	middle extension
 207.462	0.000	index extension
@@ -67,7 +67,7 @@ onset	duration	trial_type
 252.613	0.000	index flexion
 255.712	0.000	middle flexion
 258.713	0.000	ring flexion
-261.612	0.000	little extension
+261.612	0.000	little flexion
 266.562	0.000	little extension
 272.112	0.000	middle extension
 275.662	0.000	index extension

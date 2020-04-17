@@ -3,7 +3,7 @@ onset	duration	trial_type
 31.237	0.000	ring flexion
 34.137	0.000	middle flexion
 37.337	0.000	index flexion
-40.237	0.000	thumb extension
+40.237	0.000	thumb flexion
 45.138	0.000	thumb extension
 48.237	0.000	index extension
 51.038	0.000	middle extension
@@ -13,7 +13,7 @@ onset	duration	trial_type
 65.237	0.000	index flexion
 68.338	0.000	middle flexion
 70.937	0.000	ring flexion
-74.237	0.000	little extension
+74.237	0.000	little flexion
 79.337	0.000	little extension
 82.237	0.000	ring extension
 84.937	0.000	middle extension
@@ -23,7 +23,7 @@ onset	duration	trial_type
 100.937	0.000	ring flexion
 102.438	0.000	middle flexion
 105.237	0.000	index flexion
-108.337	0.000	thumb extension
+108.337	0.000	thumb flexion
 113.237	0.000	thumb extension
 116.338	0.000	index extension
 119.237	0.000	middle extension
@@ -33,7 +33,7 @@ onset	duration	trial_type
 133.338	0.000	index flexion
 136.237	0.000	middle flexion
 139.238	0.000	ring flexion
-142.237	0.000	little extension
+142.237	0.000	little flexion
 147.137	0.000	little extension
 150.137	0.000	ring extension
 154.037	0.000	middle extension
@@ -43,7 +43,7 @@ onset	duration	trial_type
 167.237	0.000	ring flexion
 170.138	0.000	middle flexion
 173.237	0.000	index flexion
-176.137	0.000	thumb extension
+176.137	0.000	thumb flexion
 181.138	0.000	thumb extension
 184.137	0.000	index extension
 187.038	0.000	middle extension
@@ -53,7 +53,7 @@ onset	duration	trial_type
 201.238	0.000	index flexion
 204.237	0.000	middle flexion
 207.337	0.000	ring flexion
-210.338	0.000	little extension
+210.338	0.000	little flexion
 215.238	0.000	little extension
 218.238	0.000	ring extension
 221.138	0.000	middle extension
@@ -63,7 +63,7 @@ onset	duration	trial_type
 235.238	0.000	ring flexion
 238.137	0.000	middle flexion
 241.237	0.000	index flexion
-244.237	0.000	thumb extension
+244.237	0.000	thumb flexion
 249.238	0.000	thumb extension
 252.137	0.000	index extension
 255.037	0.000	middle extension
@@ -73,7 +73,7 @@ onset	duration	trial_type
 269.237	0.000	index flexion
 272.237	0.000	middle flexion
 275.538	0.000	ring flexion
-278.337	0.000	little extension
+278.337	0.000	little flexion
 283.437	0.000	little extension
 286.138	0.000	ring extension
 289.238	0.000	middle extension

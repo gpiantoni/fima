@@ -1,4 +1,5 @@
 import plotly.graph_objects as go
+from numpy import argmin
 
 
 DASH = {
@@ -13,14 +14,7 @@ FINGERS = {
     'little': 'blue',
 }
 
-def _plot_dataglove(tsv, events):
-
-    if 'right_thumb' in tsv.dtype.names:
-        left_right = 'right'
-    elif 'left_thumb' in tsv.dtype.names:
-        left_right = 'left'
-    else:
-        raise ValueError
+def plot_dataglove(tsv, events, mov=None):
 
     traces = []
     i = 0
@@ -29,7 +23,7 @@ def _plot_dataglove(tsv, events):
         traces.append(
             go.Scatter(
                 x=tsv['time'],
-                y=normalize(tsv[f'{left_right}_{finger}']) - i,
+                y=tsv[finger] - i,
                 name=finger,
                 line=dict(
                     color=FINGERS[finger],
@@ -37,17 +31,20 @@ def _plot_dataglove(tsv, events):
                 ),
             ))
         i += 1
-    traces.append(
-      go.Scatter(
+
+    if mov is not None:
+        y, circle_color, symbol = _plot_movements(mov, tsv)
+        traces.append(
+            go.Scatter(
                 x=mov['onset'],
                 y=y,
                 mode='markers',
-                  marker=dict(
+                marker=dict(
                     color=circle_color,
                     size=10,
                     symbol=symbol,
-                ),
-            ))
+                    ),
+                ))
 
     fig = go.Figure(
         traces,
@@ -88,7 +85,7 @@ def _plot_dataglove(tsv, events):
     return fig
 
 
-def _plot_movements():
+def _plot_movements(mov, tsv):
     y = []
     circle_color = []
     symbol = []
@@ -105,3 +102,5 @@ def _plot_movements():
             symbol.append('circle')
         else:
             symbol.append('circle-open')
+
+    return y, circle_color, symbol
