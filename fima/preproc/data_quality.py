@@ -5,7 +5,6 @@ from numpy import arange, array, histogram, log10, empty, copy, isnan
 import plotly.graph_objects as go
 
 
-from .read import select_events
 from ..viz import to_div
 from ..parameters import P
 

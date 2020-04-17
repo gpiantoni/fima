@@ -1,8 +1,10 @@
 from numpy import genfromtxt, isin
+from bidso.objects import Electrodes
 
 from .preproc import read_data
 from .dataglove.read_dataglove import read_physio
-from .parameters import BIDS_DIR, SCRIPTS_DIR
+from .parameters import BIDS_DIR, SCRIPTS_DIR, FREESURFER_DIR
+from .preproc.elec import read_surf
 
 
 FINGERS_OPEN = [
@@ -46,6 +48,8 @@ def load(what, subject, run=None, acq=None, event_type=None):
       - 'events' returns: ndarray
       - 'dataglove' returns: ndarray
       - 'movements' returns: ndarray
+      - 'electrodes'
+      - 'surface'
 
     EVENT_TYPE
       - cues : all cues (to open and close)
@@ -71,6 +75,14 @@ def load(what, subject, run=None, acq=None, event_type=None):
         pattern = f'sub-{subject}_*_run-{run}_events.tsv'
         folder = BIDS_DIR
 
+    elif what == 'electrodes':
+        pattern = f'sub-{subject}_*_acq-{acq}_run-{run}_electrodes.tsv'
+        folder = BIDS_DIR
+
+    elif what == 'surface':
+        pattern = subject
+        folder = FREESURFER_DIR
+
     elif what == 'dataglove':
         pattern = f'sub-{subject}_*_rec-dataglove_run-{run}_physio.tsv.gz'
         folder = BIDS_DIR
@@ -78,6 +90,9 @@ def load(what, subject, run=None, acq=None, event_type=None):
     elif what == 'movements':
         pattern = f'{subject}_run-{run}_dataglove.tsv'
         folder = SCRIPTS_DIR / 'movements'
+
+    else:
+        raise ValueError(f'Unrecognize "{what}" selection')
 
     found = list(folder.rglob(pattern))
 
@@ -93,6 +108,15 @@ def load(what, subject, run=None, acq=None, event_type=None):
 
     elif what == 'dataglove':
         return read_physio(filename)
+
+    elif what == 'electrodes':
+        elec = Electrodes(filename)
+        return elec.electrodes.tsv[['name', 'x', 'y', 'z']]
+
+    elif what == 'surface':
+        elec = load('electrodes', subject, run, acq)
+        right_or_left = (elec['x'] > 0).sum() / elec.shape[0]
+        return read_surf(filename, right_or_left)
 
     elif what == 'movements':
         dtypes = [

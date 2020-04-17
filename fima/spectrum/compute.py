@@ -31,22 +31,23 @@ def compute_timefreq(data, method='spectrogram', mean=True):
     return tf
 
 
-def get_chantime(tf):
+def get_chantime(tf, freq=None):
+    if freq is None:
+        freq = P['spectrum']['select']['freq']
     return math(
-        select(
-            tf,
-            freq=P['spectrum']['select']['freq'],
-            ),
+        select(tf, freq=freq),
         operator_name='mean',
         axis='freq')
 
 
-def get_chan(tf):
-    tf = get_chantime(tf)
+def get_chan(tf, freq=None, time=None):
+    if time is None:
+        time = P['spectrum']['select']['time']
+    tf = get_chantime(tf, freq=freq)
     return math(
         select(
             tf,
-            time=P['spectrum']['select']['time'],
+            time=time,
             ),
         operator_name='mean',
         axis='time')

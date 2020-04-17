@@ -1,14 +1,14 @@
 from pathlib import Path
 from numpy import argmax
 
-from ..preproc import read_data, read_elec, read_surf
+from ..preproc import read_data, read_surf
 from ..spectrum import compute_timefreq, get_chan, get_chantime
 from ..viz import plot_tfr, plot_tfr_time, to_div, to_html, plot_surf
 from ..parameters import SPECTRUM_DIR
 from ..utils import make_name
 
 
-def pipeline_timefreq(filename, event_type='all'):
+def pipeline_timefreq(subject, run, event_type='all'):
 
     filename = Path(filename).resolve()
 
