@@ -31,7 +31,6 @@ SUBJECTS = {
     'ommen': [1, 2],
     'vledder': [2, 3],
     'warmond': [1, 2],
-    'som705': [1, ],
     }
 
 
