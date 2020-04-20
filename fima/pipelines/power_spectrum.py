@@ -14,7 +14,11 @@ INTERVAL = 0.3
 def pipeline_timefreq_all(event_type='cues'):
     for subject, runs in SUBJECTS.items():
         for run in runs:
-            pipeline_timefreq(subject, run, event_type)
+            print(f'{subject} / {run}')
+            try:
+                pipeline_timefreq(subject, run, event_type)
+            except Exception as err:
+                print(err)
 
 
 def pipeline_timefreq(subject, run, event_type='cues'):
