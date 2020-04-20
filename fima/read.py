@@ -157,6 +157,8 @@ def select_events(subject, run, t):
     elif t == 'extension':
         trial_types = FINGERS_EXTENSION
         to_load = 'movements'
+    else:
+        raise ValueError(f'Unknown event_type "{t}"')
 
     events = load(to_load, subject, run)
     if to_load == 'events':

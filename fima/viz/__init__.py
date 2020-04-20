@@ -1,8 +1,7 @@
+from plotly.offline import plot, get_plotlyjs
 from .tfr_chan import plot_tfr
 from .tfr_time import plot_tfr_time
 from .surf import plot_surf
-
-from plotly.offline import plot, get_plotlyjs
 
 
 def to_div(fig):
@@ -10,6 +9,8 @@ def to_div(fig):
 
 
 def to_html(divs, filename):
+    filename.parent.mkdir(exist_ok=True)
+
     html = '''
         <html>
          <head>

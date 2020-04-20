@@ -1,34 +1,36 @@
-from pathlib import Path
 from numpy import argmax
 
-from ..preproc import read_data, read_surf
 from ..spectrum import compute_timefreq, get_chan, get_chantime
 from ..viz import plot_tfr, plot_tfr_time, to_div, to_html, plot_surf
-from ..parameters import SPECTRUM_DIR
-from ..utils import make_name
+from ..viz import plot_tfr, plot_tfr_time, to_div, to_html, plot_surf
+from ..viz import plot_tfr, plot_tfr_time, to_div, to_html, plot_surf
+from ..parameters import SPECTRUM_DIR, SUBJECTS
+from ..read import load
 
 
-def pipeline_timefreq(subject, run, event_type='all'):
+def pipeline_timefreq_all(event_type='cues'):
+    for subject, runs in SUBJECTS.items():
+        for run in runs:
+            pipeline_timefreq(subject, run, event_type)
 
-    filename = Path(filename).resolve()
 
-    print(f'reading {filename.stem}')
+def pipeline_timefreq(subject, run, event_type='cues'):
+
+    data, names = load('data', subject, run, event_type=event_type)
 
     try:
-        elec = read_elec(filename)
-    except:
-        print(f'No electrodes for {filename.stem}')
+        elec = load('electrodes', subject, run)
+    except Exception:
+        print(f'No electrodes for {subject}')
         elec = None
 
     try:
-        pial = read_surf(filename)
-    except:
-        print(f'No surfaces for {filename.stem}')
+        pial = load('surface', subject, run)
+    except Exception:
+        print(f'No surfaces for {subject}')
         pial = None
-    data, events = read_data(filename, event_type)
 
     print('computing time-frequency')
-
     tf_m = compute_timefreq(data, mean=True)
     tf_cht = get_chantime(tf_m)
     tf_ch = get_chan(tf_m)
@@ -45,5 +47,5 @@ def pipeline_timefreq(subject, run, event_type='all'):
         fig = plot_surf(tf_ch, elec, pial)
         divs.append(to_div(fig))
 
-    to_html(divs, SPECTRUM_DIR / make_name(filename, event_type))
-    print('done')
+    html_file = SPECTRUM_DIR / event_type / f'{subject}_run-{run}_{event_type}.html'
+    to_html(divs, html_file)
