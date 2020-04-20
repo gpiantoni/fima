@@ -4,6 +4,8 @@ from ..spectrum import compute_timefreq, get_chan, get_chantime
 from ..viz import plot_tfr, plot_tfr_time, to_div, to_html, plot_surf
 from ..parameters import SPECTRUM_DIR, SUBJECTS
 from ..read import load
+from ..parameters import P
+
 
 DB_THRESHOLD = 3
 INTERVAL = 0.3
@@ -43,9 +45,9 @@ def pipeline_timefreq(subject, run, event_type='cues'):
     tf_ch = get_chan(tf_m, time=best_time)
 
     divs = []
-    fig = plot_tfr(tf_m, best_chan)
+    fig = plot_tfr(tf_m, best_chan, time=best_time, freq=P['spectrum']['select']['freq'])
     divs.append(to_div(fig))
-    fig = plot_tfr_time(tf_cht)
+    fig = plot_tfr_time(tf_cht, highlight=best_time)
     divs.append(to_div(fig))
 
     if elec is not None:

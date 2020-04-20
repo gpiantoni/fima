@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 from ..parameters import P
 
 
-def plot_tfr_time(tf_time):
+def plot_tfr_time(tf_time, highlight=None):
     traces = []
     for chan in tf_time.chan[0]:
         traces.append(
@@ -34,5 +34,20 @@ def plot_tfr_time(tf_time):
                 )
             )
         )
+
+    if highlight is not None:
+        fig.add_shape(
+            type="rect",
+            xref="x",
+            yref="paper",
+            x0=highlight[0],
+            y0=0,
+            x1=highlight[1],
+            y1=1,
+            fillcolor="LightSalmon",
+            opacity=0.5,
+            layer="below",
+            line_width=0,
+            )
 
     return fig
