@@ -1,4 +1,4 @@
-from numpy import argmax, sum, empty, asanyarray, array, not_equal, nonzero, diff, append
+from numpy import argmax, sum, empty, asanyarray, array, not_equal, nonzero, diff, append, unravel_index
 
 from ..spectrum import compute_timefreq, get_chan, get_chantime
 from ..viz import plot_tfr, plot_tfr_time, to_div, to_html, plot_surf
@@ -6,6 +6,7 @@ from ..parameters import SPECTRUM_DIR, SUBJECTS
 from ..read import load
 
 DB_THRESHOLD = 3
+INTERVAL = 0.3
 
 
 def pipeline_timefreq_all(event_type='cues'):
@@ -32,8 +33,11 @@ def pipeline_timefreq(subject, run, event_type='cues'):
 
     tf_m = compute_timefreq(data, mean=True)
     tf_cht = get_chantime(tf_m)
-    best_chan = find_best_chan(tf_cht)
-    best_time = find_timeinterval(tf_cht, best_chan)
+    if False:  # this checks only above the threshold, but it fails if there is no point above threshold
+        best_chan = find_best_chan(tf_cht)
+        best_time = find_timeinterval(tf_cht, best_chan)
+    else:
+        best_chan, best_time = find_max_point(tf_cht)
     print(f'Best channel {best_chan}, best interval {best_time}s')
 
     tf_ch = get_chan(tf_m, time=best_time)
@@ -111,3 +115,17 @@ def find_runs(x):
         run_lengths = diff(append(run_starts, n))
 
         return run_values, run_starts, run_lengths
+
+
+def find_max_point(tf_cht):
+    """Take the channel with the highest value and the interval containing that
+    point
+    """
+    ind = unravel_index(argmax(tf_cht.data[0], axis=None), tf_cht.data[0].shape)
+    max_chan = tf_cht.chan[0][ind[0]]
+    max_timeinterval = (
+        tf_cht.time[0][ind[1]] - INTERVAL / 2,
+        tf_cht.time[0][ind[1]] + INTERVAL / 2,
+        )
+
+    return max_chan, max_timeinterval

@@ -58,7 +58,6 @@ P = dict(
             ),
         select=dict(
             freq=(60, 200),
-            time=(0.4, 0.8),
             ),
         ),
     )
