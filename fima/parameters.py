@@ -16,7 +16,8 @@ FREESURFER_DIR = PROJ_DIR / 'freesurfer/'
 RESULTS_DIR = PROJ_DIR / 'results'
 DATAGLOVE_DIR = RESULTS_DIR / 'dataglove'
 OVERVIEW_DIR = RESULTS_DIR / 'data_quality'
-SPECTRUM_DIR = RESULTS_DIR / 'spectrum_interactive/'
+SPECTRUM_DIR = RESULTS_DIR / 'spectrum'
+FINGERS_DIR = RESULTS_DIR / 'fingers'
 
 SUBJECTS = {
     'drouwen': [1, ],
