@@ -4,7 +4,8 @@ from ..pipelines.power_spectrum import pipeline_timefreq_all
 
 
 def main():
-    pipeline_timefreq_all('movements')
+    for ev in ('flexion', 'extension', 'open', 'close', 'cues'):
+        pipeline_timefreq_all(ev)
 
 
 if __name__ == '__main__':
