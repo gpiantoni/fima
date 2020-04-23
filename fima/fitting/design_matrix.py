@@ -33,13 +33,17 @@ def make_design_matrix(names, model):
             for f in FINGERS:
                 EVENTS.append(f'{f} {m}')
 
-    st = zeros((names.shape[0], len(EVENTS)))
+    DTYPES = []
+    for col_name in EVENTS:
+        DTYPES.append((col_name, '<f8'))
+
+    st = zeros((names.shape[0], ), dtype=DTYPES)
     for i, ev in enumerate(names):
-        for i_col, col_name in enumerate(EVENTS):
+        for col_name in EVENTS:
             if col_name in ev:
                 if model == 'open_v_close' and 'close' in ev:
-                    st[i, i_col] = -1
+                    st[col_name][i] = -1
                 else:
-                    st[i, i_col] = 1
+                    st[col_name][i] = 1
 
     return st

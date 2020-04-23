@@ -1,24 +1,14 @@
 import plotly.graph_objects as go
 from numpy import argmin
 
+from ..parameters import FINGER_COLOR, MOVEMENT_SYMBOL_DATA, MOVEMENT_LINE
 
-DASH = {
-    'open': 'dot',
-    'close': 'solid',
-    }
-FINGERS = {
-    'thumb': 'red',
-    'index': 'orange',
-    'middle': 'black',
-    'ring': 'green',
-    'little': 'blue',
-}
 
 def plot_dataglove(tsv, events, mov=None):
 
     traces = []
     i = 0
-    for finger, color in FINGERS.items():
+    for finger, color in FINGER_COLOR.items():
 
         traces.append(
             go.Scatter(
@@ -26,7 +16,7 @@ def plot_dataglove(tsv, events, mov=None):
                 y=tsv[finger] - i,
                 name=finger,
                 line=dict(
-                    color=FINGERS[finger],
+                    color=color,
                     width=1,
                 ),
             ))
@@ -55,7 +45,7 @@ def plot_dataglove(tsv, events, mov=None):
             ),
             yaxis=dict(
                 tickvals=[.5, -.5, -1.5, -2.5, -3.5],
-                ticktext=list(FINGERS),
+                ticktext=list(FINGER_COLOR),
             )
         ))
 
@@ -64,7 +54,7 @@ def plot_dataglove(tsv, events, mov=None):
         if tt == 'n/a':
             continue
         finger, movement = tt.split(' ')[:2]
-        if finger not in FINGERS:
+        if finger not in FINGER_COLOR:
             continue
 
         fig.add_shape(
@@ -77,9 +67,9 @@ def plot_dataglove(tsv, events, mov=None):
                 y0=0,
                 y1=1,
                 line=dict(
-                    color=FINGERS[finger],
+                    color=FINGER_COLOR[finger],
                     width=1,
-                    dash=DASH[movement],
+                    dash=MOVEMENT_LINE[movement],
                 )
             ))
     return fig
@@ -93,14 +83,14 @@ def _plot_movements(mov, tsv):
         finger, action = m['trial_type'].split()
         i_min = argmin(abs(m['onset'] - tsv['time']))
         y.append(
-            (tsv[finger] - list(FINGERS).index(finger))[i_min]
+            (tsv[finger] - list(FINGER_COLOR).index(finger))[i_min]
         )
         circle_color.append(
-            FINGERS[finger]
+            FINGER_COLOR[finger]
         )
         if action == 'flexion':
-            symbol.append('circle')
+            symbol.append(MOVEMENT_SYMBOL_DATA['close'])
         else:
-            symbol.append('circle-open')
+            symbol.append(MOVEMENT_SYMBOL_DATA['open'])
 
     return y, circle_color, symbol

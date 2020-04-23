@@ -34,6 +34,29 @@ SUBJECTS = {
     'warmond': [1, 2],
     }
 
+MOVEMENT_SYMBOL_DATA = {
+    'open': 'circle',
+    'close': 'circle-open',
+    }
+
+MOVEMENT_SYMBOL_MODEL = {
+    'open': 'diamond',
+    'close': 'diamond-open',
+    }
+
+MOVEMENT_LINE = {
+    'open': 'dot',
+    'close': 'solid',
+    }
+
+FINGER_COLOR = {
+    'thumb': 'red',
+    'index': 'orange',
+    'middle': 'black',
+    'ring': 'green',
+    'little': 'blue',
+}
+
 
 P = dict(
     data_quality=dict(
