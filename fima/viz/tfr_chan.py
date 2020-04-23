@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 from ..parameters import P
 
 
-def plot_tfr(tf_m, chan):
+def plot_tfr(tf_m, chan, time=None, freq=None):
     """Plot time frequency representation for one channel
 
     """
@@ -37,5 +37,22 @@ def plot_tfr(tf_m, chan):
             )
             )
         )
+
+    if freq is not None and time is not None:
+        fig.add_shape(
+            type="rect",
+            xref="x",
+            yref="y",
+            x0=time[0],
+            y0=freq[0],
+            x1=time[1],
+            y1=freq[1],
+            opacity=1,
+            layer="above",
+            line=dict(
+                color="Black",
+                width=5,
+                ),
+            )
 
     return fig
