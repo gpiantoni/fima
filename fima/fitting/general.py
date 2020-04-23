@@ -1,11 +1,11 @@
 from scipy.optimize import least_squares
+from numpy import r_
 
 from .utils import rms, r2, make_struct
 from .design_matrix import make_design_matrix
 
 
 def fitting(model, names, y):
-    print(model['doc'])
     seed = [x[0] for x in model['parameters'].values()]
     bound_low = [x[1][0] for x in model['parameters'].values()]
     bound_high = [x[1][1] for x in model['parameters'].values()]
@@ -22,14 +22,18 @@ def fitting(model, names, y):
             ],
         max_nfev=1e5,
         )
-    print(result)
-    return make_struct(result.x, model['parameters'])
+
+    est = estimate(model, names, result.x)
+    rsquared = r2(est, y)
+
+    return make_struct(r_[result.x, rsquared], list(model['parameters']) + ['rsquared', ])
 
 
 def estimate(model, names, x0):
 
     X = make_design_matrix(names, model['design_matrix'])
     return model['function'](x0.view('<f8'), X)
+
 
 def to_minimize(x0, fun, X, y, to_optimize='rms'):
     """Function to minimize
