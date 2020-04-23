@@ -3,7 +3,7 @@ from wonambi.trans import apply_baseline, timefrequency, concatenate, math, sele
 from ..parameters import P
 
 
-def compute_timefreq(data, method='spectrogram', mean=True):
+def compute_timefreq(data, method='spectrogram', baseline=True, mean=True):
 
     tf = timefrequency(
         data,
@@ -13,10 +13,11 @@ def compute_timefreq(data, method='spectrogram', mean=True):
         taper='dpss',
         halfbandwidth=10)
 
-    tf = apply_baseline(
-        tf,
-        time=P['spectrum']['baseline']['time'],
-        baseline='dB')
+    if baseline:
+        tf = apply_baseline(
+            tf,
+            time=P['spectrum']['baseline']['time'],
+            baseline='dB')
 
     tf = concatenate(
         tf,
