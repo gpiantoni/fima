@@ -26,6 +26,11 @@ def fitting(model, names, y):
     return make_struct(result.x, model['parameters'])
 
 
+def estimate(model, names, x0):
+
+    X = make_design_matrix(names, model['design_matrix'])
+    return model['function'](x0.view('<f8'), X)
+
 def to_minimize(x0, fun, X, y, to_optimize='rms'):
     """Function to minimize
 
