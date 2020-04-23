@@ -1,6 +1,6 @@
 from scipy.optimize import least_squares
 
-from .utils import rms, r2
+from .utils import rms, r2, make_struct
 from .design_matrix import make_design_matrix
 
 
@@ -23,7 +23,7 @@ def fitting(model, names, y):
         max_nfev=1e5,
         )
     print(result)
-    return result.x
+    return make_struct(result.x, model['parameters'])
 
 
 def to_minimize(x0, fun, X, y, to_optimize='rms'):
