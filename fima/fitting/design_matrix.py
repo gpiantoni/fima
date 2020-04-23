@@ -23,7 +23,7 @@ def make_design_matrix(names, model):
         design matrix (n rows is the number of events, n col depends on "model")
     """
 
-    if model == 'fingers':
+    if model in ('fingers', 'open_v_close'):
         EVENTS = FINGERS
     elif model == 'movements':
         EVENTS = MOVEMENTS
@@ -37,6 +37,9 @@ def make_design_matrix(names, model):
     for i, ev in enumerate(names):
         for i_col, col_name in enumerate(EVENTS):
             if col_name in ev:
-                st[i, i_col] = 1
+                if model == 'open_v_close' and 'close' in ev:
+                    st[i, i_col] = -1
+                else:
+                    st[i, i_col] = 1
 
     return st
