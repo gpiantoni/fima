@@ -1,7 +1,7 @@
 from numpy import zeros
 
 
-FINGERS = ['thumb', 'index', 'middle', 'ring', 'little']
+FINGERS = ['little', 'ring', 'middle', 'index', 'thumb']
 MOVEMENTS = ['close', 'open']
 
 

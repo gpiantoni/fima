@@ -1,5 +1,6 @@
 from pathlib import Path
 from platform import node
+from .utils import get_color_for_val
 
 
 NYU_DIR = Path('/Fridge/R01_BAIR/data/nyu/scitran/bair/nyu')
@@ -18,6 +19,35 @@ DATAGLOVE_DIR = RESULTS_DIR / 'dataglove'
 OVERVIEW_DIR = RESULTS_DIR / 'data_quality'
 SPECTRUM_DIR = RESULTS_DIR / 'spectrum'
 FINGERS_DIR = RESULTS_DIR / 'fingers'
+
+P = dict(
+    data_quality=dict(
+        histogram=dict(
+            contamination=0.04,
+            ),
+        spectrum=dict(
+            n_neighbors=20,
+            ),
+        ),
+    viz=dict(
+        colorscale='Jet',
+        tfr=dict(
+            max=5,
+            ),
+        tfr_mean=dict(
+            max=3,
+            ),
+        ),
+    spectrum=dict(
+        baseline=dict(
+            time=(-0.6, 0.6),
+            ),
+        select=dict(
+            freq=(60, 200),
+            ),
+        ),
+    )
+
 
 SUBJECTS = {
     'drouwen': [1, ],
@@ -50,38 +80,9 @@ MOVEMENT_LINE = {
     }
 
 FINGER_COLOR = {
-    'thumb': 'red',
-    'index': 'orange',
-    'middle': 'black',
-    'ring': 'green',
-    'little': 'blue',
+    'thumb': get_color_for_val(4, P['viz']['colorscale'], -1, 5),
+    'index': get_color_for_val(3, P['viz']['colorscale'], -1, 5),
+    'middle': get_color_for_val(2, P['viz']['colorscale'], -1, 5),
+    'ring': get_color_for_val(1, P['viz']['colorscale'], -1, 5),
+    'little': get_color_for_val(0, P['viz']['colorscale'], -1, 5),
 }
-
-
-P = dict(
-    data_quality=dict(
-        histogram=dict(
-            contamination=0.04,
-            ),
-        spectrum=dict(
-            n_neighbors=20,
-            ),
-        ),
-    viz=dict(
-        colorscale='jet',
-        tfr=dict(
-            max=5,
-            ),
-        tfr_mean=dict(
-            max=3,
-            ),
-        ),
-    spectrum=dict(
-        baseline=dict(
-            time=(-0.6, 0.6),
-            ),
-        select=dict(
-            freq=(60, 200),
-            ),
-        ),
-    )

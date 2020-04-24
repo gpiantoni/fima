@@ -14,7 +14,28 @@ AXIS = dict(
     )
 
 
-def plot_surf(data, elec, pial=None):
+def plot_surf(data, elec, pial=None, info='activity'):
+    if info == 'activity':
+        clim = (
+            P['viz']['tfr_mean']['max'] * -1,
+            P['viz']['tfr_mean']['max'],
+            )
+        colorbar = dict(
+            title="Activity",
+            titleside="top",
+            ticks="outside"
+            )
+
+    elif info == 'finger':
+        clim = (-1, 5)
+        colorbar = dict(
+            title="Main Finger",
+            titleside="top",
+            tickmode="array",
+            tickvals=[0, 1, 2, 3, 4],
+            ticktext=["Little", 'Ring', 'Middle', 'Index', 'Thumb'],
+            ticks="outside"
+            )
 
     right_or_left = sign((elec['x'] > 0).sum() / elec.shape[0] - .5)
 
@@ -65,8 +86,9 @@ def plot_surf(data, elec, pial=None):
                 color=values,
                 colorscale='jet',
                 showscale=True,
-                cmin=P['viz']['tfr_mean']['max'] * -1,
-                cmax=P['viz']['tfr_mean']['max'],
+                cmin=clim[0],
+                cmax=clim[1],
+                colorbar=colorbar,
             ),
         )
         )

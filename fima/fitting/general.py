@@ -1,11 +1,27 @@
 from scipy.optimize import least_squares
-from numpy import r_
+from numpy import r_, array
+from multiprocessing import Pool
+from functools import partial
+from wonambi.trans import math
 
 from .utils import rms, r2, make_struct
 from .design_matrix import make_design_matrix
 
 
-def fitting(model, names, y):
+def fit_data(model, data, names):
+
+    data = math(data, operator_name='mean', axis='time')
+    y = [data(trial=0, chan=chan) for chan in data.chan[0]]
+
+    with Pool() as p:
+        x = p.map(
+            partial(fitting, model=model, names=names),
+            y)
+
+    return array(x)[:, 0]
+
+
+def fitting(y, model, names):
     seed = [x[0] for x in model['parameters'].values()]
     bound_low = [x[1][0] for x in model['parameters'].values()]
     bound_high = [x[1][1] for x in model['parameters'].values()]
