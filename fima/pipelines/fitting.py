@@ -7,14 +7,21 @@ from ..viz import to_div, to_html
 from ..parameters import FITTING_DIR, SUBJECTS
 
 
-def pipeline_fitting_all(model_name):
-    for subject, runs in SUBJECTS.items():
-        for run in runs:
-            print(f'{subject} / {run}')
-            try:
-                pipeline_fitting(subject, run, model_name)
-            except Exception as err:
-                print(err)
+def pipeline_fitting_all(model_name=None):
+
+    if model_name is None:
+        model_names = MODELS
+    else:
+        model_names = [model_name, ]
+
+    for model_name in model_names:
+        for subject, runs in SUBJECTS.items():
+            for run in runs:
+                print(f'{subject} / {run}')
+                try:
+                    pipeline_fitting(subject, run, model_name)
+                except Exception as err:
+                    print(err)
 
 
 def pipeline_fitting(subject, run, model_name, event_type='cues'):
@@ -35,7 +42,7 @@ def pipeline_fitting(subject, run, model_name, event_type='cues'):
     fig = estimate_and_plot(get_trialdata(tf_cht), model, names, result, data.chan[0])
     divs.append(to_div(fig))
 
-    for param, v in model['parameters']:
+    for param, v in model['parameters'].items():
         if v['to_plot']:
             fig = plot_prf_results(result, param, data.chan[0], electrodes)
             divs.append(to_div(fig))
