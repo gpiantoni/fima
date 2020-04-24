@@ -34,33 +34,85 @@ MODELS = {
         'function': linear_gaussian_per_finger,
         'design_matrix': 'fingers',
         'parameters': {
-            'amplitude': (1, (-Inf, Inf)),
-            'center_finger': (2, (-1, 5)),
-            'std_finger': (1, (0.01, 10)),
-            }
+            'amplitude': {
+                'seed': 1,
+                'bounds': (-Inf, Inf),
+                'to_plot': False,
+                },
+            'center_finger': {
+                'seed': 2,
+                'bounds': (-1, 5),
+                'to_plot': True,
+                },
+            'std_finger': {
+                'seed': 1,
+                'bounds': (0.01, 10),
+                'to_plot': False,
+                },
+            },
         },
     'linear_gaussian_per_finger_open_v_close': {
         'doc': 'The same Gaussian across fingers, with different weights for flexion and extension',
         'function': linear_gaussian_per_finger_open_v_close,
         'design_matrix': 'cues',
         'parameters': {
-            'amplitude': (1, (-Inf, Inf)),
-            'center_finger': (2, (-1, 5)),
-            'std_finger': (1, (0.01, 10)),
-            'open_v_close': (0.5, (0, 1)),
-            }
+            'amplitude': {
+                'seed': 1,
+                'bounds': (-Inf, Inf),
+                'to_plot': False,
+                },
+            'center_finger': {
+                'seed': 2,
+                'bounds': (-1, 5),
+                'to_plot': True,
+                },
+            'std_finger': {
+                'seed': 1,
+                'bounds': (0.01, 10),
+                'to_plot': False,
+                },
+            'open_v_close': {
+                'seed': 0.5,
+                'bounds': (0, 1),
+                'to_plot': True,
+                },
+            },
         },
     'linear_separate_gaussians_per_finger': {
         'doc': 'Two independent Gaussians across fingers, one for flexion and one for extension',
         'function': linear_separate_gaussians_per_finger,
         'design_matrix': 'cues',
         'parameters': {
-            'open_amplitude': (1, (-Inf, Inf)),
-            'open_center': (2, (-1, 5)),
-            'open_std': (1, (0.01, 10)),
-            'close_amplitude': (1, (-Inf, Inf)),
-            'close_center': (2, (-1, 5)),
-            'close_std': (1, (0.01, 10)),
-            }
+            'open_amplitude': {
+                'seed': 1,
+                'bounds': (-Inf, Inf),
+                'to_plot': False,
+                },
+            'open_center': {
+                'seed': 2,
+                'bounds': (-1, 5),
+                'to_plot': True,
+                },
+            'open_std': {
+                'seed': 1,
+                'bounds': (0.01, 10),
+                'to_plot': False,
+                },
+            'close_amplitude': {
+                'seed': 1,
+                'bounds': (-Inf, Inf),
+                'to_plot': False,
+                },
+            'close_center': {
+                'seed': 2,
+                'bounds': (-1, 5),
+                'to_plot': True,
+                },
+            'close_std': {
+                'seed': 1,
+                'bounds': (0.01, 10),
+                'to_plot': False,
+                },
+            },
         },
     }

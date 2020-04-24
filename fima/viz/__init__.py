@@ -9,7 +9,7 @@ def to_div(fig):
 
 
 def to_html(divs, filename):
-    filename.parent.mkdir(exist_ok=True)
+    filename.parent.mkdir(exist_ok=True, parents=True)
 
     html = '''
         <html>

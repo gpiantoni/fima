@@ -19,6 +19,7 @@ DATAGLOVE_DIR = RESULTS_DIR / 'dataglove'
 OVERVIEW_DIR = RESULTS_DIR / 'data_quality'
 SPECTRUM_DIR = RESULTS_DIR / 'spectrum'
 FINGERS_DIR = RESULTS_DIR / 'fingers'
+FITTING_DIR = RESULTS_DIR / 'fitting'
 
 P = dict(
     data_quality=dict(

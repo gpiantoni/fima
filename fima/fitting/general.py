@@ -8,10 +8,14 @@ from .utils import rms, r2, make_struct
 from .design_matrix import make_design_matrix
 
 
+def get_trialdata(data):
+    data = math(data, operator_name='mean', axis='time')
+    return [data(trial=0, chan=chan) for chan in data.chan[0]]
+
+
 def fit_data(model, data, names):
 
-    data = math(data, operator_name='mean', axis='time')
-    y = [data(trial=0, chan=chan) for chan in data.chan[0]]
+    y = get_trialdata(data)
 
     with Pool() as p:
         x = p.map(
@@ -22,9 +26,9 @@ def fit_data(model, data, names):
 
 
 def fitting(y, model, names):
-    seed = [x[0] for x in model['parameters'].values()]
-    bound_low = [x[1][0] for x in model['parameters'].values()]
-    bound_high = [x[1][1] for x in model['parameters'].values()]
+    seed = [x['seed'] for x in model['parameters'].values()]
+    bound_low = [x['bounds'][0] for x in model['parameters'].values()]
+    bound_high = [x['bounds'][1] for x in model['parameters'].values()]
     X = make_design_matrix(names, model['design_matrix'])
 
     result = least_squares(
