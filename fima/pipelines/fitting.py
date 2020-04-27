@@ -3,7 +3,7 @@ from ..fitting.trialbased import MODELS
 from ..fitting.viz import estimate_and_plot, plot_prf_results
 from ..spectrum.compute import compute_timefreq, get_chantime
 from ..read import load
-from ..viz import to_div, to_html
+from ..viz import to_div, to_html, to_png
 from ..parameters import FITTING_DIR, SUBJECTS
 
 
@@ -55,8 +55,11 @@ def pipeline_fitting(subject, run, model_name, event_type='cues'):
 
     for param, v in model['parameters'].items():
         if v['to_plot']:
-            fig = plot_prf_results(result, param, data.chan[0], electrodes)
-            divs.append(to_div(fig))
+            png_name = f'img/{subject}_run-{run}_{event_type}_{param}.png'
+            png_file = FITTING_DIR / model_name / png_name
+            fig = plot_prf_results(result, param, data.chan[0], electrodes, surf)
+            to_png(fig, png_file)
+            divs.append(f"<div><img src='{png_name}'></div>")
 
     html_file = FITTING_DIR / model_name / f'{subject}_run-{run}_{event_type}.html'
     to_html(divs, html_file)

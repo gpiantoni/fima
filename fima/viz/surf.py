@@ -82,7 +82,7 @@ def plot_surf(data, elec, pial=None, info='activity'):
             mode='markers',
             hoverinfo='text',
             marker=dict(
-                size=3,
+                size=10,
                 color=values,
                 colorscale='jet',
                 showscale=True,

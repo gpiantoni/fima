@@ -24,3 +24,10 @@ def to_html(divs, filename):
 
     with open(filename, 'w') as f:
         f.write(html)
+
+
+def to_png(fig, png_name):
+    fig = fig.update_layout(width=1600, height=900)
+    png_name.parent.mkdir(exist_ok=True, parents=True)
+    with png_name.open('wb') as f:
+        f.write(fig.to_image('png'))
