@@ -13,15 +13,26 @@ def pipeline_fitting_all(model_name=None):
         model_names = MODELS
     else:
         model_names = [model_name, ]
+    event_type = 'cues'
 
+    values = []
     for model_name in model_names:
         for subject, runs in SUBJECTS.items():
             for run in runs:
                 print(f'{subject} / {run}')
                 try:
-                    pipeline_fitting(subject, run, model_name)
+                    vals = pipeline_fitting(subject, run, model_name, event_type)
+                    values.append(vals)
                 except Exception as err:
                     print(err)
+                    values.append([])
+            break
+
+        csv_file = FITTING_DIR / model_name / f'recap_{event_type}.csv'
+        with csv_file.open('w') as f:
+            for l in values:
+                f.write('\t'.join(l) + '\n')
+        break
 
 
 def pipeline_fitting(subject, run, model_name, event_type='cues'):
@@ -49,3 +60,9 @@ def pipeline_fitting(subject, run, model_name, event_type='cues'):
 
     html_file = FITTING_DIR / model_name / f'{subject}_run-{run}_{event_type}.html'
     to_html(divs, html_file)
+
+    output = [
+        f"{result['rsquared'].max():0.3f}",
+        f"{(result['rsquared'] >= 0.10).sum():d} / {len(result):d}",
+        ]
+    return output
