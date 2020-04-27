@@ -15,16 +15,21 @@ AXIS = dict(
 
 
 def plot_surf(data, elec, pial=None, info='activity'):
-    if info == 'activity':
-        clim = (
-            P['viz']['tfr_mean']['max'] * -1,
-            P['viz']['tfr_mean']['max'],
-            )
+    if info in ('activity', 'rsquared'):
         colorbar = dict(
-            title="Activity",
+            title=info,
             titleside="top",
             ticks="outside"
             )
+
+        if info == 'rsquared':
+            clim = (0, 0.30)
+
+        else:
+            clim = (
+                P['viz']['tfr_mean']['max'] * -1,
+                P['viz']['tfr_mean']['max'],
+                )
 
     elif info == 'finger':
         clim = (-1, 5)
@@ -82,7 +87,7 @@ def plot_surf(data, elec, pial=None, info='activity'):
             mode='markers',
             hoverinfo='text',
             marker=dict(
-                size=10,
+                size=7,
                 color=values,
                 colorscale='jet',
                 showscale=True,

@@ -35,11 +35,16 @@ def _parse_subtitle(chan, v):
 
 
 def plot_prf_results(result, param, channels, electrodes, surf=None, rsquared_threshold=0.05):
+
     val = result[param].copy()
-    val[result['rsquared'] < rsquared_threshold] = NaN
+    if param != 'rsquared':
+        val[result['rsquared'] < rsquared_threshold] = NaN
+        info = 'finger'
+    else:
+        info = 'rsquared'
     dat = Data(val, s_freq=1, chan=channels)
 
-    return plot_surf(dat, electrodes, pial=surf, info='finger')
+    return plot_surf(dat, electrodes, pial=surf, info=info)
 
 
 def plot_fitted(names, y, estimate):

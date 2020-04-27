@@ -18,6 +18,7 @@ def pipeline_fitting_all(model_name=None):
     values = []
     for model_name in model_names:
         for subject, runs in SUBJECTS.items():
+
             for run in runs:
                 print(f'{subject} / {run}')
                 try:
@@ -26,13 +27,11 @@ def pipeline_fitting_all(model_name=None):
                 except Exception as err:
                     print(err)
                     values.append([])
-            break
 
         csv_file = FITTING_DIR / model_name / f'recap_{event_type}.csv'
         with csv_file.open('w') as f:
             for l in values:
                 f.write('\t'.join(l) + '\n')
-        break
 
 
 def pipeline_fitting(subject, run, model_name, event_type='cues'):
@@ -53,8 +52,8 @@ def pipeline_fitting(subject, run, model_name, event_type='cues'):
     fig = estimate_and_plot(get_trialdata(tf_cht), model, names, result, data.chan[0])
     divs.append(to_div(fig))
 
-    for param, v in model['parameters'].items():
-        if v['to_plot']:
+    for param in (list(model['parameters']) + ['rsquared', ]):
+        if param == 'rsquared' or model['parameters'][param]['to_plot']:
             png_name = f'img/{subject}_run-{run}_{event_type}_{param}.png'
             png_file = FITTING_DIR / model_name / png_name
             fig = plot_prf_results(result, param, data.chan[0], electrodes, surf)

@@ -51,19 +51,19 @@ P = dict(
 
 
 SUBJECTS = {
-    'drouwen': [1, ],
-    'duiven': [1, 2],
-    'franeker': [1, 2],
-    'heek': [1, 2],
-    'intraop008': [1, ],
-    'intraop013': [1, 2],
-    'intraop016': [1, 2],
-    'itens': [1, 2, 3],
-    'lemmer': [1, 2],
-    'ommen': [1, 2],
-    'vledder': [1, 2, 3],
-    'warmond': [1, 2],
-    'som705': [1, ],
+    'drouwen': ['1', ],
+    'duiven': ['1', '2'],
+    'franeker': ['1', '2'],
+    'heek': ['1', '2'],
+    'intraop008': ['1', ],
+    'intraop013': ['1', '2'],
+    'intraop016': ['1', '2'],
+    'itens': ['1', '2', '3'],
+    'lemmer': ['1', '2'],
+    'ommen': ['1', '2'],
+    'vledder': ['1', '2', '3'],
+    'warmond': ['1', '2'],
+    'som705': ['01', ],
     }
 
 MOVEMENT_SYMBOL_DATA = {
