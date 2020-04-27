@@ -12,8 +12,9 @@ def read_surf(filename, right_or_left):
         hemi = 'lh'
 
     pial = getattr(fs.read_brain(), hemi)
-    pial.vert[:, 0] += ras_shift[0],
-    pial.vert[:, 1] += ras_shift[1],
-    pial.vert[:, 2] += ras_shift[2],
+    if 'som' not in filename.name:
+        pial.vert[:, 0] += ras_shift[0]
+        pial.vert[:, 1] += ras_shift[1]
+        pial.vert[:, 2] += ras_shift[2]
 
     return pial

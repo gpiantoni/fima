@@ -19,7 +19,7 @@ def estimate_and_plot(y, model, names, result, channels, chan=None):
 
     fig = plot_fitted(names, y[i_chan], est)
 
-    title = model['doc'] + '<br /> ' + _parse_subtitle(channels[i_chan], result)
+    title = model['doc'] + '<br /> ' + _parse_subtitle(channels[i_chan], result[i_chan:i_chan + 1])
     fig = fig.update_layout(
         title=dict(
             text=title))
