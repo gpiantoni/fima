@@ -15,23 +15,8 @@ AXIS = dict(
 
 
 def plot_surf(data, elec, pial=None, info='activity'):
-    if info in ('activity', 'rsquared'):
-        colorbar = dict(
-            title=info,
-            titleside="top",
-            ticks="outside"
-            )
-
-        if info == 'rsquared':
-            clim = (0, 0.30)
-
-        else:
-            clim = (
-                P['viz']['tfr_mean']['max'] * -1,
-                P['viz']['tfr_mean']['max'],
-                )
-
-    elif info == 'finger':
+    colorscale = P['viz']['colorscale']
+    if info == 'finger':
         clim = (-1, 5)
         colorbar = dict(
             title="Main Finger",
@@ -41,6 +26,27 @@ def plot_surf(data, elec, pial=None, info='activity'):
             ticktext=["Little", 'Ring', 'Middle', 'Index', 'Thumb'],
             ticks="outside"
             )
+
+    else info:
+        colorbar = dict(
+            title=info,
+            titleside="top",
+            ticks="outside"
+            )
+
+        if info == 'rsquared':
+            clim = (0, 0.30)
+            colorscale = 'Hot'
+
+        elif info == 'open_v_close':
+            clim = (0, 1)
+
+        else:
+            clim = (
+                P['viz']['tfr_mean']['max'] * -1,
+                P['viz']['tfr_mean']['max'],
+                )
+
 
     right_or_left = sign((elec['x'] > 0).sum() / elec.shape[0] - .5)
 
@@ -87,9 +93,9 @@ def plot_surf(data, elec, pial=None, info='activity'):
             mode='markers',
             hoverinfo='text',
             marker=dict(
-                size=7,
+                size=5,
                 color=values,
-                colorscale='jet',
+                colorscale=colorscale,
                 showscale=True,
                 cmin=clim[0],
                 cmax=clim[1],

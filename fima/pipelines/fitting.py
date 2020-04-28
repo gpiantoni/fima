@@ -15,8 +15,8 @@ def pipeline_fitting_all(model_name=None):
         model_names = [model_name, ]
     event_type = 'cues'
 
-    values = []
     for model_name in model_names:
+        values = []
         for subject, runs in SUBJECTS.items():
 
             for run in runs:
@@ -52,6 +52,11 @@ def pipeline_fitting(subject, run, model_name, event_type='cues'):
     fig = estimate_and_plot(get_trialdata(tf_cht), model, names, result, data.chan[0])
     divs.append(to_div(fig))
 
+    for param in (['rsquared', ] + list(model['parameters'])):
+        if param == 'rsquared' or model['parameters'][param]['to_plot']:
+            fig = plot_prf_results(result, param, data.chan[0], electrodes, surf)
+            divs.append(to_div(fig))
+    """
     for param in (list(model['parameters']) + ['rsquared', ]):
         if param == 'rsquared' or model['parameters'][param]['to_plot']:
             png_name = f'img/{subject}_run-{run}_{event_type}_{param}.png'
@@ -59,6 +64,7 @@ def pipeline_fitting(subject, run, model_name, event_type='cues'):
             fig = plot_prf_results(result, param, data.chan[0], electrodes, surf)
             to_png(fig, png_file)
             divs.append(f"<div><img src='{png_name}'></div>")
+    """
 
     html_file = FITTING_DIR / model_name / f'{subject}_run-{run}_{event_type}.html'
     to_html(divs, html_file)
