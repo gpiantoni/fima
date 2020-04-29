@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='fima',
-    version='0.1',
+    version='0.2',
     description='finger mapping analysis',
     url='https://github.com/gpiantoni/fima',
     author="Gio Piantoni",
