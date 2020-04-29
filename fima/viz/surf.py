@@ -27,7 +27,7 @@ def plot_surf(data, elec, pial=None, info='activity'):
             ticks="outside"
             )
 
-    else info:
+    else:
         colorbar = dict(
             title=info,
             titleside="top",
@@ -46,7 +46,6 @@ def plot_surf(data, elec, pial=None, info='activity'):
                 P['viz']['tfr_mean']['max'] * -1,
                 P['viz']['tfr_mean']['max'],
                 )
-
 
     right_or_left = sign((elec['x'] > 0).sum() / elec.shape[0] - .5)
 

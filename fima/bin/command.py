@@ -7,7 +7,7 @@ from ..pipelines.fitting import pipeline_fitting_all
 
 def main():
     # pipeline_fingers_all()
-    pipeline_fitting_all()
+    pipeline_fitting_all('linear_separate_gaussians_per_finger')
 
 
 if __name__ == '__main__':
