@@ -6,7 +6,7 @@ from ..pipelines.fitting import pipeline_fitting_all
 
 
 def main():
-    pipeline_fingers_all()
+    pipeline_fitting_all()
 
 
 if __name__ == '__main__':
