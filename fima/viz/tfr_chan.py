@@ -33,7 +33,7 @@ def plot_tfr(tf_m, chan, time=None, freq=None):
             ),
             yaxis=dict(
                 title='frequency (Hz)',
-                range=(0, 200),
+                range=(0, 150),
             )
             )
         )

@@ -41,10 +41,10 @@ P = dict(
         ),
     spectrum=dict(
         baseline=dict(
-            time=(-0.6, 0.6),
+            time=(-0.5, -0.1),
             ),
         select=dict(
-            freq=(60, 200),
+            freq=(60, 150),
             ),
         ),
     )

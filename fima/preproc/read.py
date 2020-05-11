@@ -2,7 +2,6 @@ from wonambi.bids.structure import BIDSEEG
 from wonambi.trans import montage
 
 
-
 def read_data(filename, event_onsets):
 
     d = BIDSEEG(filename)
@@ -16,4 +15,3 @@ def read_data(filename, event_onsets):
     data = montage(data, ref_to_avg=True)
 
     return data
-
