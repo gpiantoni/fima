@@ -69,7 +69,7 @@ def pipeline_fitting(subject, run, model_name, response=None, event_type='cues')
             fig = plot_prf_results(result, param, data.chan[0], electrodes, surf)
             divs.append(to_div(fig))
 
-    html_file = FITTING_DIR / model_name / f'{subject}_run-{run}_{event_type}.html'
+    html_file = FITTING_DIR / model_name / str(model['response']) / f'{subject}_run-{run}_{event_type}.html'
     to_html(divs, html_file)
 
     output = [
