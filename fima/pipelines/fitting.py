@@ -9,7 +9,7 @@ from ..parameters import FITTING_DIR, SUBJECTS
 from wonambi.trans import math
 
 
-def pipeline_fitting_all(model_name=None):
+def pipeline_fitting_all(model_name=None, response=None):
 
     if model_name is None:
         model_names = MODELS
@@ -24,7 +24,7 @@ def pipeline_fitting_all(model_name=None):
             for run in runs:
                 print(f'{subject} / {run}')
                 try:
-                    vals = pipeline_fitting(subject, run, model_name, event_type)
+                    vals = pipeline_fitting(subject, run, model_name, response=response, event_type=event_type)
                     values.append(vals)
                 except Exception as err:
                     print(err)
