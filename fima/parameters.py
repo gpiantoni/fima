@@ -67,13 +67,13 @@ SUBJECTS = {
     }
 
 MOVEMENT_SYMBOL_DATA = {
-    'open': 'circle',
-    'close': 'circle-open',
+    'open': 'circle-open',
+    'close': 'circle',
     }
 
 MOVEMENT_SYMBOL_MODEL = {
-    'open': 'diamond',
-    'close': 'diamond-open',
+    'open': 'diamond-open',
+    'close': 'diamond',
     }
 
 MOVEMENT_LINE = {

@@ -1,4 +1,4 @@
-from numpy import genfromtxt, isin
+from numpy import genfromtxt, isin, isnan
 from bidso.objects import Electrodes
 
 from .preproc import read_data
@@ -131,7 +131,7 @@ def load(what, subject, run=None, acq=None, event_type=None):
             ('onset', 'float'),
             ('duration', 'float'),
             ('trial_type', 'U4096'),
-            ('response_time', 'float'),
+            ('response_time', 'float'),  # if -1, it means that we can reject trial
             ('value', 'int')
             ]
         return genfromtxt(filename, delimiter='\t', skip_header=1, dtype=dtypes)
@@ -165,7 +165,7 @@ def select_events(subject, run, t):
         # get rid of "palm open" etc
         events['trial_type'] = [' '.join(x.split(' ')[:2]) for x in events['trial_type']]
 
-    i_evt = isin(events['trial_type'], trial_types)
+    i_evt = isin(events['trial_type'], trial_types) & isnan(events['response_time'])
     event_onsets = events['onset'][i_evt]
     event_types = events['trial_type'][i_evt]
     return event_types, event_onsets

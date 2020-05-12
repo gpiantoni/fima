@@ -25,12 +25,13 @@ def pipeline_fitting_all(model_name=None, response=None):
                 print(f'{subject} / {run}')
                 try:
                     vals = pipeline_fitting(subject, run, model_name, response=response, event_type=event_type)
+                    print(vals)
                     values.append(vals)
                 except Exception as err:
                     print(err)
                     values.append([])
 
-        csv_file = FITTING_DIR / model_name / f'recap_{event_type}.csv'
+        csv_file = FITTING_DIR / model_name / str(model['response']) / f'recap_{event_type}.csv'
         with csv_file.open('w') as f:
             for l in values:
                 f.write('\t'.join(l) + '\n')
