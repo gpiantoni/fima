@@ -7,15 +7,15 @@ def make_2d(x):
 
 
 def rms(est, y):
-    return ((est - y) ** 2).mean() ** .5
+    return ((est.ravel() - y.ravel()) ** 2).mean() ** .5
 
 
 def r2(est, y):
-    return pearsonr(est, y)[0] ** 2
+    return pearsonr(est.ravel(), y.ravel())[0] ** 2
 
 
 def pvalue(est, y):
-    return pearsonr(est, y)[1]
+    return pearsonr(est.ravel(), y.ravel())[1]
 
 
 def make_struct(x, dtype_names):
@@ -29,3 +29,13 @@ def make_struct(x, dtype_names):
         out[col_name] = x[i]
 
     return out
+
+
+def get_response(method, y):
+
+    if method is None:
+        response = None
+    elif method == 'mean':
+        response = y.mean(axis=1)
+
+    return response

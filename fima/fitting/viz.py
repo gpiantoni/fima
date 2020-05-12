@@ -1,10 +1,11 @@
 import plotly.graph_objects as go
-from numpy import NaN, argmax
+from numpy import NaN, argmax, outer
 from wonambi import Data
 
 from .general import estimate
 from ..viz.surf import plot_surf
 from ..parameters import FINGER_COLOR, MOVEMENT_SYMBOL_DATA, MOVEMENT_SYMBOL_MODEL
+from .utils import get_response
 
 
 def estimate_and_plot(y, model, names, result, channels, chan=None):
@@ -17,9 +18,16 @@ def estimate_and_plot(y, model, names, result, channels, chan=None):
     seed = result[i_chan:i_chan + 1].view('<f8')[:-1]
     est = estimate(model, names, seed)
 
-    fig = plot_fitted(names, y[i_chan], est)
+    response = get_response(model['response'], y[i_chan])
+    if response is None:
+        fig = plot_fitted_trial(names, y[i_chan], est)
+        response_str = ' (trials)'
+    else:
+        est = outer(response, est)
+        fig = plot_fitted_time(names, y[i_chan], est)
+        response_str = ' (' + model['response'] + ')'
 
-    title = model['doc'] + '<br /> ' + _parse_subtitle(channels[i_chan], result[i_chan:i_chan + 1])
+    title = model['doc'] + response_str + '<br /> ' + _parse_subtitle(channels[i_chan], result[i_chan:i_chan + 1])
     fig = fig.update_layout(
         title=dict(
             text=title))
@@ -58,13 +66,13 @@ def plot_prf_results(result, param, channels, electrodes, surf=None, rsquared_th
     return fig
 
 
-def plot_fitted(names, y, estimate):
+def plot_fitted_trial(names, y, estimate):
 
     finger_color, symbol_data, symbol_model = get_color_symbol(names)
     fig = go.Figure(
         data=[
             go.Scatter(
-                y=estimate,
+                y=estimate.ravel('F'),
                 name='estimate',
                 mode='lines+markers',
                 line=dict(
@@ -77,7 +85,7 @@ def plot_fitted(names, y, estimate):
                     ),
                 ),
             go.Scatter(
-                y=y,
+                y=y.ravel('F'),
                 name='data',
                 mode='lines+markers',
                 line=dict(
@@ -100,6 +108,60 @@ def plot_fitted(names, y, estimate):
             ),
         )
 
+    return fig
+
+
+def plot_fitted_time(names, y, estimate):
+
+    LINE = {
+        'circle-open': 1,
+        'circle': 2,
+    }
+
+    finger_color, symbol_data, symbol_model = get_color_symbol(names)
+    traces = []
+    for i in range(y.shape[1]):
+        traces.append(
+            go.Scatter(
+                x0=i,
+                dx=1 / y.shape[0],
+                y=y[:, i],
+                name='data',
+                mode='lines',
+                line=dict(
+                    width=LINE[symbol_data[i]],
+                    color=finger_color[i],
+                    dash='dash',
+                    ),
+            )
+        )
+        traces.append(
+            go.Scatter(
+                x0=i,
+                dx=1 / y.shape[0],
+                y=estimate[:, i],
+                name='estimate',
+                mode='lines',
+                line=dict(
+                    width=LINE[symbol_data[i]],
+                    color=finger_color[i],
+                    dash='solid',
+                    ),
+            )
+        )
+
+    fig = go.Figure(
+        data=traces,
+        layout=go.Layout(
+            showlegend=False,
+            xaxis=dict(
+                title='time',
+                ),
+            yaxis=dict(
+                title='values',
+                ),
+            ),
+    )
     return fig
 
 

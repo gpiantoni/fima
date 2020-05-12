@@ -1,26 +1,27 @@
+from numpy import r_, array, outer
 from scipy.optimize import least_squares
-from numpy import r_, array
 from multiprocessing import Pool
 from functools import partial
-from wonambi.trans import math
 
-from .utils import rms, r2, make_struct
+from .utils import rms, r2, make_struct, get_response
 from .design_matrix import make_design_matrix
 
 
 def get_trialdata(data):
-    data = math(data, operator_name='mean', axis='time')
     return [data(trial=0, chan=chan) for chan in data.chan[0]]
 
 
-def fit_data(model, data, names):
+def fit_data(model, data, names, parallel=True):
 
     y = get_trialdata(data)
 
-    with Pool() as p:
-        x = p.map(
-            partial(fitting, model=model, names=names),
-            y)
+    if parallel:
+        with Pool() as p:
+            x = p.map(
+                partial(fitting, model=model, names=names),
+                y)
+    else:
+        x = [fitting(y0, model=model, names=names) for y0 in y]
 
     return array(x)[:, 0]
 
@@ -31,6 +32,8 @@ def fitting(y, model, names):
     bound_high = [x['bounds'][1] for x in model['parameters'].values()]
     X = make_design_matrix(names, model['design_matrix'])
 
+    response = get_response(model['response'], y)
+
     result = least_squares(
         to_minimize,
         x0=seed,
@@ -38,12 +41,15 @@ def fitting(y, model, names):
         args=[
             model['function'],
             X,
+            response,
             y,
             ],
         max_nfev=1e5,
         )
 
     est = estimate(model, names, result.x)
+    if response is not None:
+        est = outer(response, est)
     rsquared = r2(est, y)
 
     return make_struct(r_[result.x, rsquared], list(model['parameters']) + ['rsquared', ])
@@ -55,16 +61,18 @@ def estimate(model, names, x0):
     return model['function'](x0.view('<f8'), X)
 
 
-def to_minimize(x0, fun, X, y, to_optimize='rms'):
+def to_minimize(x0, fun, X, response, y, to_optimize='rms'):
     """Function to minimize
 
     Parameters
     ----------
     fun : function
         function to minimize
-    X : (n_datapoints, n_betas) array
+    X : (n_trials, n_betas) array
         design matrix
-    y : (n_datapoints, ) array
+    response : (n_timepoints, ) array
+        vector with value at each time point, for all the trials
+    y : (n_trials, ) or (n_timepoints, n_trials, ) array
         raw data
     to_optimize : str
         'rms' or 'r2'
@@ -75,6 +83,8 @@ def to_minimize(x0, fun, X, y, to_optimize='rms'):
         value to minimize
     """
     est = fun(x0, X)
+    if response is not None:
+        est = outer(response, est)
 
     if to_optimize == 'rms':
         return rms(est, y)
