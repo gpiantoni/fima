@@ -16,16 +16,23 @@ def estimate_and_plot(y, model, names, result, channels, chan=None):
         i_chan = list(channels).index(i_chan)
 
     seed = result[i_chan:i_chan + 1].view('<f8')[:-1]
-    est = estimate(model, names, seed)
 
-    response = get_response(model['response'], y[i_chan])
-    if response is None:
+    if y[0].ndim == 1:
+        n_timepoints = None
+    else:
+        n_timepoints = y[0].shape[0]
+    est = estimate(model, names, seed, n_timepoints)
+
+    response = get_response(model.get('response', None), y[i_chan])
+    if response is not None:
+        est = outer(response, est)
+        
+    if response is None and model['type'] == 'trial-based':
         fig = plot_fitted_trial(names, y[i_chan], est)
         response_str = ' (trials)'
     else:
-        est = outer(response, est)
         fig = plot_fitted_time(names, y[i_chan], est)
-        response_str = ' (' + model['response'] + ')'
+        response_str = ' (' + model.get('response', '') + ')'
 
     title = model['doc'] + response_str + '<br /> ' + _parse_subtitle(channels[i_chan], result[i_chan:i_chan + 1])
     fig = fig.update_layout(

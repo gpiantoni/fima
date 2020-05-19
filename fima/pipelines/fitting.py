@@ -33,10 +33,11 @@ def pipeline_fitting_all(model_name=None, response=None, subject_only=None):
                     print(err)
                     values.append([])
 
-        csv_file = FITTING_DIR / model_name / str(response) / f'recap_{event_type}.csv'
-        with csv_file.open('w') as f:
-            for l in values:
-                f.write('\t'.join(l) + '\n')
+        if subject_only is not None:
+            csv_file = FITTING_DIR / model_name / str(response) / f'recap_{event_type}.csv'
+            with csv_file.open('w') as f:
+                for l in values:
+                    f.write('\t'.join(l) + '\n')
 
 
 def pipeline_fitting(subject, run, model_name, response=None, event_type='cues'):

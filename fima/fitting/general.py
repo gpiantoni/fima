@@ -56,7 +56,7 @@ def fitting(y, model, names):
     if response is not None:
         est = outer(response, est)
     rsquared = r2(est, y)
-    print(f'{rsquared:0.3f}')
+    print(f'{rsquared:0.3f}', end=', ')
 
     return make_struct(r_[result.x, rsquared], list(model['parameters']) + ['rsquared', ])
 
