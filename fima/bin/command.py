@@ -28,6 +28,9 @@ def main():
     action.add_argument(
         '--response', default=None,
         help='If specify, use all the datapoints (options: "mean")')
+    action.add_argument(
+        '-S', '--subject', default=None,
+        help='Run analysis only on one subject')
 
     args = parser.parse_args()
     print(args)
@@ -38,7 +41,8 @@ def main():
     elif args.function == 'fitting':
         pipeline_fitting_all(
             model_name=args.model,
-            response=args.response)
+            response=args.response,
+            subject_only=args.subject)
 
 
 if __name__ == '__main__':

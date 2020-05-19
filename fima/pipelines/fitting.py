@@ -9,7 +9,7 @@ from ..parameters import FITTING_DIR, SUBJECTS
 from wonambi.trans import math
 
 
-def pipeline_fitting_all(model_name=None, response=None):
+def pipeline_fitting_all(model_name=None, response=None, subject_only=None):
 
     if model_name is None:
         model_names = MODELS
@@ -20,6 +20,8 @@ def pipeline_fitting_all(model_name=None, response=None):
     for model_name in model_names:
         values = []
         for subject, runs in SUBJECTS.items():
+            if subject_only is not None and subject != subject_only:
+                continue
 
             for run in runs:
                 print(f'{subject} / {run}')
