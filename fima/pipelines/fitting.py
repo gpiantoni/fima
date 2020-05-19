@@ -1,5 +1,5 @@
 from ..fitting.general import fit_data, get_trialdata
-from ..fitting.trialbased import MODELS
+from ..fitting.timebased import MODELS
 from ..fitting.viz import estimate_and_plot, plot_prf_results
 from ..spectrum.compute import compute_timefreq, get_chantime
 from ..read import load
@@ -31,7 +31,7 @@ def pipeline_fitting_all(model_name=None, response=None):
                     print(err)
                     values.append([])
 
-        csv_file = FITTING_DIR / model_name / str(model['response']) / f'recap_{event_type}.csv'
+        csv_file = FITTING_DIR / model_name / str(response) / f'recap_{event_type}.csv'
         with csv_file.open('w') as f:
             for l in values:
                 f.write('\t'.join(l) + '\n')
@@ -43,19 +43,25 @@ def pipeline_fitting(subject, run, model_name, response=None, event_type='cues')
         if None, it's trial-based
         'mean' : take the mean for that channel
     """
+
     data, names = load('data', subject, run, event_type=event_type)
     electrodes = load('electrodes', subject, run)
     surf = load('surface', subject, run)
 
     tf_m = compute_timefreq(data, baseline=True, mean=False)
     data = get_chantime(tf_m)
-    if response is None:
+
+    model = MODELS[model_name]
+    if model['type'] == 'trial-based':
         data = math(data, operator_name='mean', axis='time')
+    elif model['type'] == 'time-based' and response is not None:
+        raise ValueError('You cannot use a time-based model and use an empirical response')
+
+    if response is None:
         parallel = True
     else:
         parallel = False
 
-    model = MODELS[model_name]
     model['response'] = response
 
     result = fit_data(model, data, names, parallel=parallel)

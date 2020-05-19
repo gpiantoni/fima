@@ -32,7 +32,7 @@ def fitting(y, model, names):
     bound_high = [x['bounds'][1] for x in model['parameters'].values()]
     X = make_design_matrix(names, model['design_matrix'])
 
-    response = get_response(model['response'], y)
+    response = get_response(model.get('response', None), y)
 
     result = least_squares(
         to_minimize,
@@ -47,18 +47,24 @@ def fitting(y, model, names):
         max_nfev=1e5,
         )
 
-    est = estimate(model, names, result.x)
+    if y.ndim == 1:
+        n_timepoints = None
+    else:
+        n_timepoints = y.shape[0]
+
+    est = estimate(model, names, result.x, n_timepoints)
     if response is not None:
         est = outer(response, est)
     rsquared = r2(est, y)
+    print(f'{rsquared:0.3f}')
 
     return make_struct(r_[result.x, rsquared], list(model['parameters']) + ['rsquared', ])
 
 
-def estimate(model, names, x0):
+def estimate(model, names, x0, n_points=None):
 
     X = make_design_matrix(names, model['design_matrix'])
-    return model['function'](x0.view('<f8'), X)
+    return model['function'](x0.view('<f8'), X, n_points)
 
 
 def to_minimize(x0, fun, X, response, y, to_optimize='rms'):
@@ -82,7 +88,11 @@ def to_minimize(x0, fun, X, response, y, to_optimize='rms'):
     float
         value to minimize
     """
-    est = fun(x0, X)
+    if y.ndim == 1:
+        n_timepoints = None
+    else:
+        n_timepoints = y.shape[0]
+    est = fun(x0, X, n_timepoints)
     if response is not None:
         est = outer(response, est)
 

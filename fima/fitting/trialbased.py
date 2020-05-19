@@ -4,14 +4,14 @@ from scipy.stats import norm
 from .utils import make_2d
 
 
-def linear_gaussian_per_finger(x0, X):
+def linear_gaussian_per_finger(x0, X, n_points=None):
     A, loc, scale = x0
     pdf = norm.pdf(arange(5), loc=loc, scale=scale)
 
     return A * (make_2d(X) * pdf).sum(axis=1)
 
 
-def linear_gaussian_per_finger_open_v_close(x0, X):
+def linear_gaussian_per_finger_open_v_close(x0, X, n_points=None):
     A, loc, scale, openclose = x0
     pdf = norm.pdf(arange(5), loc=loc, scale=scale)
     pdf = r_[pdf * openclose, pdf * (1 - openclose)]
@@ -19,7 +19,7 @@ def linear_gaussian_per_finger_open_v_close(x0, X):
     return A * (make_2d(X) * pdf).sum(axis=1)
 
 
-def linear_separate_gaussians_per_finger(x0, X):
+def linear_separate_gaussians_per_finger(x0, X, n_points=None):
     open_A, open_loc, open_scale, close_A, close_loc, close_scale = x0
     pdf = norm.pdf([0, 1, 2, 3, 4], loc=open_loc, scale=open_scale)
     open_y = open_A * (make_2d(X)[:, :5] * pdf).sum(axis=1)
@@ -30,6 +30,7 @@ def linear_separate_gaussians_per_finger(x0, X):
 
 MODELS = {
     'linear_gaussian_per_finger': {
+        'type': 'trial-based',
         'doc': 'One Gaussian across fingers, no distinction between flexion and extension',
         'function': linear_gaussian_per_finger,
         'design_matrix': 'fingers',
@@ -52,6 +53,7 @@ MODELS = {
             },
         },
     'linear_gaussian_per_finger_open_v_close': {
+        'type': 'trial-based',
         'doc': 'The same Gaussian across fingers, with different weights for flexion and extension',
         'function': linear_gaussian_per_finger_open_v_close,
         'design_matrix': 'cues',
@@ -79,6 +81,7 @@ MODELS = {
             },
         },
     'linear_separate_gaussians_per_finger': {
+        'type': 'trial-based',
         'doc': 'Two independent Gaussians across fingers, one for flexion and one for extension',
         'function': linear_separate_gaussians_per_finger,
         'design_matrix': 'cues',
