@@ -1,5 +1,5 @@
 import plotly.graph_objects as go
-from numpy import NaN, argmax, outer
+from numpy import NaN, nanargmax, outer
 from wonambi import Data
 
 from .general import estimate
@@ -11,7 +11,7 @@ from .utils import get_response
 def estimate_and_plot(y, model, names, result, channels, chan=None):
 
     if chan is None:
-        i_chan = argmax(result['rsquared'])
+        i_chan = nanargmax(result['rsquared'])
     else:
         i_chan = list(channels).index(i_chan)
 
@@ -26,13 +26,13 @@ def estimate_and_plot(y, model, names, result, channels, chan=None):
     response = get_response(model.get('response', None), y[i_chan])
     if response is not None:
         est = outer(response, est)
-        
+
     if response is None and model['type'] == 'trial-based':
         fig = plot_fitted_trial(names, y[i_chan], est)
         response_str = ' (trials)'
     else:
         fig = plot_fitted_time(names, y[i_chan], est)
-        response_str = ' (' + model.get('response', '') + ')'
+        response_str = ' (' + str(model.get('response', '')) + ')'
 
     title = model['doc'] + response_str + '<br /> ' + _parse_subtitle(channels[i_chan], result[i_chan:i_chan + 1])
     fig = fig.update_layout(

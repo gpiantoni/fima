@@ -6,6 +6,7 @@ from ..read import load
 from ..viz import to_div, to_html
 from ..parameters import FITTING_DIR, SUBJECTS
 
+from numpy import nanmax
 from wonambi.trans import math
 
 
@@ -55,7 +56,7 @@ def pipeline_fitting(subject, run, model_name, response=None, event_type='cues')
     data = get_chantime(tf_m)
 
     model = MODELS[model_name]
-    if model['type'] == 'trial-based':
+    if model['type'] == 'trial-based' and response is None:
         data = math(data, operator_name='mean', axis='time')
     elif model['type'] == 'time-based' and response is not None:
         raise ValueError('You cannot use a time-based model and use an empirical response')
@@ -79,11 +80,15 @@ def pipeline_fitting(subject, run, model_name, response=None, event_type='cues')
             fig = plot_prf_results(result, param, data.chan[0], electrodes, surf)
             divs.append(to_div(fig))
 
-    html_file = FITTING_DIR / model_name / str(model['response']) / f'{subject}_run-{run}_{event_type}.html'
+    html_file = FITTING_DIR / model_name / str(model.get('response', 'None')) / f'{subject}_run-{run}_{event_type}.html'
     to_html(divs, html_file)
 
     output = [
-        f"{result['rsquared'].max():0.3f}",
+        f"{nanmax(result['rsquared']):0.3f}",
         f"{(result['rsquared'] >= 0.10).sum():d} / {len(result):d}",
         ]
+    csv_file = html_file.with_suffix('.csv')
+    with csv_file.open('w') as f:
+        f.write('\t'.join(output))
+
     return output
