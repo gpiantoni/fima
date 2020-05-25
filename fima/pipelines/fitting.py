@@ -11,6 +11,9 @@ from numpy import nanmax
 from wonambi.trans import math
 
 
+FOLDER_NAME = '400ms'
+
+
 def pipeline_fitting_all(model_name=None, response=None, subject_only=None):
 
     if model_name is None:
@@ -36,10 +39,10 @@ def pipeline_fitting_all(model_name=None, response=None, subject_only=None):
                     values.append([])
 
         if subject_only is not None:
-            csv_file = FITTING_DIR / model_name / str(response) / f'recap_{event_type}.csv'
+            csv_file = FITTING_DIR / model_name / FOLDER_NAME / f'recap_{event_type}.csv'
             with csv_file.open('w') as f:
-                for l in values:
-                    f.write('\t'.join(l) + '\n')
+                for line in values:
+                    f.write('\t'.join(line) + '\n')
 
 
 def pipeline_fitting(subject, run, model_name, response=None, event_type='cues'):
@@ -84,7 +87,7 @@ def pipeline_fitting(subject, run, model_name, response=None, event_type='cues')
             fig = plot_prf_results(result, param, data.chan[0], electrodes, surf)
             divs.append(to_div(fig))
 
-    html_file = FITTING_DIR / model_name / str(model.get('response', 'None')) / f'{subject}_run-{run}_{event_type}.html'
+    html_file = FITTING_DIR / model_name / FOLDER_NAME / f'{subject}_run-{run}_{event_type}.html'
     to_html(divs, html_file)
 
     output = [

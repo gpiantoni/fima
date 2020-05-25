@@ -25,7 +25,7 @@ def compute_timefreq(data, baseline=True, mean=True):
         tf = math(tf, operator_name='abs')
         t_bool = zeros(tf.time[0].shape, dtype=bool)
         t_step = t_bool.shape[0] // 100
-        t_bool[::t_step] = True
+        t_bool[20:-20:t_step] = True
         tf = select(tf, time=t_bool)
 
     if baseline:

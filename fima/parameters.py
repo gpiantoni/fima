@@ -40,7 +40,7 @@ P = dict(
             ),
         ),
     spectrum=dict(
-        method='morlet',  # spectrogram or morlet
+        method='spectrogram',  # spectrogram or morlet
         baseline=dict(
             time=(-0.5, -0.1),
             type='dB',
