@@ -37,8 +37,31 @@ MODELS['linear_gaussian_per_finger_with_gauss'] = {
         },
     }
 
+
 MODELS['linear_separate_gaussians_per_finger_with_gauss'] = {
     'type': 'time-based',
+    'doc': MODELS['linear_separate_gaussians_per_finger']['doc'] + ' multiplied by a Gaussian',
+    'function': partial(add_gauss, fun=linear_separate_gaussians_per_finger),
+    'design_matrix': MODELS['linear_separate_gaussians_per_finger']['design_matrix'],
+    'parameters': {
+        **MODELS['linear_separate_gaussians_per_finger']['parameters'],
+        'delay': {
+            'seed': 20,
+            'bounds': (-5, 80),  # this depends on the number of data points
+            'to_plot': True,
+            },
+        'spread': {
+            'seed': 10,
+            'bounds': (0.1, 40),  # this depends on the number of data points
+            'to_plot': False,
+            },
+        },
+    }
+
+
+MODELS['group_separate_gaussians_per_finger_with_gauss'] = {
+    'type': 'time-based',
+    'grouped': True,
     'doc': MODELS['linear_separate_gaussians_per_finger']['doc'] + ' multiplied by a Gaussian',
     'function': partial(add_gauss, fun=linear_separate_gaussians_per_finger),
     'design_matrix': MODELS['linear_separate_gaussians_per_finger']['design_matrix'],

@@ -1,10 +1,11 @@
 from ..fitting.general import fit_data, get_trialdata
 from ..fitting.timebased import MODELS
 from ..fitting.viz import estimate_and_plot, plot_prf_results
+from ..fitting.utils import group_per_condition
 from ..spectrum.compute import compute_timefreq, get_chantime
 from ..read import load
 from ..viz import to_div, to_html
-from ..parameters import FITTING_DIR, SUBJECTS
+from ..parameters import FITTING_DIR, SUBJECTS, P
 
 from numpy import nanmax
 from wonambi.trans import math
@@ -52,7 +53,7 @@ def pipeline_fitting(subject, run, model_name, response=None, event_type='cues')
     electrodes = load('electrodes', subject, run)
     surf = load('surface', subject, run)
 
-    tf_m = compute_timefreq(data, baseline=True, mean=False)
+    tf_m = compute_timefreq(data, baseline=P['spectrum']['baseline']['type'], mean=False)
     data = get_chantime(tf_m)
 
     model = MODELS[model_name]
@@ -60,6 +61,9 @@ def pipeline_fitting(subject, run, model_name, response=None, event_type='cues')
         data = math(data, operator_name='mean', axis='time')
     elif model['type'] == 'time-based' and response is not None:
         raise ValueError('You cannot use a time-based model and use an empirical response')
+
+    if model.get('grouped', False):
+        data, names = group_per_condition(data, names)
 
     if response is None:
         parallel = True

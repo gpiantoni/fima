@@ -42,6 +42,7 @@ P = dict(
     spectrum=dict(
         baseline=dict(
             time=(-0.5, -0.1),
+            type='dB',
             ),
         select=dict(
             freq=(60, 150),

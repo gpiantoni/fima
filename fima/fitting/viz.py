@@ -34,7 +34,7 @@ def estimate_and_plot(y, model, names, result, channels, chan=None):
         fig = plot_fitted_time(names, y[i_chan], est)
         response_str = ' (' + str(model.get('response', '')) + ')'
 
-    title = model['doc'] + response_str + '<br /> ' + _parse_subtitle(channels[i_chan], result[i_chan:i_chan + 1])
+    title = model['doc'] + response_str + '<br />' + _parse_subtitle(channels[i_chan], result[i_chan:i_chan + 1])
     fig = fig.update_layout(
         title=dict(
             text=title))
@@ -46,7 +46,15 @@ def _parse_subtitle(chan, v):
     for name in v.dtype.names:
         t.append(f'{name}: {v[name][0]:0.3f}')
 
-    return '\t'.join(t)
+    if len(t) > 6:
+        return '<br />'.join([
+            '\t'.join(t[:5]),
+            '\t'.join(t[5:]),
+            ])
+
+    else:
+        return '\t'.join(t)
+
 
 
 def plot_prf_results(result, param, channels, electrodes, surf=None, rsquared_threshold=0.05):

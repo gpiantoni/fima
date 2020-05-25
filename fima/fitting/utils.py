@@ -1,5 +1,14 @@
 from numpy import zeros
 from scipy.stats import pearsonr
+from ..fingers.max_activity import FINGERS, create_bool
+from ..spectrum.compute import get_chantime
+from numpy import moveaxis, array
+
+
+EVENTS = []
+for action in ('close', 'open'):
+    for f in FINGERS:
+        EVENTS.append(f'{f} {action}')
 
 
 def make_2d(x):
@@ -39,3 +48,17 @@ def get_response(method, y):
         response = y.mean(axis=1)
 
     return response
+
+
+def group_per_condition(data, names):
+    dat = []
+    for ev in EVENTS:
+        i = create_bool(names, ev)
+        dat.append(data.data[0][..., i].mean(axis=-1))
+
+    data.data[0] = moveaxis(array(dat), 0, -1)
+    data.axis.pop('trial_axis');
+    data.axis['event'] = array((1, ), dtype='O')
+    data.axis['event'][0] = array(EVENTS)
+
+    return data, array(EVENTS)
