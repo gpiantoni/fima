@@ -16,6 +16,9 @@ def main():
         help='Compute Time-Frequency Analysis',
         )
     action.set_defaults(function='spectrum')
+    action.add_argument(
+        '-S', '--subject', default=None,
+        help='Run analysis only on one subject')
 
     action = list_pipelines.add_parser(
         'fitting',
@@ -36,7 +39,8 @@ def main():
     print(args)
 
     if args.function == 'spectrum':
-        pipeline_timefreq_all()
+        pipeline_timefreq_all(
+            subject_only=args.subject)
 
     elif args.function == 'fitting':
         pipeline_fitting_all(

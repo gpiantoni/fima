@@ -10,8 +10,10 @@ from ..utils import find_max_point
 DB_THRESHOLD = 3
 
 
-def pipeline_timefreq_all(event_type='cues'):
+def pipeline_timefreq_all(event_type='cues', subject_only=None):
     for subject, runs in SUBJECTS.items():
+        if subject_only is not None and subject != subject_only:
+            continue
         for run in runs:
             print(f'{subject} / {run}')
             try:
