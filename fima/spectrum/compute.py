@@ -22,6 +22,7 @@ def compute_timefreq(data, baseline=True, mean=True):
             ratio=7,
             dur_in_sd=3
         )
+        tf = math(tf, operator_name='abs')
         t_bool = zeros(tf.time[0].shape, dtype=bool)
         t_step = t_bool.shape[0] // 100
         t_bool[::t_step] = True
