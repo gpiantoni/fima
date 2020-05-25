@@ -1,24 +1,37 @@
+from numpy import arange, zeros
 from wonambi.trans import apply_baseline, timefrequency, concatenate, math, select
 
 from ..parameters import P
 
 
-def compute_timefreq(data, method='spectrogram', baseline=None, mean=True):
-    """baseline: 'dB' or 'zscore'"""
+def compute_timefreq(data, baseline=True, mean=True):
 
-    tf = timefrequency(
-        data,
-        'spectrogram',
-        duration=0.4,
-        overlap=0.9,
-        taper='dpss',
-        halfbandwidth=10)
+    if P['spectrum']['method'] == 'spectrogram':
+        tf = timefrequency(
+            data,
+            'spectrogram',
+            duration=0.4,
+            overlap=0.9,
+            taper='dpss',
+            halfbandwidth=10)
+    else:
+        tf = timefrequency(
+            data,
+            'morlet',
+            foi=arange(1, 200),
+            ratio=7,
+            dur_in_sd=3
+        )
+        t_bool = zeros(tf.time[0].shape, dtype=bool)
+        t_step = t_bool.shape[0] // 100
+        t_bool[::t_step] = True
+        tf = select(tf, time=t_bool)
 
-    if baseline is not None:
+    if baseline:
         tf = apply_baseline(
             tf,
             time=P['spectrum']['baseline']['time'],
-            baseline=baseline)
+            baseline=P['spectrum']['baseline']['type'])
 
     tf = concatenate(
         tf,

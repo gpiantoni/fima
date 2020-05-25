@@ -92,7 +92,13 @@ def pipeline_fitting(subject, run, model_name, response=None, event_type='cues')
         f"{(result['rsquared'] >= 0.10).sum():d} / {len(result):d}",
         ]
     csv_file = html_file.with_suffix('.csv')
-    with csv_file.open('w') as f:
-        f.write('\t'.join(output))
+    export_results(result, data, csv_file)
 
     return output
+
+
+def export_results(result, data, out_file):
+    with out_file.open('w') as f:
+        f.write('chan\t' + '\t'.join(result.dtype.names) + '\n')
+        for chan, r in zip(data.chan[0], result):
+            f.write(chan + '\t' + '\t'.join(f'{x:0.3f}' for x in r) + '\n')
