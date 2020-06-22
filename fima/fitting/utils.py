@@ -1,7 +1,6 @@
-from numpy import zeros
+from numpy import zeros, std
 from scipy.stats import pearsonr
 from ..fingers.max_activity import FINGERS, create_bool
-from ..spectrum.compute import get_chantime
 from numpy import moveaxis, array
 
 
@@ -50,14 +49,17 @@ def get_response(method, y):
     return response
 
 
-def group_per_condition(data, names):
+def group_per_condition(data, names, operator='mean'):
     dat = []
     for ev in EVENTS:
         i = create_bool(names, ev)
-        dat.append(data.data[0][..., i].mean(axis=-1))
-
+        y = data.data[0][..., i]
+        if operator == 'mean':
+            dat.append(y.mean(axis=-1))
+        elif operator == 'std':
+            dat.append(std(y, axis=-1))
     data.data[0] = moveaxis(array(dat), 0, -1)
-    data.axis.pop('trial_axis');
+    data.axis.pop('trial_axis')
     data.axis['event'] = array((1, ), dtype='O')
     data.axis['event'][0] = array(EVENTS)
 
