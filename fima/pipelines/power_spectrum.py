@@ -62,6 +62,10 @@ def pipeline_timefreq(subject, run, event_type='cues'):
     html_file = SPECTRUM_DIR / event_type / f'{subject}_run-{run}_{event_type}.html'
     to_html(divs, html_file)
 
+    html_file = SPECTRUM_DIR / event_type / f'{subject}_run-{run}_{event_type}_allchan.html'
+    divs = plot_conditions_per_chan(tf_cht, names)
+    to_html(divs, html_file)
+
 
 def find_best_chan(tf_cht):
     """Find best channel which has the most significant time point above

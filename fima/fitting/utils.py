@@ -1,4 +1,4 @@
-from numpy import zeros, std
+from numpy import zeros, std, sqrt
 from scipy.stats import pearsonr
 from ..fingers.max_activity import FINGERS, create_bool
 from numpy import moveaxis, array
@@ -58,9 +58,12 @@ def group_per_condition(data, names, operator='mean'):
             dat.append(y.mean(axis=-1))
         elif operator == 'std':
             dat.append(std(y, axis=-1))
-    data.data[0] = moveaxis(array(dat), 0, -1)
-    data.axis.pop('trial_axis')
-    data.axis['event'] = array((1, ), dtype='O')
-    data.axis['event'][0] = array(EVENTS)
+        elif operator == 'sem':
+            dat.append(std(y, axis=-1) / sqrt(y.shape[-1]))
+    out = data._copy()
+    out.data[0] = moveaxis(array(dat), 0, -1)
+    out.axis.pop('trial_axis')
+    out.axis['event'] = array((1, ), dtype='O')
+    out.axis['event'][0] = array(EVENTS)
 
-    return data, array(EVENTS)
+    return out, array(EVENTS)
