@@ -1,10 +1,12 @@
 from numpy import argmax, sum, empty, asanyarray, array, not_equal, nonzero, diff, append
 
 from ..spectrum import compute_timefreq, get_chan, get_chantime
-from ..viz import plot_tfr, plot_tfr_time, to_div, to_html, plot_surf
+from ..viz import plot_tfr, plot_tfr_time, to_div, to_html, plot_surf, plot_conditions_per_chan
 from ..parameters import SPECTRUM_DIR, SUBJECTS, P
 from ..read import load
 from ..utils import find_max_point
+
+from wonambi.trans import math
 
 
 DB_THRESHOLD = 3
@@ -38,7 +40,8 @@ def pipeline_timefreq(subject, run, event_type='cues'):
         print(f'No surfaces for {subject}')
         pial = None
 
-    tf_m = compute_timefreq(data, mean=True)
+    tf = compute_timefreq(data, mean=False)
+    tf_m = math(tf, operator_name='mean', axis='trial_axis')
     tf_cht = get_chantime(tf_m)
     if False:  # this checks only above the threshold, but it fails if there is no point above threshold
         best_chan = find_best_chan(tf_cht)
@@ -63,6 +66,8 @@ def pipeline_timefreq(subject, run, event_type='cues'):
     to_html(divs, html_file)
 
     html_file = SPECTRUM_DIR / event_type / f'{subject}_run-{run}_{event_type}_allchan.html'
+
+    tf_cht = get_chantime(tf)
     divs = plot_conditions_per_chan(tf_cht, names)
     to_html(divs, html_file)
 

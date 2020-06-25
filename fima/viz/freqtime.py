@@ -80,6 +80,7 @@ def plot_per_chan(y, s, chan, names):
                 ),
             yaxis=dict(
                 title='change from baseline',
+                range=(-6, 6),
                 ),
             ),
     )
