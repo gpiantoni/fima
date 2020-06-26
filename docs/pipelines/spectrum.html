@@ -24,7 +24,7 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from numpy import argmax, sum, empty, asanyarray, array, not_equal, nonzero, diff, append
+<pre><code class="python">from numpy import argmax, empty, asanyarray, array, not_equal, nonzero, diff, append
 
 from ..spectrum import compute_timefreq, get_chan, get_chantime
 from ..viz import plot_tfr, plot_tfr_time, to_div, to_html, plot_surf, plot_conditions_per_chan
@@ -35,10 +35,17 @@ from ..utils import find_max_point
 from wonambi.trans import math
 
 
-DB_THRESHOLD = 3
-
-
 def pipeline_spectrum_all(event_type=&#39;cues&#39;, subject_only=None):
+    &#34;&#34;&#34;Run pipeline to compute power spectrum on all the participants
+
+    Parameters
+    ----------
+    event_type : str
+        event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
+        &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
+    subject_only : str
+        compute pipeline only for this participant
+    &#34;&#34;&#34;
     for subject, runs in SUBJECTS.items():
         if subject_only is not None and subject != subject_only:
             continue
@@ -51,7 +58,18 @@ def pipeline_spectrum_all(event_type=&#39;cues&#39;, subject_only=None):
 
 
 def pipeline_spectrum(subject, run, event_type=&#39;cues&#39;):
+    &#34;&#34;&#34;Run pipeline to compute power spectrum on one participant, one run
 
+    Parameters
+    ----------
+    subject : str
+        subject code
+    run : str
+        number of the run of interest
+    event_type : str
+        event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
+        &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
+    &#34;&#34;&#34;
     data, names = load(&#39;data&#39;, subject, run, event_type=event_type)
 
     try:
@@ -69,11 +87,7 @@ def pipeline_spectrum(subject, run, event_type=&#39;cues&#39;):
     tf = compute_timefreq(data, mean=False)
     tf_m = math(tf, operator_name=&#39;mean&#39;, axis=&#39;trial_axis&#39;)
     tf_cht = get_chantime(tf_m)
-    if False:  # this checks only above the threshold, but it fails if there is no point above threshold
-        best_chan = find_best_chan(tf_cht)
-        best_time = find_timeinterval(tf_cht, best_chan)
-    else:
-        best_chan, best_time = find_max_point(tf_cht)
+    best_chan, best_time = find_max_point(tf_cht)
     print(f&#39;Best channel {best_chan}, best interval {best_time}s&#39;)
 
     tf_ch = get_chan(tf_m, time=best_time)
@@ -96,28 +110,6 @@ def pipeline_spectrum(subject, run, event_type=&#39;cues&#39;):
     tf_cht = get_chantime(tf)
     divs = plot_conditions_per_chan(tf_cht, names)
     to_html(divs, html_file)
-
-
-def find_best_chan(tf_cht):
-    &#34;&#34;&#34;Find best channel which has the most significant time point above
-    a threshold.
-    &#34;&#34;&#34;
-    values_per_chan = sum(tf_cht.data[0] &gt; DB_THRESHOLD, axis=1)
-    i_chan = argmax(values_per_chan)
-    best_chan = tf_cht.chan[0][i_chan]
-    return best_chan
-
-
-def find_timeinterval(tf_cht, best_chan):
-    &#34;&#34;&#34;Find time interval with the longest period above threshold
-    &#34;&#34;&#34;
-    i_s = tf_cht(trial=0, chan=best_chan) &gt; DB_THRESHOLD
-    i_start, i_end = find_max_true(i_s)
-
-    time_start = tf_cht.time[0][i_start]
-    time_end = tf_cht.time[0][i_end]
-
-    return time_start, time_end
 
 
 def find_max_true(x):
@@ -166,26 +158,6 @@ def find_runs(x):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="fima.pipelines.spectrum.find_best_chan"><code class="name flex">
-<span>def <span class="ident">find_best_chan</span></span>(<span>tf_cht)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Find best channel which has the most significant time point above
-a threshold.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def find_best_chan(tf_cht):
-    &#34;&#34;&#34;Find best channel which has the most significant time point above
-    a threshold.
-    &#34;&#34;&#34;
-    values_per_chan = sum(tf_cht.data[0] &gt; DB_THRESHOLD, axis=1)
-    i_chan = argmax(values_per_chan)
-    best_chan = tf_cht.chan[0][i_chan]
-    return best_chan</code></pre>
-</details>
-</dd>
 <dt id="fima.pipelines.spectrum.find_max_true"><code class="name flex">
 <span>def <span class="ident">find_max_true</span></span>(<span>x)</span>
 </code></dt>
@@ -244,38 +216,38 @@ a threshold.</p></div>
         return run_values, run_starts, run_lengths</code></pre>
 </details>
 </dd>
-<dt id="fima.pipelines.spectrum.find_timeinterval"><code class="name flex">
-<span>def <span class="ident">find_timeinterval</span></span>(<span>tf_cht, best_chan)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Find time interval with the longest period above threshold</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def find_timeinterval(tf_cht, best_chan):
-    &#34;&#34;&#34;Find time interval with the longest period above threshold
-    &#34;&#34;&#34;
-    i_s = tf_cht(trial=0, chan=best_chan) &gt; DB_THRESHOLD
-    i_start, i_end = find_max_true(i_s)
-
-    time_start = tf_cht.time[0][i_start]
-    time_end = tf_cht.time[0][i_end]
-
-    return time_start, time_end</code></pre>
-</details>
-</dd>
 <dt id="fima.pipelines.spectrum.pipeline_spectrum"><code class="name flex">
 <span>def <span class="ident">pipeline_spectrum</span></span>(<span>subject, run, event_type='cues')</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Run pipeline to compute power spectrum on one participant, one run</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>subject</code></strong> :&ensp;<code>str</code></dt>
+<dd>subject code</dd>
+<dt><strong><code>run</code></strong> :&ensp;<code>str</code></dt>
+<dd>number of the run of interest</dd>
+<dt><strong><code>event_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>event type used to identify the trials (one of 'cues', 'open', 'close',
+'movements', 'extension', 'flexion')</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def pipeline_spectrum(subject, run, event_type=&#39;cues&#39;):
+    &#34;&#34;&#34;Run pipeline to compute power spectrum on one participant, one run
 
+    Parameters
+    ----------
+    subject : str
+        subject code
+    run : str
+        number of the run of interest
+    event_type : str
+        event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
+        &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
+    &#34;&#34;&#34;
     data, names = load(&#39;data&#39;, subject, run, event_type=event_type)
 
     try:
@@ -293,11 +265,7 @@ a threshold.</p></div>
     tf = compute_timefreq(data, mean=False)
     tf_m = math(tf, operator_name=&#39;mean&#39;, axis=&#39;trial_axis&#39;)
     tf_cht = get_chantime(tf_m)
-    if False:  # this checks only above the threshold, but it fails if there is no point above threshold
-        best_chan = find_best_chan(tf_cht)
-        best_time = find_timeinterval(tf_cht, best_chan)
-    else:
-        best_chan, best_time = find_max_point(tf_cht)
+    best_chan, best_time = find_max_point(tf_cht)
     print(f&#39;Best channel {best_chan}, best interval {best_time}s&#39;)
 
     tf_ch = get_chan(tf_m, time=best_time)
@@ -326,12 +294,30 @@ a threshold.</p></div>
 <span>def <span class="ident">pipeline_spectrum_all</span></span>(<span>event_type='cues', subject_only=None)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Run pipeline to compute power spectrum on all the participants</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>event_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>event type used to identify the trials (one of 'cues', 'open', 'close',
+'movements', 'extension', 'flexion')</dd>
+<dt><strong><code>subject_only</code></strong> :&ensp;<code>str</code></dt>
+<dd>compute pipeline only for this participant</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def pipeline_spectrum_all(event_type=&#39;cues&#39;, subject_only=None):
+    &#34;&#34;&#34;Run pipeline to compute power spectrum on all the participants
+
+    Parameters
+    ----------
+    event_type : str
+        event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
+        &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
+    subject_only : str
+        compute pipeline only for this participant
+    &#34;&#34;&#34;
     for subject, runs in SUBJECTS.items():
         if subject_only is not None and subject != subject_only:
             continue
@@ -361,10 +347,8 @@ a threshold.</p></div>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="fima.pipelines.spectrum.find_best_chan" href="#fima.pipelines.spectrum.find_best_chan">find_best_chan</a></code></li>
 <li><code><a title="fima.pipelines.spectrum.find_max_true" href="#fima.pipelines.spectrum.find_max_true">find_max_true</a></code></li>
 <li><code><a title="fima.pipelines.spectrum.find_runs" href="#fima.pipelines.spectrum.find_runs">find_runs</a></code></li>
-<li><code><a title="fima.pipelines.spectrum.find_timeinterval" href="#fima.pipelines.spectrum.find_timeinterval">find_timeinterval</a></code></li>
 <li><code><a title="fima.pipelines.spectrum.pipeline_spectrum" href="#fima.pipelines.spectrum.pipeline_spectrum">pipeline_spectrum</a></code></li>
 <li><code><a title="fima.pipelines.spectrum.pipeline_spectrum_all" href="#fima.pipelines.spectrum.pipeline_spectrum_all">pipeline_spectrum_all</a></code></li>
 </ul>
