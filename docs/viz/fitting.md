@@ -1,2 +1,0 @@
-Module fima.viz.fitting
-=======================
