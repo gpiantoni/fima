@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
-from ..pipelines.power_spectrum import pipeline_timefreq_all
-from ..pipelines.fingers import pipeline_fingers_all
-from ..pipelines.fitting import pipeline_fitting_all
+from ..pipelines import (
+    pipeline_spectrum_all,
+    pipeline_fitting_all,
+    )
 
 
 def main():
@@ -39,7 +40,7 @@ def main():
     print(args)
 
     if args.function == 'spectrum':
-        pipeline_timefreq_all(
+        pipeline_spectrum_all(
             subject_only=args.subject)
 
     elif args.function == 'fitting':

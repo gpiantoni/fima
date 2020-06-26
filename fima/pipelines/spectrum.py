@@ -12,19 +12,19 @@ from wonambi.trans import math
 DB_THRESHOLD = 3
 
 
-def pipeline_timefreq_all(event_type='cues', subject_only=None):
+def pipeline_spectrum_all(event_type='cues', subject_only=None):
     for subject, runs in SUBJECTS.items():
         if subject_only is not None and subject != subject_only:
             continue
         for run in runs:
             print(f'{subject} / {run}')
             try:
-                pipeline_timefreq(subject, run, event_type)
+                pipeline_spectrum(subject, run, event_type)
             except Exception as err:
                 print(err)
 
 
-def pipeline_timefreq(subject, run, event_type='cues'):
+def pipeline_spectrum(subject, run, event_type='cues'):
 
     data, names = load('data', subject, run, event_type=event_type)
 

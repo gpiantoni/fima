@@ -1,3 +1,5 @@
+"""General parameters useful for all the functions"""
+
 from pathlib import Path
 from platform import node
 from .utils import get_color_for_val

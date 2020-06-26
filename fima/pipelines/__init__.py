@@ -1,3 +1,5 @@
-from .power_spectrum import  pipeline_timefreq
-from .dataglove import pipeline_dataglove
-from .data_quality import pipeline_dataquality
+"""Entry functions (these functions should allow you to run one clear
+processing step
+"""
+from .spectrum import pipeline_spectrum_all
+from .fitting import pipeline_fitting_all

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.viz.fitting API documentation</title>
+<title>fima.pipelines.dataquality API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,15 +17,58 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.viz.fitting</code></h1>
+<h1 class="title">Module <code>fima.pipelines.dataquality</code></h1>
 </header>
 <section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from ..preproc.data_quality import plot_raw_overview
+from ..utils import make_name
+from ..viz import to_html
+from ..parameters import BIDS_DIR, OVERVIEW_DIR
+
+
+def pipeline_dataquality():
+    for filename in BIDS_DIR.rglob(&#39;*_ieeg.eeg&#39;):
+        print(filename.stem)
+
+        divs = plot_raw_overview(filename)[1]
+        if divs is None:
+            continue
+        fig_name = make_name(filename, &#39;dataquality&#39;)
+        to_html(divs, OVERVIEW_DIR / fig_name)</code></pre>
+</details>
 </section>
 <section>
 </section>
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="fima.pipelines.dataquality.pipeline_dataquality"><code class="name flex">
+<span>def <span class="ident">pipeline_dataquality</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pipeline_dataquality():
+    for filename in BIDS_DIR.rglob(&#39;*_ieeg.eeg&#39;):
+        print(filename.stem)
+
+        divs = plot_raw_overview(filename)[1]
+        if divs is None:
+            continue
+        fig_name = make_name(filename, &#39;dataquality&#39;)
+        to_html(divs, OVERVIEW_DIR / fig_name)</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -38,7 +81,12 @@
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="fima.viz" href="index.html">fima.viz</a></code></li>
+<li><code><a title="fima.pipelines" href="index.html">fima.pipelines</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="fima.pipelines.dataquality.pipeline_dataquality" href="#fima.pipelines.dataquality.pipeline_dataquality">pipeline_dataquality</a></code></li>
 </ul>
 </li>
 </ul>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.pipelines.power_spectrum API documentation</title>
+<title>fima.pipelines.spectrum API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.pipelines.power_spectrum</code></h1>
+<h1 class="title">Module <code>fima.pipelines.spectrum</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -38,19 +38,19 @@ from wonambi.trans import math
 DB_THRESHOLD = 3
 
 
-def pipeline_timefreq_all(event_type=&#39;cues&#39;, subject_only=None):
+def pipeline_spectrum_all(event_type=&#39;cues&#39;, subject_only=None):
     for subject, runs in SUBJECTS.items():
         if subject_only is not None and subject != subject_only:
             continue
         for run in runs:
             print(f&#39;{subject} / {run}&#39;)
             try:
-                pipeline_timefreq(subject, run, event_type)
+                pipeline_spectrum(subject, run, event_type)
             except Exception as err:
                 print(err)
 
 
-def pipeline_timefreq(subject, run, event_type=&#39;cues&#39;):
+def pipeline_spectrum(subject, run, event_type=&#39;cues&#39;):
 
     data, names = load(&#39;data&#39;, subject, run, event_type=event_type)
 
@@ -166,7 +166,7 @@ def find_runs(x):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="fima.pipelines.power_spectrum.find_best_chan"><code class="name flex">
+<dt id="fima.pipelines.spectrum.find_best_chan"><code class="name flex">
 <span>def <span class="ident">find_best_chan</span></span>(<span>tf_cht)</span>
 </code></dt>
 <dd>
@@ -186,7 +186,7 @@ a threshold.</p></div>
     return best_chan</code></pre>
 </details>
 </dd>
-<dt id="fima.pipelines.power_spectrum.find_max_true"><code class="name flex">
+<dt id="fima.pipelines.spectrum.find_max_true"><code class="name flex">
 <span>def <span class="ident">find_max_true</span></span>(<span>x)</span>
 </code></dt>
 <dd>
@@ -203,7 +203,7 @@ a threshold.</p></div>
     return i_start[i_best], i_start[i_best] + i_dur[i_best]</code></pre>
 </details>
 </dd>
-<dt id="fima.pipelines.power_spectrum.find_runs"><code class="name flex">
+<dt id="fima.pipelines.spectrum.find_runs"><code class="name flex">
 <span>def <span class="ident">find_runs</span></span>(<span>x)</span>
 </code></dt>
 <dd>
@@ -244,7 +244,7 @@ a threshold.</p></div>
         return run_values, run_starts, run_lengths</code></pre>
 </details>
 </dd>
-<dt id="fima.pipelines.power_spectrum.find_timeinterval"><code class="name flex">
+<dt id="fima.pipelines.spectrum.find_timeinterval"><code class="name flex">
 <span>def <span class="ident">find_timeinterval</span></span>(<span>tf_cht, best_chan)</span>
 </code></dt>
 <dd>
@@ -265,8 +265,8 @@ a threshold.</p></div>
     return time_start, time_end</code></pre>
 </details>
 </dd>
-<dt id="fima.pipelines.power_spectrum.pipeline_timefreq"><code class="name flex">
-<span>def <span class="ident">pipeline_timefreq</span></span>(<span>subject, run, event_type='cues')</span>
+<dt id="fima.pipelines.spectrum.pipeline_spectrum"><code class="name flex">
+<span>def <span class="ident">pipeline_spectrum</span></span>(<span>subject, run, event_type='cues')</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -274,7 +274,7 @@ a threshold.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def pipeline_timefreq(subject, run, event_type=&#39;cues&#39;):
+<pre><code class="python">def pipeline_spectrum(subject, run, event_type=&#39;cues&#39;):
 
     data, names = load(&#39;data&#39;, subject, run, event_type=event_type)
 
@@ -322,8 +322,8 @@ a threshold.</p></div>
     to_html(divs, html_file)</code></pre>
 </details>
 </dd>
-<dt id="fima.pipelines.power_spectrum.pipeline_timefreq_all"><code class="name flex">
-<span>def <span class="ident">pipeline_timefreq_all</span></span>(<span>event_type='cues', subject_only=None)</span>
+<dt id="fima.pipelines.spectrum.pipeline_spectrum_all"><code class="name flex">
+<span>def <span class="ident">pipeline_spectrum_all</span></span>(<span>event_type='cues', subject_only=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -331,14 +331,14 @@ a threshold.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def pipeline_timefreq_all(event_type=&#39;cues&#39;, subject_only=None):
+<pre><code class="python">def pipeline_spectrum_all(event_type=&#39;cues&#39;, subject_only=None):
     for subject, runs in SUBJECTS.items():
         if subject_only is not None and subject != subject_only:
             continue
         for run in runs:
             print(f&#39;{subject} / {run}&#39;)
             try:
-                pipeline_timefreq(subject, run, event_type)
+                pipeline_spectrum(subject, run, event_type)
             except Exception as err:
                 print(err)</code></pre>
 </details>
@@ -361,12 +361,12 @@ a threshold.</p></div>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="fima.pipelines.power_spectrum.find_best_chan" href="#fima.pipelines.power_spectrum.find_best_chan">find_best_chan</a></code></li>
-<li><code><a title="fima.pipelines.power_spectrum.find_max_true" href="#fima.pipelines.power_spectrum.find_max_true">find_max_true</a></code></li>
-<li><code><a title="fima.pipelines.power_spectrum.find_runs" href="#fima.pipelines.power_spectrum.find_runs">find_runs</a></code></li>
-<li><code><a title="fima.pipelines.power_spectrum.find_timeinterval" href="#fima.pipelines.power_spectrum.find_timeinterval">find_timeinterval</a></code></li>
-<li><code><a title="fima.pipelines.power_spectrum.pipeline_timefreq" href="#fima.pipelines.power_spectrum.pipeline_timefreq">pipeline_timefreq</a></code></li>
-<li><code><a title="fima.pipelines.power_spectrum.pipeline_timefreq_all" href="#fima.pipelines.power_spectrum.pipeline_timefreq_all">pipeline_timefreq_all</a></code></li>
+<li><code><a title="fima.pipelines.spectrum.find_best_chan" href="#fima.pipelines.spectrum.find_best_chan">find_best_chan</a></code></li>
+<li><code><a title="fima.pipelines.spectrum.find_max_true" href="#fima.pipelines.spectrum.find_max_true">find_max_true</a></code></li>
+<li><code><a title="fima.pipelines.spectrum.find_runs" href="#fima.pipelines.spectrum.find_runs">find_runs</a></code></li>
+<li><code><a title="fima.pipelines.spectrum.find_timeinterval" href="#fima.pipelines.spectrum.find_timeinterval">find_timeinterval</a></code></li>
+<li><code><a title="fima.pipelines.spectrum.pipeline_spectrum" href="#fima.pipelines.spectrum.pipeline_spectrum">pipeline_spectrum</a></code></li>
+<li><code><a title="fima.pipelines.spectrum.pipeline_spectrum_all" href="#fima.pipelines.spectrum.pipeline_spectrum_all">pipeline_spectrum_all</a></code></li>
 </ul>
 </li>
 </ul>
