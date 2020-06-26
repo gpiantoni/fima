@@ -29,7 +29,6 @@
 
 from pathlib import Path
 from platform import node
-from .utils import get_color_for_val
 
 
 NYU_DIR = Path(&#39;/Fridge/R01_BAIR/data/nyu/scitran/bair/nyu&#39;)
@@ -76,6 +75,7 @@ P = dict(
             ),
         select=dict(
             freq=(60, 200),
+            timeinterval=0.3,  # fima/utils.py
             ),
         ),
     )
@@ -110,15 +110,7 @@ MOVEMENT_SYMBOL_MODEL = {
 MOVEMENT_LINE = {
     &#39;open&#39;: &#39;dot&#39;,
     &#39;close&#39;: &#39;solid&#39;,
-    }
-
-FINGER_COLOR = {
-    &#39;thumb&#39;: get_color_for_val(4, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;index&#39;: get_color_for_val(3, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;middle&#39;: get_color_for_val(2, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;ring&#39;: get_color_for_val(1, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;little&#39;: get_color_for_val(0, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-}</code></pre>
+    }</code></pre>
 </details>
 </section>
 <section>

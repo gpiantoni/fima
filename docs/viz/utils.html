@@ -26,12 +26,46 @@
 </summary>
 <pre><code class="python">from plotly.offline import plot, get_plotlyjs
 
+from ..parameters import P
+from ..utils import get_color_for_val
+
+
+FINGER_COLOR = {
+    &#39;thumb&#39;: get_color_for_val(4, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
+    &#39;index&#39;: get_color_for_val(3, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
+    &#39;middle&#39;: get_color_for_val(2, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
+    &#39;ring&#39;: get_color_for_val(1, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
+    &#39;little&#39;: get_color_for_val(0, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
+}
+
 
 def to_div(fig):
+    &#34;&#34;&#34;Convert plotly FIG into an HTML div
+
+    Parameters
+    ----------
+    fig : instance of plotly.Figure
+        figure to convert
+
+    Returns
+    -------
+    str
+        html div, containing the figure as dynamic javascript plot
+    &#34;&#34;&#34;
     return plot(fig, output_type=&#39;div&#39;, show_link=False, include_plotlyjs=False)
 
 
 def to_html(divs, filename):
+    &#34;&#34;&#34;Convert DIVs, obtained from &#39;to_div&#39;, into one HTML file
+
+    Parameters
+    ----------
+    divs : list of divs
+        list of the output of &#39;to_div&#39;
+    filename : path
+        path of the file to write (extension should be .html). It overwrites if
+        it exists
+    &#34;&#34;&#34;
     filename.parent.mkdir(exist_ok=True, parents=True)
 
     html = &#39;&#39;&#39;
@@ -50,6 +84,21 @@ def to_html(divs, filename):
 
 
 def to_png(fig, png_name):
+    &#34;&#34;&#34;Convert image to png directly
+
+    Parameters
+    ----------
+    fig : instance of plotly.Figure
+        figure to convert
+    png_name : path
+        path of the file to write (extension should be .png). It overwrites if
+        it exists
+
+    Notes
+    -----
+    It crashes easily, especially if it&#39;s called multiple times, because it relies
+    on plotly calling an external function to do the actual plotting (orca)
+    &#34;&#34;&#34;
     fig = fig.update_layout(width=1600, height=900)
     png_name.parent.mkdir(exist_ok=True, parents=True)
     with png_name.open(&#39;wb&#39;) as f:
@@ -67,12 +116,34 @@ def to_png(fig, png_name):
 <span>def <span class="ident">to_div</span></span>(<span>fig)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Convert plotly FIG into an HTML div</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>fig</code></strong> :&ensp;<code>instance</code> of <code>plotly.Figure</code></dt>
+<dd>figure to convert</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>html div, containing the figure as dynamic javascript plot</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_div(fig):
+    &#34;&#34;&#34;Convert plotly FIG into an HTML div
+
+    Parameters
+    ----------
+    fig : instance of plotly.Figure
+        figure to convert
+
+    Returns
+    -------
+    str
+        html div, containing the figure as dynamic javascript plot
+    &#34;&#34;&#34;
     return plot(fig, output_type=&#39;div&#39;, show_link=False, include_plotlyjs=False)</code></pre>
 </details>
 </dd>
@@ -80,12 +151,30 @@ def to_png(fig, png_name):
 <span>def <span class="ident">to_html</span></span>(<span>divs, filename)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Convert DIVs, obtained from 'to_div', into one HTML file</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>divs</code></strong> :&ensp;<code>list</code> of <code>divs</code></dt>
+<dd>list of the output of 'to_div'</dd>
+<dt><strong><code>filename</code></strong> :&ensp;<code>path</code></dt>
+<dd>path of the file to write (extension should be .html). It overwrites if
+it exists</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_html(divs, filename):
+    &#34;&#34;&#34;Convert DIVs, obtained from &#39;to_div&#39;, into one HTML file
+
+    Parameters
+    ----------
+    divs : list of divs
+        list of the output of &#39;to_div&#39;
+    filename : path
+        path of the file to write (extension should be .html). It overwrites if
+        it exists
+    &#34;&#34;&#34;
     filename.parent.mkdir(exist_ok=True, parents=True)
 
     html = &#39;&#39;&#39;
@@ -107,12 +196,38 @@ def to_png(fig, png_name):
 <span>def <span class="ident">to_png</span></span>(<span>fig, png_name)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Convert image to png directly</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>fig</code></strong> :&ensp;<code>instance</code> of <code>plotly.Figure</code></dt>
+<dd>figure to convert</dd>
+<dt><strong><code>png_name</code></strong> :&ensp;<code>path</code></dt>
+<dd>path of the file to write (extension should be .png). It overwrites if
+it exists</dd>
+</dl>
+<h2 id="notes">Notes</h2>
+<p>It crashes easily, especially if it's called multiple times, because it relies
+on plotly calling an external function to do the actual plotting (orca)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_png(fig, png_name):
+    &#34;&#34;&#34;Convert image to png directly
+
+    Parameters
+    ----------
+    fig : instance of plotly.Figure
+        figure to convert
+    png_name : path
+        path of the file to write (extension should be .png). It overwrites if
+        it exists
+
+    Notes
+    -----
+    It crashes easily, especially if it&#39;s called multiple times, because it relies
+    on plotly calling an external function to do the actual plotting (orca)
+    &#34;&#34;&#34;
     fig = fig.update_layout(width=1600, height=900)
     png_name.parent.mkdir(exist_ok=True, parents=True)
     with png_name.open(&#39;wb&#39;) as f:

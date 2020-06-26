@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
 <title>fima.utils API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Miscellaneous functions that might be useful across modules" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,20 +20,39 @@
 <h1 class="title">Module <code>fima.utils</code></h1>
 </header>
 <section id="section-intro">
+<p>Miscellaneous functions that might be useful across modules</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from bidso import file_Core
+<pre><code class="python">&#34;&#34;&#34;Miscellaneous functions that might be useful across modules&#34;&#34;&#34;
+from bidso import file_Core
 from numpy import argmax, unravel_index
 from ast import literal_eval
 from numpy import arange, array, clip, where
 from plotly.colors import sequential, cyclical, diverging
 
-INTERVAL = 0.3
+from .parameters import P
 
 
 def make_name(filename, event_type, ext=&#39;.html&#39;):
+    &#34;&#34;&#34;Create name based on the data file name
+
+    Parameters
+    ----------
+    filename : str
+        filename of the dataset of interest
+    event_type : str
+        event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
+        &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
+    ext : str
+        extension of the file
+
+    Returns
+    -------
+    str
+        file name specific to this filename and event type
+    &#34;&#34;&#34;
     f = file_Core(filename)
     if f.acquisition is None:
         acq = &#39;&#39;
@@ -45,7 +64,19 @@ def make_name(filename, event_type, ext=&#39;.html&#39;):
 def find_max_point(tf_cht):
     &#34;&#34;&#34;Take the channel with the highest value and the interval containing that
     point
+
+    Parameters
+    ----------
+    tf_cht : instance of ChanTime
+
+    Returns
+    -------
+    str
+        channel with largest activity
+    tuple of float
+        interval centered around largest activity (width depends on P[&#39;
     &#34;&#34;&#34;
+    INTERVAL = P[&#39;spectrum&#39;][&#39;select&#39;][&#39;timeinterval&#39;]
     ind = unravel_index(argmax(tf_cht.data[0], axis=None), tf_cht.data[0].shape)
     max_chan = tf_cht.chan[0][ind[0]]
     max_timeinterval = (
@@ -58,6 +89,22 @@ def find_max_point(tf_cht):
 
 def get_color_for_val(value, colorscale, vmin=0, vmax=1):
     &#34;&#34;&#34;Return RGB value for plotly
+
+    Parameters
+    ----------
+    value : float
+        value of interest (between vmin and vmax)
+    colorscale : str
+        name of the color scale
+    vmin : float
+        minimal value (lowest value on the color scale)
+    vmax : float
+        maximal value (highest value on the color scale)
+
+    Returns
+    -------
+    str
+        RGB color in plotly format
     &#34;&#34;&#34;
     if colorscale in dir(sequential):
         color_values = getattr(sequential, colorscale)
@@ -98,7 +145,19 @@ def get_color_for_val(value, colorscale, vmin=0, vmax=1):
 </code></dt>
 <dd>
 <div class="desc"><p>Take the channel with the highest value and the interval containing that
-point</p></div>
+point</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>tf_cht</code></strong> :&ensp;<code>instance</code> of <code>ChanTime</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>channel with largest activity</dd>
+<dt><code>tuple</code> of <code>float</code></dt>
+<dd>interval centered around largest activity (width depends on P['</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -106,7 +165,19 @@ point</p></div>
 <pre><code class="python">def find_max_point(tf_cht):
     &#34;&#34;&#34;Take the channel with the highest value and the interval containing that
     point
+
+    Parameters
+    ----------
+    tf_cht : instance of ChanTime
+
+    Returns
+    -------
+    str
+        channel with largest activity
+    tuple of float
+        interval centered around largest activity (width depends on P[&#39;
     &#34;&#34;&#34;
+    INTERVAL = P[&#39;spectrum&#39;][&#39;select&#39;][&#39;timeinterval&#39;]
     ind = unravel_index(argmax(tf_cht.data[0], axis=None), tf_cht.data[0].shape)
     max_chan = tf_cht.chan[0][ind[0]]
     max_timeinterval = (
@@ -121,13 +192,45 @@ point</p></div>
 <span>def <span class="ident">get_color_for_val</span></span>(<span>value, colorscale, vmin=0, vmax=1)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Return RGB value for plotly</p></div>
+<div class="desc"><p>Return RGB value for plotly</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>value</code></strong> :&ensp;<code>float</code></dt>
+<dd>value of interest (between vmin and vmax)</dd>
+<dt><strong><code>colorscale</code></strong> :&ensp;<code>str</code></dt>
+<dd>name of the color scale</dd>
+<dt><strong><code>vmin</code></strong> :&ensp;<code>float</code></dt>
+<dd>minimal value (lowest value on the color scale)</dd>
+<dt><strong><code>vmax</code></strong> :&ensp;<code>float</code></dt>
+<dd>maximal value (highest value on the color scale)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>RGB color in plotly format</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_color_for_val(value, colorscale, vmin=0, vmax=1):
     &#34;&#34;&#34;Return RGB value for plotly
+
+    Parameters
+    ----------
+    value : float
+        value of interest (between vmin and vmax)
+    colorscale : str
+        name of the color scale
+    vmin : float
+        minimal value (lowest value on the color scale)
+    vmax : float
+        maximal value (highest value on the color scale)
+
+    Returns
+    -------
+    str
+        RGB color in plotly format
     &#34;&#34;&#34;
     if colorscale in dir(sequential):
         color_values = getattr(sequential, colorscale)
@@ -160,12 +263,44 @@ point</p></div>
 <span>def <span class="ident">make_name</span></span>(<span>filename, event_type, ext='.html')</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Create name based on the data file name</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>filename</code></strong> :&ensp;<code>str</code></dt>
+<dd>filename of the dataset of interest</dd>
+<dt><strong><code>event_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>event type used to identify the trials (one of 'cues', 'open', 'close',
+'movements', 'extension', 'flexion')</dd>
+<dt><strong><code>ext</code></strong> :&ensp;<code>str</code></dt>
+<dd>extension of the file</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>file name specific to this filename and event type</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def make_name(filename, event_type, ext=&#39;.html&#39;):
+    &#34;&#34;&#34;Create name based on the data file name
+
+    Parameters
+    ----------
+    filename : str
+        filename of the dataset of interest
+    event_type : str
+        event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
+        &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
+    ext : str
+        extension of the file
+
+    Returns
+    -------
+    str
+        file name specific to this filename and event type
+    &#34;&#34;&#34;
     f = file_Core(filename)
     if f.acquisition is None:
         acq = &#39;&#39;

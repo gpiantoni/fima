@@ -1,13 +1,31 @@
+"""Miscellaneous functions that might be useful across modules"""
 from bidso import file_Core
 from numpy import argmax, unravel_index
 from ast import literal_eval
 from numpy import arange, array, clip, where
 from plotly.colors import sequential, cyclical, diverging
 
-INTERVAL = 0.3
+from .parameters import P
 
 
 def make_name(filename, event_type, ext='.html'):
+    """Create name based on the data file name
+
+    Parameters
+    ----------
+    filename : str
+        filename of the dataset of interest
+    event_type : str
+        event type used to identify the trials (one of 'cues', 'open', 'close',
+        'movements', 'extension', 'flexion')
+    ext : str
+        extension of the file
+
+    Returns
+    -------
+    str
+        file name specific to this filename and event type
+    """
     f = file_Core(filename)
     if f.acquisition is None:
         acq = ''
@@ -19,7 +37,19 @@ def make_name(filename, event_type, ext='.html'):
 def find_max_point(tf_cht):
     """Take the channel with the highest value and the interval containing that
     point
+
+    Parameters
+    ----------
+    tf_cht : instance of ChanTime
+
+    Returns
+    -------
+    str
+        channel with largest activity
+    tuple of float
+        interval centered around largest activity (width depends on P['
     """
+    INTERVAL = P['spectrum']['select']['timeinterval']
     ind = unravel_index(argmax(tf_cht.data[0], axis=None), tf_cht.data[0].shape)
     max_chan = tf_cht.chan[0][ind[0]]
     max_timeinterval = (
@@ -32,6 +62,22 @@ def find_max_point(tf_cht):
 
 def get_color_for_val(value, colorscale, vmin=0, vmax=1):
     """Return RGB value for plotly
+
+    Parameters
+    ----------
+    value : float
+        value of interest (between vmin and vmax)
+    colorscale : str
+        name of the color scale
+    vmin : float
+        minimal value (lowest value on the color scale)
+    vmax : float
+        maximal value (highest value on the color scale)
+
+    Returns
+    -------
+    str
+        RGB color in plotly format
     """
     if colorscale in dir(sequential):
         color_values = getattr(sequential, colorscale)
