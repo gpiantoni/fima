@@ -1,4 +1,4 @@
-from numpy import zeros, std, sqrt
+from numpy import zeros, std, sqrt, median
 from scipy.stats import pearsonr
 from ..fingers.max_activity import FINGERS, create_bool
 from numpy import moveaxis, array
@@ -56,6 +56,8 @@ def group_per_condition(data, names, operator='mean'):
         y = data.data[0][..., i]
         if operator == 'mean':
             dat.append(y.mean(axis=-1))
+        elif operator == 'median':
+            dat.append(median(y, axis=-1))
         elif operator == 'std':
             dat.append(std(y, axis=-1))
         elif operator == 'sem':
