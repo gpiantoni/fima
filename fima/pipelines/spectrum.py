@@ -1,3 +1,4 @@
+"""Compute the power spectrum"""
 from numpy import argmax, empty, asanyarray, array, not_equal, nonzero, diff, append
 
 from ..spectrum import compute_timefreq, get_chan, get_chantime
