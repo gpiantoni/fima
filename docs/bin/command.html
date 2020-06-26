@@ -34,6 +34,7 @@ from ..pipelines import (
 
 
 def main():
+    &#34;&#34;&#34;Command line function to compute the analyzses&#34;&#34;&#34;
     parser = ArgumentParser(description=&#39;Analysis finger mapping&#39;)
 
     list_pipelines = parser.add_subparsers(title=&#39;Pipelines&#39;, help=&#39;&#39;)
@@ -91,12 +92,13 @@ if __name__ == &#39;__main__&#39;:
 <span>def <span class="ident">main</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Command line function to compute the analyzses</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def main():
+    &#34;&#34;&#34;Command line function to compute the analyzses&#34;&#34;&#34;
     parser = ArgumentParser(description=&#39;Analysis finger mapping&#39;)
 
     list_pipelines = parser.add_subparsers(title=&#39;Pipelines&#39;, help=&#39;&#39;)

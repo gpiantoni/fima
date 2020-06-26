@@ -8,6 +8,7 @@ from ..pipelines import (
 
 
 def main():
+    """Command line function to compute the analyzses"""
     parser = ArgumentParser(description='Analysis finger mapping')
 
     list_pipelines = parser.add_subparsers(title='Pipelines', help='')
