@@ -77,7 +77,7 @@ def load(what, subject, run=None, acq=None, event_type=None):
       - &#39;electrodes&#39;
       - &#39;surface&#39;
 
-    EVENT_TYPE
+    EVENT_TYPE:
       - cues : all cues (to open and close)
       - open : cues to open fingers
       - close : cues to close fingers
@@ -217,13 +217,15 @@ def select_events(subject, run, t):
 <li>'electrodes'</li>
 <li>'surface'</li>
 </ul>
-<p>EVENT_TYPE
-- cues : all cues (to open and close)
-- open : cues to open fingers
-- close : cues to close fingers
-- movements : all actual movements (from dataglove)
-- extension : actual extension of all fingers
-- flexion : actual flexion of all fingers</p></div>
+<h2 id="event_type">Event_Type</h2>
+<ul>
+<li>cues : all cues (to open and close)</li>
+<li>open : cues to open fingers</li>
+<li>close : cues to close fingers</li>
+<li>movements : all actual movements (from dataglove)</li>
+<li>extension : actual extension of all fingers</li>
+<li>flexion : actual flexion of all fingers</li>
+</ul></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -238,7 +240,7 @@ def select_events(subject, run, t):
       - &#39;electrodes&#39;
       - &#39;surface&#39;
 
-    EVENT_TYPE
+    EVENT_TYPE:
       - cues : all cues (to open and close)
       - open : cues to open fingers
       - close : cues to close fingers

@@ -51,7 +51,7 @@ def load(what, subject, run=None, acq=None, event_type=None):
       - 'electrodes'
       - 'surface'
 
-    EVENT_TYPE
+    EVENT_TYPE:
       - cues : all cues (to open and close)
       - open : cues to open fingers
       - close : cues to close fingers
