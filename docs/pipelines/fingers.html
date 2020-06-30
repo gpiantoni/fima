@@ -28,10 +28,13 @@
 from ..viz.finger_channels import plot_finger_chan
 from ..fingers.viz import plot_fingerbars
 from ..viz import to_div, to_html
-from ..parameters import FINGERS_DIR, SUBJECTS, FINGERBARS_DIR
+from ..parameters import FINGERS_DIR, SUBJECTS, FINGERBARS_DIR, FINGERCORR_DIR
+from ..fingers.correlation import plot_correlation
+
+from numpy import corrcoef
 
 
-def pipeline_fingers_all(event_type=&#39;cues&#39;, bars=False):
+def pipeline_fingers_all(event_type=&#39;cues&#39;, bars=False, corr=False):
 
     for subject, runs in SUBJECTS.items():
         for run in runs:
@@ -39,6 +42,8 @@ def pipeline_fingers_all(event_type=&#39;cues&#39;, bars=False):
             try:
                 if bars:
                     pipeline_fingerbars(subject, run, event_type)
+                elif corr:
+                    pipeline_finger_correlations(subject, run, event_type)
                 else:
                     pipeline_fingers(subject, run, event_type)
             except Exception as err:
@@ -61,6 +66,21 @@ def pipeline_fingerbars(subject, run, event_type=&#39;cues&#39;):
     divs = [to_div(fig), ]
 
     html_file = FINGERBARS_DIR / event_type / f&#39;{subject}_run-{run}_{event_type}.html&#39;
+    to_html(divs, html_file)
+
+
+def pipeline_finger_correlations(subject, run, event_type, threshold=5):
+    t, events = find_tstat_per_finger(subject, run, event_type)
+    X = t.data[0]
+    i_active = (X &gt; threshold).any(axis=1)
+    X1 = X[i_active]
+
+    dat = corrcoef(X1.T)
+
+    fig = plot_correlation(dat, events)
+    divs = [to_div(fig), ]
+
+    html_file = FINGERCORR_DIR / event_type / f&#39;{subject}_run-{run}_{event_type}.html&#39;
     to_html(divs, html_file)</code></pre>
 </details>
 </section>
@@ -71,6 +91,30 @@ def pipeline_fingerbars(subject, run, event_type=&#39;cues&#39;):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="fima.pipelines.fingers.pipeline_finger_correlations"><code class="name flex">
+<span>def <span class="ident">pipeline_finger_correlations</span></span>(<span>subject, run, event_type, threshold=5)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pipeline_finger_correlations(subject, run, event_type, threshold=5):
+    t, events = find_tstat_per_finger(subject, run, event_type)
+    X = t.data[0]
+    i_active = (X &gt; threshold).any(axis=1)
+    X1 = X[i_active]
+
+    dat = corrcoef(X1.T)
+
+    fig = plot_correlation(dat, events)
+    divs = [to_div(fig), ]
+
+    html_file = FINGERCORR_DIR / event_type / f&#39;{subject}_run-{run}_{event_type}.html&#39;
+    to_html(divs, html_file)</code></pre>
+</details>
+</dd>
 <dt id="fima.pipelines.fingers.pipeline_fingerbars"><code class="name flex">
 <span>def <span class="ident">pipeline_fingerbars</span></span>(<span>subject, run, event_type='cues')</span>
 </code></dt>
@@ -109,7 +153,7 @@ def pipeline_fingerbars(subject, run, event_type=&#39;cues&#39;):
 </details>
 </dd>
 <dt id="fima.pipelines.fingers.pipeline_fingers_all"><code class="name flex">
-<span>def <span class="ident">pipeline_fingers_all</span></span>(<span>event_type='cues', bars=False)</span>
+<span>def <span class="ident">pipeline_fingers_all</span></span>(<span>event_type='cues', bars=False, corr=False)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -117,7 +161,7 @@ def pipeline_fingerbars(subject, run, event_type=&#39;cues&#39;):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def pipeline_fingers_all(event_type=&#39;cues&#39;, bars=False):
+<pre><code class="python">def pipeline_fingers_all(event_type=&#39;cues&#39;, bars=False, corr=False):
 
     for subject, runs in SUBJECTS.items():
         for run in runs:
@@ -125,6 +169,8 @@ def pipeline_fingerbars(subject, run, event_type=&#39;cues&#39;):
             try:
                 if bars:
                     pipeline_fingerbars(subject, run, event_type)
+                elif corr:
+                    pipeline_finger_correlations(subject, run, event_type)
                 else:
                     pipeline_fingers(subject, run, event_type)
             except Exception as err:
@@ -149,6 +195,7 @@ def pipeline_fingerbars(subject, run, event_type=&#39;cues&#39;):
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="fima.pipelines.fingers.pipeline_finger_correlations" href="#fima.pipelines.fingers.pipeline_finger_correlations">pipeline_finger_correlations</a></code></li>
 <li><code><a title="fima.pipelines.fingers.pipeline_fingerbars" href="#fima.pipelines.fingers.pipeline_fingerbars">pipeline_fingerbars</a></code></li>
 <li><code><a title="fima.pipelines.fingers.pipeline_fingers" href="#fima.pipelines.fingers.pipeline_fingers">pipeline_fingers</a></code></li>
 <li><code><a title="fima.pipelines.fingers.pipeline_fingers_all" href="#fima.pipelines.fingers.pipeline_fingers_all">pipeline_fingers_all</a></code></li>

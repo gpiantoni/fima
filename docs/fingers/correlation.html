@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.parameters API documentation</title>
-<meta name="description" content="General parameters useful for all the functions" />
+<title>fima.fingers.correlation API documentation</title>
+<meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -17,119 +17,54 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.parameters</code></h1>
+<h1 class="title">Module <code>fima.fingers.correlation</code></h1>
 </header>
 <section id="section-intro">
-<p>General parameters useful for all the functions</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;General parameters useful for all the functions&#34;&#34;&#34;
-
-from pathlib import Path
-from platform import node
-from .utils import get_color_for_val
+<pre><code class="python">from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+from ..parameters import FINGER_COLOR
 
 
-NYU_DIR = Path(&#39;/Fridge/R01_BAIR/data/nyu/scitran/bair/nyu&#39;)
+def plot_correlation(dat, events):
+    &#34;&#34;&#34;To be merged with .viz/plot_fingerbars&#34;&#34;&#34;
+    n_rows = dat.shape[0]
+    range = (-1, 1)
 
-if node() == &#39;archxps&#39;:
-    PROJ_DIR = Path(&#39;/home/gio/projects/finger_mapping&#39;)
-else:
-    PROJ_DIR = Path(&#39;/Fridge/users/giovanni/projects/finger_mapping&#39;)
+    fig = make_subplots(rows=n_rows, cols=1,
+                        shared_xaxes=True,
+                        vertical_spacing=0.1 / n_rows)
 
-SCRIPTS_DIR = PROJ_DIR / &#39;scripts&#39;
-BIDS_DIR = PROJ_DIR / &#39;subjects&#39;
-FREESURFER_DIR = PROJ_DIR / &#39;freesurfer/&#39;
+    i = 1
+    for y in dat:
+        fig.add_trace(
+            go.Bar(
+                x=events,
+                y=y,
+                marker=dict(
+                    color=list(FINGER_COLOR.values()) + list(FINGER_COLOR.values()),
+                ),
+            ), col=1, row=i)
 
-RESULTS_DIR = PROJ_DIR / &#39;results&#39;
-DATAGLOVE_DIR = RESULTS_DIR / &#39;dataglove&#39;
-OVERVIEW_DIR = RESULTS_DIR / &#39;data_quality&#39;
-SPECTRUM_DIR = RESULTS_DIR / &#39;spectrum&#39;
-FINGERS_DIR = RESULTS_DIR / &#39;fingers&#39;
-FINGERBARS_DIR = RESULTS_DIR / &#39;finger_bars&#39;
-FINGERCORR_DIR = RESULTS_DIR / &#39;finger_corr&#39;
-FITTING_DIR = RESULTS_DIR / &#39;fitting&#39;
+        yaxis_name = &#39;yaxis&#39;
+        if i &gt; 1:
+            yaxis_name += str(i)
+        fig.update_layout({yaxis_name: dict(range=range, title=events[i - 1])})
 
-P = dict(
-    data_quality=dict(
-        histogram=dict(
-            contamination=0.04,
-            ),
-        spectrum=dict(
-            n_neighbors=20,
-            ),
-        ),
-    viz=dict(
-        colorscale=&#39;Jet&#39;,
-        tfr=dict(
-            max=5,
-            ),
-        tfr_mean=dict(
-            max=3,
-            ),
-        ),
-    spectrum=dict(
-        method=&#39;spectrogram&#39;,  # spectrogram or morlet
-        baseline=dict(
-            time=(-0.5, -0.1),
-            type=&#39;dB&#39;,
-            ),
-        select=dict(
-            freq=(60, 200),
-            timeinterval=0.3,  # fima/utils.py
-            ),
-        ),
+        if i == n_rows:
+            break
+        i += 1
+
+    fig.update_layout(
+        height=100 * n_rows,
+        width=600,
+        showlegend=False,
     )
 
-
-SUBJECTS = {
-    &#39;drouwen&#39;: [&#39;1&#39;, ],
-    &#39;duiven&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;franeker&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;heek&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;intraop008&#39;: [&#39;1&#39;, ],
-    &#39;intraop013&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;intraop016&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;itens&#39;: [&#39;1&#39;, &#39;2&#39;, &#39;3&#39;],
-    &#39;lemmer&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;ommen&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;vledder&#39;: [&#39;1&#39;, &#39;2&#39;, &#39;3&#39;],
-    &#39;warmond&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;som705&#39;: [&#39;01&#39;, ],
-    }
-
-MOVEMENT_SYMBOL_DATA = {
-    &#39;open&#39;: &#39;circle-open&#39;,
-    &#39;close&#39;: &#39;circle&#39;,
-    }
-
-MOVEMENT_SYMBOL_MODEL = {
-    &#39;open&#39;: &#39;diamond-open&#39;,
-    &#39;close&#39;: &#39;diamond&#39;,
-    }
-
-MOVEMENT_LINE = {
-    &#39;open&#39;: &#39;dot&#39;,
-    &#39;close&#39;: &#39;solid&#39;,
-    }
-
-FINGER_COLOR = {
-    &#39;thumb&#39;: get_color_for_val(4, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;index&#39;: get_color_for_val(3, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;middle&#39;: get_color_for_val(2, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;ring&#39;: get_color_for_val(1, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;little&#39;: get_color_for_val(0, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-}
-
-FINGERS = list(FINGER_COLOR)
-
-
-EVENTS = []
-for action in MOVEMENT_LINE:
-    for f in FINGERS:
-        EVENTS.append(f&#39;{f} {action}&#39;)</code></pre>
+    return fig</code></pre>
 </details>
 </section>
 <section>
@@ -137,6 +72,56 @@ for action in MOVEMENT_LINE:
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="fima.fingers.correlation.plot_correlation"><code class="name flex">
+<span>def <span class="ident">plot_correlation</span></span>(<span>dat, events)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>To be merged with .viz/plot_fingerbars</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_correlation(dat, events):
+    &#34;&#34;&#34;To be merged with .viz/plot_fingerbars&#34;&#34;&#34;
+    n_rows = dat.shape[0]
+    range = (-1, 1)
+
+    fig = make_subplots(rows=n_rows, cols=1,
+                        shared_xaxes=True,
+                        vertical_spacing=0.1 / n_rows)
+
+    i = 1
+    for y in dat:
+        fig.add_trace(
+            go.Bar(
+                x=events,
+                y=y,
+                marker=dict(
+                    color=list(FINGER_COLOR.values()) + list(FINGER_COLOR.values()),
+                ),
+            ), col=1, row=i)
+
+        yaxis_name = &#39;yaxis&#39;
+        if i &gt; 1:
+            yaxis_name += str(i)
+        fig.update_layout({yaxis_name: dict(range=range, title=events[i - 1])})
+
+        if i == n_rows:
+            break
+        i += 1
+
+    fig.update_layout(
+        height=100 * n_rows,
+        width=600,
+        showlegend=False,
+    )
+
+    return fig</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -149,7 +134,12 @@ for action in MOVEMENT_LINE:
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="fima" href="index.html">fima</a></code></li>
+<li><code><a title="fima.fingers" href="index.html">fima.fingers</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="fima.fingers.correlation.plot_correlation" href="#fima.fingers.correlation.plot_correlation">plot_correlation</a></code></li>
 </ul>
 </li>
 </ul>

@@ -21,7 +21,8 @@ DATAGLOVE_DIR = RESULTS_DIR / 'dataglove'
 OVERVIEW_DIR = RESULTS_DIR / 'data_quality'
 SPECTRUM_DIR = RESULTS_DIR / 'spectrum'
 FINGERS_DIR = RESULTS_DIR / 'fingers'
-FINGERBARS_DIR = RESULTS_DIR / 'finger_bars'
+FINGERBARS_DIR = RESULTS_DIR / 'beta_finger_bars'
+FINGERCORR_DIR = RESULTS_DIR / 'beta_finger_corr'
 FITTING_DIR = RESULTS_DIR / 'fitting'
 
 P = dict(
@@ -49,7 +50,7 @@ P = dict(
             type='dB',
             ),
         select=dict(
-            freq=(60, 200),
+            freq=(10, 30),  # (60, 200)
             timeinterval=0.3,  # fima/utils.py
             ),
         ),

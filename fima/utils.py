@@ -48,6 +48,7 @@ def find_max_point(tf_cht):
     tuple of float
         interval centered around largest activity (width depends on P['
     """
+    from .parameters import P
     INTERVAL = P['spectrum']['select']['timeinterval']
     ind = unravel_index(argmax(tf_cht.data[0], axis=None), tf_cht.data[0].shape)
     max_chan = tf_cht.chan[0][ind[0]]

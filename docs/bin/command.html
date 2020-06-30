@@ -57,6 +57,9 @@ def main():
     action.add_argument(
         &#39;--bars&#39;, action=&#39;store_true&#39;,
         help=&#39;Plot bars with t-statistics&#39;)
+    action.add_argument(
+        &#39;--corr&#39;, action=&#39;store_true&#39;,
+        help=&#39;Correlation across fingers&#39;)
 
     action = list_pipelines.add_parser(
         &#39;fitting&#39;,
@@ -81,7 +84,7 @@ def main():
             subject_only=args.subject)
 
     elif args.function == &#39;fingers&#39;:
-        pipeline_fingers_all(bars=args.bars)
+        pipeline_fingers_all(bars=args.bars, corr=args.corr)
 
     elif args.function == &#39;fitting&#39;:
         pipeline_fitting_all(
@@ -133,6 +136,9 @@ if __name__ == &#39;__main__&#39;:
     action.add_argument(
         &#39;--bars&#39;, action=&#39;store_true&#39;,
         help=&#39;Plot bars with t-statistics&#39;)
+    action.add_argument(
+        &#39;--corr&#39;, action=&#39;store_true&#39;,
+        help=&#39;Correlation across fingers&#39;)
 
     action = list_pipelines.add_parser(
         &#39;fitting&#39;,
@@ -157,7 +163,7 @@ if __name__ == &#39;__main__&#39;:
             subject_only=args.subject)
 
     elif args.function == &#39;fingers&#39;:
-        pipeline_fingers_all(bars=args.bars)
+        pipeline_fingers_all(bars=args.bars, corr=args.corr)
 
     elif args.function == &#39;fitting&#39;:
         pipeline_fitting_all(
