@@ -1,4 +1,5 @@
-from numpy import argmax, sum, empty, asanyarray, array, not_equal, nonzero, diff, append
+"""Compute the power spectrum"""
+from numpy import argmax, empty, asanyarray, array, not_equal, nonzero, diff, append
 
 from ..spectrum import compute_timefreq, get_chan, get_chantime
 from ..viz import plot_tfr, plot_tfr_time, to_div, to_html, plot_surf, plot_conditions_per_chan
@@ -9,10 +10,17 @@ from ..utils import find_max_point
 from wonambi.trans import math
 
 
-DB_THRESHOLD = 3
-
-
 def pipeline_spectrum_all(event_type='cues', subject_only=None):
+    """Run pipeline to compute power spectrum on all the participants
+
+    Parameters
+    ----------
+    event_type : str
+        event type used to identify the trials (one of 'cues', 'open', 'close',
+        'movements', 'extension', 'flexion')
+    subject_only : str
+        compute pipeline only for this participant
+    """
     for subject, runs in SUBJECTS.items():
         if subject_only is not None and subject != subject_only:
             continue
@@ -25,7 +33,18 @@ def pipeline_spectrum_all(event_type='cues', subject_only=None):
 
 
 def pipeline_spectrum(subject, run, event_type='cues'):
+    """Run pipeline to compute power spectrum on one participant, one run
 
+    Parameters
+    ----------
+    subject : str
+        subject code
+    run : str
+        number of the run of interest
+    event_type : str
+        event type used to identify the trials (one of 'cues', 'open', 'close',
+        'movements', 'extension', 'flexion')
+    """
     data, names = load('data', subject, run, event_type=event_type)
 
     try:
@@ -43,11 +62,7 @@ def pipeline_spectrum(subject, run, event_type='cues'):
     tf = compute_timefreq(data, mean=False)
     tf_m = math(tf, operator_name='mean', axis='trial_axis')
     tf_cht = get_chantime(tf_m)
-    if False:  # this checks only above the threshold, but it fails if there is no point above threshold
-        best_chan = find_best_chan(tf_cht)
-        best_time = find_timeinterval(tf_cht, best_chan)
-    else:
-        best_chan, best_time = find_max_point(tf_cht)
+    best_chan, best_time = find_max_point(tf_cht)
     print(f'Best channel {best_chan}, best interval {best_time}s')
 
     tf_ch = get_chan(tf_m, time=best_time)
@@ -70,28 +85,6 @@ def pipeline_spectrum(subject, run, event_type='cues'):
     tf_cht = get_chantime(tf)
     divs = plot_conditions_per_chan(tf_cht, names)
     to_html(divs, html_file)
-
-
-def find_best_chan(tf_cht):
-    """Find best channel which has the most significant time point above
-    a threshold.
-    """
-    values_per_chan = sum(tf_cht.data[0] > DB_THRESHOLD, axis=1)
-    i_chan = argmax(values_per_chan)
-    best_chan = tf_cht.chan[0][i_chan]
-    return best_chan
-
-
-def find_timeinterval(tf_cht, best_chan):
-    """Find time interval with the longest period above threshold
-    """
-    i_s = tf_cht(trial=0, chan=best_chan) > DB_THRESHOLD
-    i_start, i_end = find_max_true(i_s)
-
-    time_start = tf_cht.time[0][i_start]
-    time_end = tf_cht.time[0][i_end]
-
-    return time_start, time_end
 
 
 def find_max_true(x):

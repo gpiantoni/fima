@@ -1,7 +1,8 @@
 import plotly.graph_objects as go
 from numpy import argmin
 
-from ..parameters import FINGER_COLOR, MOVEMENT_SYMBOL_DATA, MOVEMENT_LINE
+from ..parameters import MOVEMENT_SYMBOL_DATA, MOVEMENT_LINE
+from ..viz.utils import FINGER_COLOR
 
 
 def plot_dataglove(tsv, events, mov=None):

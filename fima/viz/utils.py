@@ -1,11 +1,45 @@
 from plotly.offline import plot, get_plotlyjs
 
+from ..parameters import P
+from ..utils import get_color_for_val
+
+
+FINGER_COLOR = {
+    'thumb': get_color_for_val(4, P['viz']['colorscale'], -1, 5),
+    'index': get_color_for_val(3, P['viz']['colorscale'], -1, 5),
+    'middle': get_color_for_val(2, P['viz']['colorscale'], -1, 5),
+    'ring': get_color_for_val(1, P['viz']['colorscale'], -1, 5),
+    'little': get_color_for_val(0, P['viz']['colorscale'], -1, 5),
+}
+
 
 def to_div(fig):
+    """Convert plotly FIG into an HTML div
+
+    Parameters
+    ----------
+    fig : instance of plotly.Figure
+        figure to convert
+
+    Returns
+    -------
+    str
+        html div, containing the figure as dynamic javascript plot
+    """
     return plot(fig, output_type='div', show_link=False, include_plotlyjs=False)
 
 
 def to_html(divs, filename):
+    """Convert DIVs, obtained from 'to_div', into one HTML file
+
+    Parameters
+    ----------
+    divs : list of divs
+        list of the output of 'to_div'
+    filename : path
+        path of the file to write (extension should be .html). It overwrites if
+        it exists
+    """
     filename.parent.mkdir(exist_ok=True, parents=True)
 
     html = '''
@@ -24,6 +58,21 @@ def to_html(divs, filename):
 
 
 def to_png(fig, png_name):
+    """Convert image to png directly
+
+    Parameters
+    ----------
+    fig : instance of plotly.Figure
+        figure to convert
+    png_name : path
+        path of the file to write (extension should be .png). It overwrites if
+        it exists
+
+    Notes
+    -----
+    It crashes easily, especially if it's called multiple times, because it relies
+    on plotly calling an external function to do the actual plotting (orca)
+    """
     fig = fig.update_layout(width=1600, height=900)
     png_name.parent.mkdir(exist_ok=True, parents=True)
     with png_name.open('wb') as f:

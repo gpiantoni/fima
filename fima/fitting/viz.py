@@ -4,8 +4,9 @@ from wonambi import Data
 
 from .general import estimate
 from ..viz.surf import plot_surf
-from ..parameters import FINGER_COLOR, MOVEMENT_SYMBOL_DATA, MOVEMENT_SYMBOL_MODEL
+from ..parameters import MOVEMENT_SYMBOL_DATA, MOVEMENT_SYMBOL_MODEL
 from .utils import get_response
+from ..viz.utils import FINGER_COLOR
 
 
 def estimate_and_plot(y, model, names, result, channels, chan=None):
@@ -54,7 +55,6 @@ def _parse_subtitle(chan, v):
 
     else:
         return '\t'.join(t)
-
 
 
 def plot_prf_results(result, param, channels, electrodes, surf=None, rsquared_threshold=0.05):

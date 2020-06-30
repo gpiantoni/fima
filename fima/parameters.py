@@ -50,6 +50,7 @@ P = dict(
             ),
         select=dict(
             freq=(60, 200),
+            timeinterval=0.3,  # fima/utils.py
             ),
         ),
     )

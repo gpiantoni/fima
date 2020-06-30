@@ -3,3 +3,4 @@ processing step
 """
 from .spectrum import pipeline_spectrum_all
 from .fitting import pipeline_fitting_all
+from .fingers import pipeline_fingers_all

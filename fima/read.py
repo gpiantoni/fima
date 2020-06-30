@@ -1,3 +1,4 @@
+"""Read the data, based on event type and onset time"""
 from numpy import genfromtxt, isin, isnan
 from bidso.objects import Electrodes
 
@@ -138,7 +139,25 @@ def load(what, subject, run=None, acq=None, event_type=None):
 
 
 def select_events(subject, run, t):
+    """Select events for one subject / run
 
+    Parameters
+    ----------
+    subject : str
+        subject code
+    run : str
+        number of the run of interest
+    t : str
+        event type used to identify the trials (one of 'cues', 'open', 'close',
+        'movements', 'extension', 'flexion')
+
+    Returns
+    -------
+    ndarray
+        (N, ) vector of onset times (float)
+    ndarray
+        (N, ) vector of events (str)
+    """
     if t == 'cues':
         trial_types = FINGERS_OPEN + FINGERS_CLOSED
         to_load = 'events'

@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 from ..pipelines import (
     pipeline_spectrum_all,
     pipeline_fitting_all,
+    pipeline_fingers_all,
     )
 
 

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
 <title>fima.read API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Read the data, based on event type and onset time" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,11 +20,13 @@
 <h1 class="title">Module <code>fima.read</code></h1>
 </header>
 <section id="section-intro">
+<p>Read the data, based on event type and onset time</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from numpy import genfromtxt, isin, isnan
+<pre><code class="python">&#34;&#34;&#34;Read the data, based on event type and onset time&#34;&#34;&#34;
+from numpy import genfromtxt, isin, isnan
 from bidso.objects import Electrodes
 
 from .preproc import read_data
@@ -164,7 +166,25 @@ def load(what, subject, run=None, acq=None, event_type=None):
 
 
 def select_events(subject, run, t):
+    &#34;&#34;&#34;Select events for one subject / run
 
+    Parameters
+    ----------
+    subject : str
+        subject code
+    run : str
+        number of the run of interest
+    t : str
+        event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
+        &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
+
+    Returns
+    -------
+    ndarray
+        (N, ) vector of onset times (float)
+    ndarray
+        (N, ) vector of events (str)
+    &#34;&#34;&#34;
     if t == &#39;cues&#39;:
         trial_types = FINGERS_OPEN + FINGERS_CLOSED
         to_load = &#39;events&#39;
@@ -330,13 +350,48 @@ def select_events(subject, run, t):
 <span>def <span class="ident">select_events</span></span>(<span>subject, run, t)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Select events for one subject / run</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>subject</code></strong> :&ensp;<code>str</code></dt>
+<dd>subject code</dd>
+<dt><strong><code>run</code></strong> :&ensp;<code>str</code></dt>
+<dd>number of the run of interest</dd>
+<dt><strong><code>t</code></strong> :&ensp;<code>str</code></dt>
+<dd>event type used to identify the trials (one of 'cues', 'open', 'close',
+'movements', 'extension', 'flexion')</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>ndarray</code></dt>
+<dd>(N, ) vector of onset times (float)</dd>
+<dt><code>ndarray</code></dt>
+<dd>(N, ) vector of events (str)</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def select_events(subject, run, t):
+    &#34;&#34;&#34;Select events for one subject / run
 
+    Parameters
+    ----------
+    subject : str
+        subject code
+    run : str
+        number of the run of interest
+    t : str
+        event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
+        &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
+
+    Returns
+    -------
+    ndarray
+        (N, ) vector of onset times (float)
+    ndarray
+        (N, ) vector of events (str)
+    &#34;&#34;&#34;
     if t == &#39;cues&#39;:
         trial_types = FINGERS_OPEN + FINGERS_CLOSED
         to_load = &#39;events&#39;

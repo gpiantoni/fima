@@ -24,8 +24,9 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from ..fingers.max_activity import find_activity_per_finger
+<pre><code class="python">from ..fingers.max_activity import find_activity_per_finger, find_tstat_per_finger
 from ..viz.finger_channels import plot_finger_chan
+from ..fingers.viz import plot_fingerbars
 from ..viz import to_div, to_html
 from ..parameters import FINGERS_DIR, SUBJECTS, FINGERBARS_DIR
 
@@ -51,6 +52,15 @@ def pipeline_fingers(subject, run, event_type=&#39;cues&#39;):
     divs = [to_div(fig), ]
 
     html_file = FINGERS_DIR / event_type / f&#39;{subject}_run-{run}_{event_type}.html&#39;
+    to_html(divs, html_file)
+
+
+def pipeline_fingerbars(subject, run, event_type=&#39;cues&#39;):
+    t, events = find_tstat_per_finger(subject, run, event_type)
+    fig = plot_fingerbars(t, events)
+    divs = [to_div(fig), ]
+
+    html_file = FINGERBARS_DIR / event_type / f&#39;{subject}_run-{run}_{event_type}.html&#39;
     to_html(divs, html_file)</code></pre>
 </details>
 </section>
@@ -61,6 +71,24 @@ def pipeline_fingers(subject, run, event_type=&#39;cues&#39;):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="fima.pipelines.fingers.pipeline_fingerbars"><code class="name flex">
+<span>def <span class="ident">pipeline_fingerbars</span></span>(<span>subject, run, event_type='cues')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pipeline_fingerbars(subject, run, event_type=&#39;cues&#39;):
+    t, events = find_tstat_per_finger(subject, run, event_type)
+    fig = plot_fingerbars(t, events)
+    divs = [to_div(fig), ]
+
+    html_file = FINGERBARS_DIR / event_type / f&#39;{subject}_run-{run}_{event_type}.html&#39;
+    to_html(divs, html_file)</code></pre>
+</details>
+</dd>
 <dt id="fima.pipelines.fingers.pipeline_fingers"><code class="name flex">
 <span>def <span class="ident">pipeline_fingers</span></span>(<span>subject, run, event_type='cues')</span>
 </code></dt>
@@ -121,6 +149,7 @@ def pipeline_fingers(subject, run, event_type=&#39;cues&#39;):
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="fima.pipelines.fingers.pipeline_fingerbars" href="#fima.pipelines.fingers.pipeline_fingerbars">pipeline_fingerbars</a></code></li>
 <li><code><a title="fima.pipelines.fingers.pipeline_fingers" href="#fima.pipelines.fingers.pipeline_fingers">pipeline_fingers</a></code></li>
 <li><code><a title="fima.pipelines.fingers.pipeline_fingers_all" href="#fima.pipelines.fingers.pipeline_fingers_all">pipeline_fingers_all</a></code></li>
 </ul>
