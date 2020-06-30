@@ -1,7 +1,7 @@
 import plotly.graph_objs as go
 
 from ..fitting.viz import get_color_symbol
-from ..fitting.utils import group_per_condition
+from ..utils import group_per_condition
 from .utils import to_div
 
 

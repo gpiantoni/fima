@@ -1,16 +1,19 @@
 from ..fingers.max_activity import find_activity_per_finger
 from ..viz.finger_channels import plot_finger_chan
 from ..viz import to_div, to_html
-from ..parameters import FINGERS_DIR, SUBJECTS
+from ..parameters import FINGERS_DIR, SUBJECTS, FINGERBARS_DIR
 
 
-def pipeline_fingers_all(event_type='cues'):
+def pipeline_fingers_all(event_type='cues', bars=False):
 
     for subject, runs in SUBJECTS.items():
         for run in runs:
             print(f'{subject} / {run}')
             try:
-                pipeline_fingers(subject, run, event_type)
+                if bars:
+                    pipeline_fingerbars(subject, run, event_type)
+                else:
+                    pipeline_fingers(subject, run, event_type)
             except Exception as err:
                 print(err)
 

@@ -23,6 +23,15 @@ def main():
         help='Run analysis only on one subject')
 
     action = list_pipelines.add_parser(
+        'fingers',
+        help='Analyze each finger individually',
+        )
+    action.set_defaults(function='fingers')
+    action.add_argument(
+        '--bars', action='store_true',
+        help='Plot bars with t-statistics')
+
+    action = list_pipelines.add_parser(
         'fitting',
         help='Fit a PRF model to the data',
         )
@@ -43,6 +52,9 @@ def main():
     if args.function == 'spectrum':
         pipeline_spectrum_all(
             subject_only=args.subject)
+
+    elif args.function == 'fingers':
+        pipeline_fingers_all(bars=args.bars)
 
     elif args.function == 'fitting':
         pipeline_fitting_all(

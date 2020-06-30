@@ -1,8 +1,10 @@
 from bidso import file_Core
-from numpy import argmax, unravel_index
+from numpy import argmax, unravel_index, zeros, std, sqrt, median, moveaxis
 from ast import literal_eval
 from numpy import arange, array, clip, where
 from plotly.colors import sequential, cyclical, diverging
+from scipy.stats import ttest_1samp
+
 
 INTERVAL = 0.3
 
@@ -58,3 +60,38 @@ def get_color_for_val(value, colorscale, vmin=0, vmax=1):
 
     val_color_0255 = (255 * val_color + 0.5).astype(int)
     return f'rgb{str(tuple(val_color_0255))}'
+
+
+def group_per_condition(data, names, operator='mean'):
+    from .parameters import EVENTS
+
+    dat = []
+    for ev in EVENTS:
+        i = create_bool(names, ev)
+        y = data.data[0][..., i]
+        if operator == 'mean':
+            dat.append(y.mean(axis=-1))
+        elif operator == 'median':
+            dat.append(median(y, axis=-1))
+        elif operator == 'std':
+            dat.append(std(y, axis=-1))
+        elif operator == 'sem':
+            dat.append(std(y, axis=-1) / sqrt(y.shape[-1]))
+        elif operator == 'tstat':
+            res = ttest_1samp(y, 0, axis=-1)
+            dat.append(res.statistic)
+    out = data._copy()
+    out.data[0] = moveaxis(array(dat), 0, -1)
+    out.axis.pop('trial_axis')
+    out.axis['event'] = array((1, ), dtype='O')
+    out.axis['event'][0] = array(EVENTS)
+
+    return out, array(EVENTS)
+
+
+def create_bool(events, to_select):
+    i_finger = zeros(len(events), dtype='bool')
+    for i, evt in enumerate(events):
+        if evt.startswith(to_select):
+            i_finger[i] = True
+    return i_finger

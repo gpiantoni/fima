@@ -25,10 +25,12 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from bidso import file_Core
-from numpy import argmax, unravel_index
+from numpy import argmax, unravel_index, zeros, std, sqrt, median, moveaxis
 from ast import literal_eval
 from numpy import arange, array, clip, where
 from plotly.colors import sequential, cyclical, diverging
+from scipy.stats import ttest_1samp
+
 
 INTERVAL = 0.3
 
@@ -83,7 +85,42 @@ def get_color_for_val(value, colorscale, vmin=0, vmax=1):
     val_color = colors[v_min, :] + vv * (colors[v_max, :] - colors[v_min, :])
 
     val_color_0255 = (255 * val_color + 0.5).astype(int)
-    return f&#39;rgb{str(tuple(val_color_0255))}&#39;</code></pre>
+    return f&#39;rgb{str(tuple(val_color_0255))}&#39;
+
+
+def group_per_condition(data, names, operator=&#39;mean&#39;):
+    from .parameters import EVENTS
+
+    dat = []
+    for ev in EVENTS:
+        i = create_bool(names, ev)
+        y = data.data[0][..., i]
+        if operator == &#39;mean&#39;:
+            dat.append(y.mean(axis=-1))
+        elif operator == &#39;median&#39;:
+            dat.append(median(y, axis=-1))
+        elif operator == &#39;std&#39;:
+            dat.append(std(y, axis=-1))
+        elif operator == &#39;sem&#39;:
+            dat.append(std(y, axis=-1) / sqrt(y.shape[-1]))
+        elif operator == &#39;tstat&#39;:
+            res = ttest_1samp(y, 0, axis=-1)
+            dat.append(res.statistic)
+    out = data._copy()
+    out.data[0] = moveaxis(array(dat), 0, -1)
+    out.axis.pop(&#39;trial_axis&#39;)
+    out.axis[&#39;event&#39;] = array((1, ), dtype=&#39;O&#39;)
+    out.axis[&#39;event&#39;][0] = array(EVENTS)
+
+    return out, array(EVENTS)
+
+
+def create_bool(events, to_select):
+    i_finger = zeros(len(events), dtype=&#39;bool&#39;)
+    for i, evt in enumerate(events):
+        if evt.startswith(to_select):
+            i_finger[i] = True
+    return i_finger</code></pre>
 </details>
 </section>
 <section>
@@ -93,6 +130,23 @@ def get_color_for_val(value, colorscale, vmin=0, vmax=1):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="fima.utils.create_bool"><code class="name flex">
+<span>def <span class="ident">create_bool</span></span>(<span>events, to_select)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_bool(events, to_select):
+    i_finger = zeros(len(events), dtype=&#39;bool&#39;)
+    for i, evt in enumerate(events):
+        if evt.startswith(to_select):
+            i_finger[i] = True
+    return i_finger</code></pre>
+</details>
+</dd>
 <dt id="fima.utils.find_max_point"><code class="name flex">
 <span>def <span class="ident">find_max_point</span></span>(<span>tf_cht)</span>
 </code></dt>
@@ -156,6 +210,42 @@ point</p></div>
     return f&#39;rgb{str(tuple(val_color_0255))}&#39;</code></pre>
 </details>
 </dd>
+<dt id="fima.utils.group_per_condition"><code class="name flex">
+<span>def <span class="ident">group_per_condition</span></span>(<span>data, names, operator='mean')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def group_per_condition(data, names, operator=&#39;mean&#39;):
+    from .parameters import EVENTS
+
+    dat = []
+    for ev in EVENTS:
+        i = create_bool(names, ev)
+        y = data.data[0][..., i]
+        if operator == &#39;mean&#39;:
+            dat.append(y.mean(axis=-1))
+        elif operator == &#39;median&#39;:
+            dat.append(median(y, axis=-1))
+        elif operator == &#39;std&#39;:
+            dat.append(std(y, axis=-1))
+        elif operator == &#39;sem&#39;:
+            dat.append(std(y, axis=-1) / sqrt(y.shape[-1]))
+        elif operator == &#39;tstat&#39;:
+            res = ttest_1samp(y, 0, axis=-1)
+            dat.append(res.statistic)
+    out = data._copy()
+    out.data[0] = moveaxis(array(dat), 0, -1)
+    out.axis.pop(&#39;trial_axis&#39;)
+    out.axis[&#39;event&#39;] = array((1, ), dtype=&#39;O&#39;)
+    out.axis[&#39;event&#39;][0] = array(EVENTS)
+
+    return out, array(EVENTS)</code></pre>
+</details>
+</dd>
 <dt id="fima.utils.make_name"><code class="name flex">
 <span>def <span class="ident">make_name</span></span>(<span>filename, event_type, ext='.html')</span>
 </code></dt>
@@ -192,8 +282,10 @@ point</p></div>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="fima.utils.create_bool" href="#fima.utils.create_bool">create_bool</a></code></li>
 <li><code><a title="fima.utils.find_max_point" href="#fima.utils.find_max_point">find_max_point</a></code></li>
 <li><code><a title="fima.utils.get_color_for_val" href="#fima.utils.get_color_for_val">get_color_for_val</a></code></li>
+<li><code><a title="fima.utils.group_per_condition" href="#fima.utils.group_per_condition">group_per_condition</a></code></li>
 <li><code><a title="fima.utils.make_name" href="#fima.utils.make_name">make_name</a></code></li>
 </ul>
 </li>

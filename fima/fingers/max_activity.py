@@ -1,14 +1,17 @@
 from wonambi.trans import select, math
-from numpy import c_, zeros
+from numpy import c_
 from ..spectrum.compute import compute_timefreq, get_chantime, get_chan
 from ..read import load
-from ..utils import find_max_point
-
-
-FINGERS = ('thumb', 'index', 'middle', 'ring', 'little')
+from ..utils import find_max_point, group_per_condition, create_bool
+from ..parameters import FINGERS
 
 
 def find_activity_per_finger(subject, run, event_type='cues'):
+    """
+    TODO
+    ----
+    this function could be rewritten using preexisting code
+    """
     data, events = load('data', subject, run, event_type=event_type)
     tf = compute_timefreq(data, mean=True)
     tf = get_chantime(tf)
@@ -28,9 +31,22 @@ def find_activity_per_finger(subject, run, event_type='cues'):
     return v, tf.chan[0]
 
 
-def create_bool(events, to_select):
-    i_finger = zeros(len(events), dtype='bool')
-    for i, evt in enumerate(events):
-        if evt.startswith(to_select):
-            i_finger[i] = True
-    return i_finger
+def find_tstat_per_finger(subject, run, event_type='cues'):
+    """Get tstat for each finger
+
+    TODO
+    ----
+    this function can be merged with the one above
+    """
+    data, names = load('data', subject, run, event_type=event_type)
+    tf = compute_timefreq(data, mean=False)
+
+    tf_m = math(tf, operator_name='mean', axis='trial_axis')
+    tf_cht = get_chantime(tf_m)
+
+    best_chan, best_time = find_max_point(tf_cht)
+
+    tf_ch = get_chan(tf, time=best_time)
+    t, events = group_per_condition(tf_ch, names, 'tstat')
+
+    return t, events

@@ -1,13 +1,5 @@
-from numpy import zeros, std, sqrt, median
 from scipy.stats import pearsonr
-from ..fingers.max_activity import FINGERS, create_bool
-from numpy import moveaxis, array
-
-
-EVENTS = []
-for action in ('close', 'open'):
-    for f in FINGERS:
-        EVENTS.append(f'{f} {action}')
+from numpy import zeros
 
 
 def make_2d(x):
@@ -47,25 +39,3 @@ def get_response(method, y):
         response = y.mean(axis=1)
 
     return response
-
-
-def group_per_condition(data, names, operator='mean'):
-    dat = []
-    for ev in EVENTS:
-        i = create_bool(names, ev)
-        y = data.data[0][..., i]
-        if operator == 'mean':
-            dat.append(y.mean(axis=-1))
-        elif operator == 'median':
-            dat.append(median(y, axis=-1))
-        elif operator == 'std':
-            dat.append(std(y, axis=-1))
-        elif operator == 'sem':
-            dat.append(std(y, axis=-1) / sqrt(y.shape[-1]))
-    out = data._copy()
-    out.data[0] = moveaxis(array(dat), 0, -1)
-    out.axis.pop('trial_axis')
-    out.axis['event'] = array((1, ), dtype='O')
-    out.axis['event'][0] = array(EVENTS)
-
-    return out, array(EVENTS)

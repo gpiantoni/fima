@@ -48,6 +48,7 @@ DATAGLOVE_DIR = RESULTS_DIR / &#39;dataglove&#39;
 OVERVIEW_DIR = RESULTS_DIR / &#39;data_quality&#39;
 SPECTRUM_DIR = RESULTS_DIR / &#39;spectrum&#39;
 FINGERS_DIR = RESULTS_DIR / &#39;fingers&#39;
+FINGERBARS_DIR = RESULTS_DIR / &#39;finger_bars&#39;
 FITTING_DIR = RESULTS_DIR / &#39;fitting&#39;
 
 P = dict(
@@ -118,7 +119,15 @@ FINGER_COLOR = {
     &#39;middle&#39;: get_color_for_val(2, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
     &#39;ring&#39;: get_color_for_val(1, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
     &#39;little&#39;: get_color_for_val(0, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-}</code></pre>
+}
+
+FINGERS = list(FINGER_COLOR)
+
+
+EVENTS = []
+for action in MOVEMENT_LINE:
+    for f in FINGERS:
+        EVENTS.append(f&#39;{f} {action}&#39;)</code></pre>
 </details>
 </section>
 <section>

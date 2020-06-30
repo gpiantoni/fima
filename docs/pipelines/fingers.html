@@ -27,16 +27,19 @@
 <pre><code class="python">from ..fingers.max_activity import find_activity_per_finger
 from ..viz.finger_channels import plot_finger_chan
 from ..viz import to_div, to_html
-from ..parameters import FINGERS_DIR, SUBJECTS
+from ..parameters import FINGERS_DIR, SUBJECTS, FINGERBARS_DIR
 
 
-def pipeline_fingers_all(event_type=&#39;cues&#39;):
+def pipeline_fingers_all(event_type=&#39;cues&#39;, bars=False):
 
     for subject, runs in SUBJECTS.items():
         for run in runs:
             print(f&#39;{subject} / {run}&#39;)
             try:
-                pipeline_fingers(subject, run, event_type)
+                if bars:
+                    pipeline_fingerbars(subject, run, event_type)
+                else:
+                    pipeline_fingers(subject, run, event_type)
             except Exception as err:
                 print(err)
 
@@ -78,7 +81,7 @@ def pipeline_fingers(subject, run, event_type=&#39;cues&#39;):
 </details>
 </dd>
 <dt id="fima.pipelines.fingers.pipeline_fingers_all"><code class="name flex">
-<span>def <span class="ident">pipeline_fingers_all</span></span>(<span>event_type='cues')</span>
+<span>def <span class="ident">pipeline_fingers_all</span></span>(<span>event_type='cues', bars=False)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -86,13 +89,16 @@ def pipeline_fingers(subject, run, event_type=&#39;cues&#39;):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def pipeline_fingers_all(event_type=&#39;cues&#39;):
+<pre><code class="python">def pipeline_fingers_all(event_type=&#39;cues&#39;, bars=False):
 
     for subject, runs in SUBJECTS.items():
         for run in runs:
             print(f&#39;{subject} / {run}&#39;)
             try:
-                pipeline_fingers(subject, run, event_type)
+                if bars:
+                    pipeline_fingerbars(subject, run, event_type)
+                else:
+                    pipeline_fingers(subject, run, event_type)
             except Exception as err:
                 print(err)</code></pre>
 </details>

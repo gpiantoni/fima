@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.fitting.utils API documentation</title>
+<title>fima.fingers.viz API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,54 +17,73 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.fitting.utils</code></h1>
+<h1 class="title">Module <code>fima.fingers.viz</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from scipy.stats import pearsonr
-from numpy import zeros
+<pre><code class="python">from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+from ..parameters import FINGER_COLOR
 
 
-def make_2d(x):
-    return x.view(&#39;&lt;f8&#39;).reshape(x.shape[0], -1)
+def plot_fingerbars(t, events, range=(-20, 20)):
+    &#34;&#34;&#34;Plot bars for each value of the fingers.
 
+    Parameters
+    ----------
+    t : instance of ChanTime
+        with channels X values per event
+    events : list of str
+        list of events
 
-def rms(est, y):
-    return ((est.ravel() - y.ravel()) ** 2).mean() ** .5
+    Returns
+    -------
+    instance of Plotly Figure
 
-
-def r2(est, y):
-    return pearsonr(est.ravel(), y.ravel())[0] ** 2
-
-
-def pvalue(est, y):
-    return pearsonr(est.ravel(), y.ravel())[1]
-
-
-def make_struct(x, dtype_names):
-    &#34;&#34;&#34;There should be a numpy function to do this, but I cannot find it
+    TODO
+    -----
+    Note that the function is not very flexible now
     &#34;&#34;&#34;
-    DTYPES = []
-    for col_name in dtype_names:
-        DTYPES.append((col_name, &#39;&lt;f8&#39;))
-    out = zeros(1, dtype=DTYPES)
-    for i, col_name in enumerate(dtype_names):
-        out[col_name] = x[i]
+    n_rows = t.data[0].shape[0]
 
-    return out
+    fig = make_subplots(rows=n_rows, cols=1,
+                        shared_xaxes=True,
+                        vertical_spacing=0.1 / n_rows)
 
+    i = 1
+    for y in t.data[0]:
+        fig.add_trace(
+            go.Bar(
+                x=events,
+                y=y,
+                marker=dict(
+                    color=list(FINGER_COLOR.values()) + list(FINGER_COLOR.values()),
+                    line=dict(
+                        color=&#39;black&#39;,
+                        width=0,
+                    ),
+                ),
+            ), col=1, row=i)
 
-def get_response(method, y):
+        yaxis_name = &#39;yaxis&#39;
+        if i &gt; 1:
+            yaxis_name += str(i)
+        fig.update_layout({yaxis_name: dict(range=range, title=t.chan[0][i - 1])})
 
-    if method is None:
-        response = None
-    elif method == &#39;mean&#39;:
-        response = y.mean(axis=1)
+        if i == n_rows:
+            break
+        i += 1
 
-    return response</code></pre>
+    fig.update_layout(
+        height=100 * n_rows,
+        width=600,
+        showlegend=False,
+    )
+
+    return fig</code></pre>
 </details>
 </section>
 <section>
@@ -74,97 +93,84 @@ def get_response(method, y):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="fima.fitting.utils.get_response"><code class="name flex">
-<span>def <span class="ident">get_response</span></span>(<span>method, y)</span>
+<dt id="fima.fingers.viz.plot_fingerbars"><code class="name flex">
+<span>def <span class="ident">plot_fingerbars</span></span>(<span>t, events, range=(-20, 20))</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Plot bars for each value of the fingers.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>instance</code> of <code>ChanTime</code></dt>
+<dd>with channels X values per event</dd>
+<dt><strong><code>events</code></strong> :&ensp;<code>list</code> of <code>str</code></dt>
+<dd>list of events</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>instance</code> of <code>Plotly Figure</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="todo">Todo</h2>
+<p>Note that the function is not very flexible now</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_response(method, y):
+<pre><code class="python">def plot_fingerbars(t, events, range=(-20, 20)):
+    &#34;&#34;&#34;Plot bars for each value of the fingers.
 
-    if method is None:
-        response = None
-    elif method == &#39;mean&#39;:
-        response = y.mean(axis=1)
+    Parameters
+    ----------
+    t : instance of ChanTime
+        with channels X values per event
+    events : list of str
+        list of events
 
-    return response</code></pre>
-</details>
-</dd>
-<dt id="fima.fitting.utils.make_2d"><code class="name flex">
-<span>def <span class="ident">make_2d</span></span>(<span>x)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def make_2d(x):
-    return x.view(&#39;&lt;f8&#39;).reshape(x.shape[0], -1)</code></pre>
-</details>
-</dd>
-<dt id="fima.fitting.utils.make_struct"><code class="name flex">
-<span>def <span class="ident">make_struct</span></span>(<span>x, dtype_names)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>There should be a numpy function to do this, but I cannot find it</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def make_struct(x, dtype_names):
-    &#34;&#34;&#34;There should be a numpy function to do this, but I cannot find it
+    Returns
+    -------
+    instance of Plotly Figure
+
+    TODO
+    -----
+    Note that the function is not very flexible now
     &#34;&#34;&#34;
-    DTYPES = []
-    for col_name in dtype_names:
-        DTYPES.append((col_name, &#39;&lt;f8&#39;))
-    out = zeros(1, dtype=DTYPES)
-    for i, col_name in enumerate(dtype_names):
-        out[col_name] = x[i]
+    n_rows = t.data[0].shape[0]
 
-    return out</code></pre>
-</details>
-</dd>
-<dt id="fima.fitting.utils.pvalue"><code class="name flex">
-<span>def <span class="ident">pvalue</span></span>(<span>est, y)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def pvalue(est, y):
-    return pearsonr(est.ravel(), y.ravel())[1]</code></pre>
-</details>
-</dd>
-<dt id="fima.fitting.utils.r2"><code class="name flex">
-<span>def <span class="ident">r2</span></span>(<span>est, y)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def r2(est, y):
-    return pearsonr(est.ravel(), y.ravel())[0] ** 2</code></pre>
-</details>
-</dd>
-<dt id="fima.fitting.utils.rms"><code class="name flex">
-<span>def <span class="ident">rms</span></span>(<span>est, y)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def rms(est, y):
-    return ((est.ravel() - y.ravel()) ** 2).mean() ** .5</code></pre>
+    fig = make_subplots(rows=n_rows, cols=1,
+                        shared_xaxes=True,
+                        vertical_spacing=0.1 / n_rows)
+
+    i = 1
+    for y in t.data[0]:
+        fig.add_trace(
+            go.Bar(
+                x=events,
+                y=y,
+                marker=dict(
+                    color=list(FINGER_COLOR.values()) + list(FINGER_COLOR.values()),
+                    line=dict(
+                        color=&#39;black&#39;,
+                        width=0,
+                    ),
+                ),
+            ), col=1, row=i)
+
+        yaxis_name = &#39;yaxis&#39;
+        if i &gt; 1:
+            yaxis_name += str(i)
+        fig.update_layout({yaxis_name: dict(range=range, title=t.chan[0][i - 1])})
+
+        if i == n_rows:
+            break
+        i += 1
+
+    fig.update_layout(
+        height=100 * n_rows,
+        width=600,
+        showlegend=False,
+    )
+
+    return fig</code></pre>
 </details>
 </dd>
 </dl>
@@ -180,17 +186,12 @@ def get_response(method, y):
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="fima.fitting" href="index.html">fima.fitting</a></code></li>
+<li><code><a title="fima.fingers" href="index.html">fima.fingers</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="two-column">
-<li><code><a title="fima.fitting.utils.get_response" href="#fima.fitting.utils.get_response">get_response</a></code></li>
-<li><code><a title="fima.fitting.utils.make_2d" href="#fima.fitting.utils.make_2d">make_2d</a></code></li>
-<li><code><a title="fima.fitting.utils.make_struct" href="#fima.fitting.utils.make_struct">make_struct</a></code></li>
-<li><code><a title="fima.fitting.utils.pvalue" href="#fima.fitting.utils.pvalue">pvalue</a></code></li>
-<li><code><a title="fima.fitting.utils.r2" href="#fima.fitting.utils.r2">r2</a></code></li>
-<li><code><a title="fima.fitting.utils.rms" href="#fima.fitting.utils.rms">rms</a></code></li>
+<ul class="">
+<li><code><a title="fima.fingers.viz.plot_fingerbars" href="#fima.fingers.viz.plot_fingerbars">plot_fingerbars</a></code></li>
 </ul>
 </li>
 </ul>
