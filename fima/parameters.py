@@ -21,8 +21,9 @@ DATAGLOVE_DIR = RESULTS_DIR / 'dataglove'
 OVERVIEW_DIR = RESULTS_DIR / 'data_quality'
 SPECTRUM_DIR = RESULTS_DIR / 'spectrum'
 FINGERS_DIR = RESULTS_DIR / 'fingers'
-FINGERBARS_DIR = RESULTS_DIR / 'beta_finger_bars'
-FINGERCORR_DIR = RESULTS_DIR / 'beta_finger_corr'
+FINGERBARS_DIR = RESULTS_DIR / 'finger_bars'
+FINGERCORR_DIR = RESULTS_DIR / 'finger_corr'
+FINGERCORREACH_DIR = RESULTS_DIR / 'finger_correach'
 FITTING_DIR = RESULTS_DIR / 'fitting'
 
 P = dict(

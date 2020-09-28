@@ -1,6 +1,7 @@
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-from ..parameters import FINGER_COLOR
+
+from ..parameters import FINGER_COLOR, P
 
 
 def plot_correlation(dat, events):
@@ -36,6 +37,53 @@ def plot_correlation(dat, events):
         height=100 * n_rows,
         width=600,
         showlegend=False,
+    )
+
+    return fig
+
+
+def plot_heatmap(v, events):
+    fig = go.Figure(
+        go.Heatmap(
+            x=events,
+            y=events,
+            z=v.T,
+            zmax=1,
+            zmin=-1,
+            colorscale=P['viz']['colorscale'],
+        ),
+        layout=go.Layout(
+            xaxis=dict(
+                title='Fingers',
+            ),
+            yaxis=dict(
+                title='Fingers (used for electrode selection)',
+                autorange='reversed',
+            ))
+    )
+    return fig
+
+
+def plot_finger_chan_2(v, events, chans):
+    fig = go.Figure(
+        go.Heatmap(
+            x=events,
+            y=chans,
+            z=v,
+            zmax=10,
+            zmin=-10,
+            colorscale=P['viz']['colorscale'],
+        ),
+        layout=go.Layout(
+            width=600,
+            height=50 * len(chans),
+            xaxis=dict(
+                title='Channels',
+            ),
+            yaxis=dict(
+                title='Fingers',
+                autorange='reversed',
+            ))
     )
 
     return fig
