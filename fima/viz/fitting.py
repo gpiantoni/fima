@@ -2,11 +2,10 @@ import plotly.graph_objects as go
 from numpy import NaN, nanargmax, outer
 from wonambi import Data
 
-from .general import estimate
-from ..viz.surf import plot_surf
-from ..parameters import MOVEMENT_SYMBOL_DATA, MOVEMENT_SYMBOL_MODEL
-from .utils import get_response
-from ..viz.utils import FINGER_COLOR
+from .surf import plot_surf
+from ..fitting.general import estimate
+from ..fitting.utils import get_response
+from ..viz.utils import get_color_symbol
 
 
 def estimate_and_plot(y, model, names, result, channels, chan=None):
@@ -178,17 +177,3 @@ def plot_fitted_time(names, y, estimate):
             ),
     )
     return fig
-
-
-def get_color_symbol(names):
-    color = []
-    symbol_data = []
-    symbol_model = []
-
-    for m in names:
-        finger, action = m.split()
-        color.append(FINGER_COLOR[finger])
-        symbol_data.append(MOVEMENT_SYMBOL_DATA[action])
-        symbol_model.append(MOVEMENT_SYMBOL_MODEL[action])
-
-    return color, symbol_data, symbol_model

@@ -1,13 +1,29 @@
 import plotly.graph_objs as go
 
-from ..fitting.viz import get_color_symbol
+from ..viz.fitting import get_color_symbol
 from ..utils import group_per_condition
 from .utils import to_div
 
 
-def plot_conditions_per_chan(tf_cht, names):
+def plot_conditions_per_chan(tf_cht, names, statistics='sem'):
+    """Plot all the conditions for each channel
+
+    Parameters
+    ----------
+    tf_cht : wonambi.Data
+        time-channel data
+    names : list of str
+        list of all the events
+    statistics : str
+        'sem' or 'std'
+
+    Returns
+    -------
+    list of dict
+        plotly images
+    """
     data_m, events = group_per_condition(tf_cht, names, 'mean')
-    data_sd, events = group_per_condition(tf_cht, names, 'std')  # you can also use sem
+    data_sd, events = group_per_condition(tf_cht, names, statistics)  # you can also use sem
 
     divs = []
 

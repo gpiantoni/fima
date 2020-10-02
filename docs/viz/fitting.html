@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.fitting.viz API documentation</title>
+<title>fima.viz.fitting API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.fitting.viz</code></h1>
+<h1 class="title">Module <code>fima.viz.fitting</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -28,11 +28,10 @@
 from numpy import NaN, nanargmax, outer
 from wonambi import Data
 
-from .general import estimate
-from ..viz.surf import plot_surf
-from ..parameters import MOVEMENT_SYMBOL_DATA, MOVEMENT_SYMBOL_MODEL
-from .utils import get_response
-from ..viz.utils import FINGER_COLOR
+from .surf import plot_surf
+from ..fitting.general import estimate
+from ..fitting.utils import get_response
+from ..viz.utils import get_color_symbol
 
 
 def estimate_and_plot(y, model, names, result, channels, chan=None):
@@ -203,21 +202,7 @@ def plot_fitted_time(names, y, estimate):
                 ),
             ),
     )
-    return fig
-
-
-def get_color_symbol(names):
-    color = []
-    symbol_data = []
-    symbol_model = []
-
-    for m in names:
-        finger, action = m.split()
-        color.append(FINGER_COLOR[finger])
-        symbol_data.append(MOVEMENT_SYMBOL_DATA[action])
-        symbol_model.append(MOVEMENT_SYMBOL_MODEL[action])
-
-    return color, symbol_data, symbol_model</code></pre>
+    return fig</code></pre>
 </details>
 </section>
 <section>
@@ -227,7 +212,7 @@ def get_color_symbol(names):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="fima.fitting.viz.estimate_and_plot"><code class="name flex">
+<dt id="fima.viz.fitting.estimate_and_plot"><code class="name flex">
 <span>def <span class="ident">estimate_and_plot</span></span>(<span>y, model, names, result, channels, chan=None)</span>
 </code></dt>
 <dd>
@@ -269,30 +254,7 @@ def get_color_symbol(names):
     return fig</code></pre>
 </details>
 </dd>
-<dt id="fima.fitting.viz.get_color_symbol"><code class="name flex">
-<span>def <span class="ident">get_color_symbol</span></span>(<span>names)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_color_symbol(names):
-    color = []
-    symbol_data = []
-    symbol_model = []
-
-    for m in names:
-        finger, action = m.split()
-        color.append(FINGER_COLOR[finger])
-        symbol_data.append(MOVEMENT_SYMBOL_DATA[action])
-        symbol_model.append(MOVEMENT_SYMBOL_MODEL[action])
-
-    return color, symbol_data, symbol_model</code></pre>
-</details>
-</dd>
-<dt id="fima.fitting.viz.plot_fitted_time"><code class="name flex">
+<dt id="fima.viz.fitting.plot_fitted_time"><code class="name flex">
 <span>def <span class="ident">plot_fitted_time</span></span>(<span>names, y, estimate)</span>
 </code></dt>
 <dd>
@@ -355,7 +317,7 @@ def get_color_symbol(names):
     return fig</code></pre>
 </details>
 </dd>
-<dt id="fima.fitting.viz.plot_fitted_trial"><code class="name flex">
+<dt id="fima.viz.fitting.plot_fitted_trial"><code class="name flex">
 <span>def <span class="ident">plot_fitted_trial</span></span>(<span>names, y, estimate)</span>
 </code></dt>
 <dd>
@@ -409,7 +371,7 @@ def get_color_symbol(names):
     return fig</code></pre>
 </details>
 </dd>
-<dt id="fima.fitting.viz.plot_prf_results"><code class="name flex">
+<dt id="fima.viz.fitting.plot_prf_results"><code class="name flex">
 <span>def <span class="ident">plot_prf_results</span></span>(<span>result, param, channels, electrodes, surf=None, rsquared_threshold=0.05)</span>
 </code></dt>
 <dd>
@@ -455,16 +417,15 @@ def get_color_symbol(names):
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="fima.fitting" href="index.html">fima.fitting</a></code></li>
+<li><code><a title="fima.viz" href="index.html">fima.viz</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="fima.fitting.viz.estimate_and_plot" href="#fima.fitting.viz.estimate_and_plot">estimate_and_plot</a></code></li>
-<li><code><a title="fima.fitting.viz.get_color_symbol" href="#fima.fitting.viz.get_color_symbol">get_color_symbol</a></code></li>
-<li><code><a title="fima.fitting.viz.plot_fitted_time" href="#fima.fitting.viz.plot_fitted_time">plot_fitted_time</a></code></li>
-<li><code><a title="fima.fitting.viz.plot_fitted_trial" href="#fima.fitting.viz.plot_fitted_trial">plot_fitted_trial</a></code></li>
-<li><code><a title="fima.fitting.viz.plot_prf_results" href="#fima.fitting.viz.plot_prf_results">plot_prf_results</a></code></li>
+<li><code><a title="fima.viz.fitting.estimate_and_plot" href="#fima.viz.fitting.estimate_and_plot">estimate_and_plot</a></code></li>
+<li><code><a title="fima.viz.fitting.plot_fitted_time" href="#fima.viz.fitting.plot_fitted_time">plot_fitted_time</a></code></li>
+<li><code><a title="fima.viz.fitting.plot_fitted_trial" href="#fima.viz.fitting.plot_fitted_trial">plot_fitted_trial</a></code></li>
+<li><code><a title="fima.viz.fitting.plot_prf_results" href="#fima.viz.fitting.plot_prf_results">plot_prf_results</a></code></li>
 </ul>
 </li>
 </ul>

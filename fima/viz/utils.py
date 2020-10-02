@@ -1,6 +1,6 @@
 from plotly.offline import plot, get_plotlyjs
 
-from ..parameters import P
+from ..parameters import P, MOVEMENT_SYMBOL_DATA, MOVEMENT_SYMBOL_MODEL
 from ..utils import get_color_for_val
 
 
@@ -11,6 +11,36 @@ FINGER_COLOR = {
     'ring': get_color_for_val(1, P['viz']['colorscale'], -1, 5),
     'little': get_color_for_val(0, P['viz']['colorscale'], -1, 5),
 }
+
+
+def get_color_symbol(names):
+    """Get the appropriate color and symbol for each condition
+
+    Parameters
+    ----------
+    names : list of str
+        list of conditions
+
+    Returns
+    -------
+    list of str
+        list of colors
+    list of str
+        list of symbols for the data
+    list of str
+        list of symbols for the model estimates
+    """
+    color = []
+    symbol_data = []
+    symbol_model = []
+
+    for m in names:
+        finger, action = m.split()
+        color.append(FINGER_COLOR[finger])
+        symbol_data.append(MOVEMENT_SYMBOL_DATA[action])
+        symbol_model.append(MOVEMENT_SYMBOL_MODEL[action])
+
+    return color, symbol_data, symbol_model
 
 
 def to_div(fig):

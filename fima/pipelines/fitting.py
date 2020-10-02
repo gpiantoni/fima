@@ -1,6 +1,6 @@
 from ..fitting.general import fit_data, get_trialdata
 from ..fitting.timebased import MODELS
-from ..fitting.viz import estimate_and_plot, plot_prf_results
+from ..viz.fitting import estimate_and_plot, plot_prf_results
 from ..utils import group_per_condition
 from ..spectrum.compute import compute_timefreq, get_chantime
 from ..read import load

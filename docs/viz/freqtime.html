@@ -26,14 +26,30 @@
 </summary>
 <pre><code class="python">import plotly.graph_objs as go
 
-from ..fitting.viz import get_color_symbol
+from ..viz.fitting import get_color_symbol
 from ..utils import group_per_condition
 from .utils import to_div
 
 
-def plot_conditions_per_chan(tf_cht, names):
+def plot_conditions_per_chan(tf_cht, names, statistics=&#39;sem&#39;):
+    &#34;&#34;&#34;Plot all the conditions for each channel
+
+    Parameters
+    ----------
+    tf_cht : wonambi.Data
+        time-channel data
+    names : list of str
+        list of all the events
+    statistics : str
+        &#39;sem&#39; or &#39;std&#39;
+
+    Returns
+    -------
+    list of dict
+        plotly images
+    &#34;&#34;&#34;
     data_m, events = group_per_condition(tf_cht, names, &#39;mean&#39;)
-    data_sd, events = group_per_condition(tf_cht, names, &#39;std&#39;)  # you can also use sem
+    data_sd, events = group_per_condition(tf_cht, names, statistics)  # you can also use sem
 
     divs = []
 
@@ -121,17 +137,47 @@ def plot_per_chan(y, s, chan, names):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="fima.viz.freqtime.plot_conditions_per_chan"><code class="name flex">
-<span>def <span class="ident">plot_conditions_per_chan</span></span>(<span>tf_cht, names)</span>
+<span>def <span class="ident">plot_conditions_per_chan</span></span>(<span>tf_cht, names, statistics='sem')</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Plot all the conditions for each channel</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>tf_cht</code></strong> :&ensp;<code>wonambi.Data</code></dt>
+<dd>time-channel data</dd>
+<dt><strong><code>names</code></strong> :&ensp;<code>list</code> of <code>str</code></dt>
+<dd>list of all the events</dd>
+<dt><strong><code>statistics</code></strong> :&ensp;<code>str</code></dt>
+<dd>'sem' or 'std'</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code> of <code>dict</code></dt>
+<dd>plotly images</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def plot_conditions_per_chan(tf_cht, names):
+<pre><code class="python">def plot_conditions_per_chan(tf_cht, names, statistics=&#39;sem&#39;):
+    &#34;&#34;&#34;Plot all the conditions for each channel
+
+    Parameters
+    ----------
+    tf_cht : wonambi.Data
+        time-channel data
+    names : list of str
+        list of all the events
+    statistics : str
+        &#39;sem&#39; or &#39;std&#39;
+
+    Returns
+    -------
+    list of dict
+        plotly images
+    &#34;&#34;&#34;
     data_m, events = group_per_condition(tf_cht, names, &#39;mean&#39;)
-    data_sd, events = group_per_condition(tf_cht, names, &#39;std&#39;)  # you can also use sem
+    data_sd, events = group_per_condition(tf_cht, names, statistics)  # you can also use sem
 
     divs = []
 

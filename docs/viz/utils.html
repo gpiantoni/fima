@@ -26,7 +26,7 @@
 </summary>
 <pre><code class="python">from plotly.offline import plot, get_plotlyjs
 
-from ..parameters import P
+from ..parameters import P, MOVEMENT_SYMBOL_DATA, MOVEMENT_SYMBOL_MODEL
 from ..utils import get_color_for_val
 
 
@@ -37,6 +37,36 @@ FINGER_COLOR = {
     &#39;ring&#39;: get_color_for_val(1, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
     &#39;little&#39;: get_color_for_val(0, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
 }
+
+
+def get_color_symbol(names):
+    &#34;&#34;&#34;Get the appropriate color and symbol for each condition
+
+    Parameters
+    ----------
+    names : list of str
+        list of conditions
+
+    Returns
+    -------
+    list of str
+        list of colors
+    list of str
+        list of symbols for the data
+    list of str
+        list of symbols for the model estimates
+    &#34;&#34;&#34;
+    color = []
+    symbol_data = []
+    symbol_model = []
+
+    for m in names:
+        finger, action = m.split()
+        color.append(FINGER_COLOR[finger])
+        symbol_data.append(MOVEMENT_SYMBOL_DATA[action])
+        symbol_model.append(MOVEMENT_SYMBOL_MODEL[action])
+
+    return color, symbol_data, symbol_model
 
 
 def to_div(fig):
@@ -112,6 +142,59 @@ def to_png(fig, png_name):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="fima.viz.utils.get_color_symbol"><code class="name flex">
+<span>def <span class="ident">get_color_symbol</span></span>(<span>names)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the appropriate color and symbol for each condition</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>names</code></strong> :&ensp;<code>list</code> of <code>str</code></dt>
+<dd>list of conditions</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code> of <code>str</code></dt>
+<dd>list of colors</dd>
+<dt><code>list</code> of <code>str</code></dt>
+<dd>list of symbols for the data</dd>
+<dt><code>list</code> of <code>str</code></dt>
+<dd>list of symbols for the model estimates</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_color_symbol(names):
+    &#34;&#34;&#34;Get the appropriate color and symbol for each condition
+
+    Parameters
+    ----------
+    names : list of str
+        list of conditions
+
+    Returns
+    -------
+    list of str
+        list of colors
+    list of str
+        list of symbols for the data
+    list of str
+        list of symbols for the model estimates
+    &#34;&#34;&#34;
+    color = []
+    symbol_data = []
+    symbol_model = []
+
+    for m in names:
+        finger, action = m.split()
+        color.append(FINGER_COLOR[finger])
+        symbol_data.append(MOVEMENT_SYMBOL_DATA[action])
+        symbol_model.append(MOVEMENT_SYMBOL_MODEL[action])
+
+    return color, symbol_data, symbol_model</code></pre>
+</details>
+</dd>
 <dt id="fima.viz.utils.to_div"><code class="name flex">
 <span>def <span class="ident">to_div</span></span>(<span>fig)</span>
 </code></dt>
@@ -252,6 +335,7 @@ on plotly calling an external function to do the actual plotting (orca)</p></div
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="fima.viz.utils.get_color_symbol" href="#fima.viz.utils.get_color_symbol">get_color_symbol</a></code></li>
 <li><code><a title="fima.viz.utils.to_div" href="#fima.viz.utils.to_div">to_div</a></code></li>
 <li><code><a title="fima.viz.utils.to_html" href="#fima.viz.utils.to_html">to_html</a></code></li>
 <li><code><a title="fima.viz.utils.to_png" href="#fima.viz.utils.to_png">to_png</a></code></li>
