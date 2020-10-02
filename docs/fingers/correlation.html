@@ -26,7 +26,8 @@
 </summary>
 <pre><code class="python">from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-from ..parameters import FINGER_COLOR
+
+from ..parameters import FINGER_COLOR, P
 
 
 def plot_correlation(dat, events):
@@ -62,6 +63,53 @@ def plot_correlation(dat, events):
         height=100 * n_rows,
         width=600,
         showlegend=False,
+    )
+
+    return fig
+
+
+def plot_heatmap(v, events):
+    fig = go.Figure(
+        go.Heatmap(
+            x=events,
+            y=events,
+            z=v.T,
+            zmax=1,
+            zmin=-1,
+            colorscale=P[&#39;viz&#39;][&#39;colorscale&#39;],
+        ),
+        layout=go.Layout(
+            xaxis=dict(
+                title=&#39;Fingers&#39;,
+            ),
+            yaxis=dict(
+                title=&#39;Fingers (used for electrode selection)&#39;,
+                autorange=&#39;reversed&#39;,
+            ))
+    )
+    return fig
+
+
+def plot_finger_chan_2(v, events, chans):
+    fig = go.Figure(
+        go.Heatmap(
+            x=events,
+            y=chans,
+            z=v,
+            zmax=10,
+            zmin=-10,
+            colorscale=P[&#39;viz&#39;][&#39;colorscale&#39;],
+        ),
+        layout=go.Layout(
+            width=600,
+            height=50 * len(chans),
+            xaxis=dict(
+                title=&#39;Channels&#39;,
+            ),
+            yaxis=dict(
+                title=&#39;Fingers&#39;,
+                autorange=&#39;reversed&#39;,
+            ))
     )
 
     return fig</code></pre>
@@ -121,6 +169,71 @@ def plot_correlation(dat, events):
     return fig</code></pre>
 </details>
 </dd>
+<dt id="fima.fingers.correlation.plot_finger_chan_2"><code class="name flex">
+<span>def <span class="ident">plot_finger_chan_2</span></span>(<span>v, events, chans)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_finger_chan_2(v, events, chans):
+    fig = go.Figure(
+        go.Heatmap(
+            x=events,
+            y=chans,
+            z=v,
+            zmax=10,
+            zmin=-10,
+            colorscale=P[&#39;viz&#39;][&#39;colorscale&#39;],
+        ),
+        layout=go.Layout(
+            width=600,
+            height=50 * len(chans),
+            xaxis=dict(
+                title=&#39;Channels&#39;,
+            ),
+            yaxis=dict(
+                title=&#39;Fingers&#39;,
+                autorange=&#39;reversed&#39;,
+            ))
+    )
+
+    return fig</code></pre>
+</details>
+</dd>
+<dt id="fima.fingers.correlation.plot_heatmap"><code class="name flex">
+<span>def <span class="ident">plot_heatmap</span></span>(<span>v, events)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_heatmap(v, events):
+    fig = go.Figure(
+        go.Heatmap(
+            x=events,
+            y=events,
+            z=v.T,
+            zmax=1,
+            zmin=-1,
+            colorscale=P[&#39;viz&#39;][&#39;colorscale&#39;],
+        ),
+        layout=go.Layout(
+            xaxis=dict(
+                title=&#39;Fingers&#39;,
+            ),
+            yaxis=dict(
+                title=&#39;Fingers (used for electrode selection)&#39;,
+                autorange=&#39;reversed&#39;,
+            ))
+    )
+    return fig</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
@@ -140,6 +253,8 @@ def plot_correlation(dat, events):
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="fima.fingers.correlation.plot_correlation" href="#fima.fingers.correlation.plot_correlation">plot_correlation</a></code></li>
+<li><code><a title="fima.fingers.correlation.plot_finger_chan_2" href="#fima.fingers.correlation.plot_finger_chan_2">plot_finger_chan_2</a></code></li>
+<li><code><a title="fima.fingers.correlation.plot_heatmap" href="#fima.fingers.correlation.plot_heatmap">plot_heatmap</a></code></li>
 </ul>
 </li>
 </ul>

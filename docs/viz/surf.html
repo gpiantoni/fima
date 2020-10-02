@@ -67,6 +67,9 @@ def plot_surf(data, elec, pial=None, info=&#39;activity&#39;):
         elif info == &#39;open_v_close&#39;:
             clim = (0, 1)
 
+        elif info == &#39;tstat&#39;:
+            clim = (-10, 10)
+
         else:
             clim = (
                 P[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;] * -1,
@@ -195,6 +198,9 @@ def plot_surf(data, elec, pial=None, info=&#39;activity&#39;):
 
         elif info == &#39;open_v_close&#39;:
             clim = (0, 1)
+
+        elif info == &#39;tstat&#39;:
+            clim = (-10, 10)
 
         else:
             clim = (
