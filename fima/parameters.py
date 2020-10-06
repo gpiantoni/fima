@@ -38,7 +38,7 @@ P = dict(
     viz=dict(
         colorscale='Jet',
         tfr=dict(
-            max=5,
+            max=6,
             ),
         tfr_mean=dict(
             max=3,
@@ -46,9 +46,10 @@ P = dict(
         ),
     spectrum=dict(
         method='spectrogram',  # spectrogram or morlet
+        windowsize=0.3,
         baseline=dict(
             time=(-0.5, -0.1),
-            type='dB',
+            type='dB',  # dB or
             ),
         select=dict(
             freq=(60, 200),  # (60, 200)

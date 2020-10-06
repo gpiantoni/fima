@@ -10,7 +10,7 @@ def compute_timefreq(data, baseline=True, mean=True):
         tf = timefrequency(
             data,
             'spectrogram',
-            duration=0.6,
+            duration=P['spectrum']['window_size'],
             overlap=0.9,
             taper='dpss',
             halfbandwidth=5)

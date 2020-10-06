@@ -83,7 +83,7 @@ def to_html(divs, filename):
      </html>
     '''.format(plotlyjs=get_plotlyjs(), div='\n'.join(divs))
 
-    with open(filename, 'w') as f:
+    with filename.open('w') as f:
         f.write(html)
 
 

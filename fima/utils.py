@@ -139,17 +139,3 @@ def create_bool(events, to_select):
         if evt.startswith(to_select):
             i_finger[i] = True
     return i_finger
-
-
-def get_color_symbol(names):
-    color = []
-    symbol_data = []
-    symbol_model = []
-
-    for m in names:
-        finger, action = m.split()
-        color.append(FINGER_COLOR[finger])
-        symbol_data.append(MOVEMENT_SYMBOL_DATA[action])
-        symbol_model.append(MOVEMENT_SYMBOL_MODEL[action])
-
-    return color, symbol_data, symbol_model
