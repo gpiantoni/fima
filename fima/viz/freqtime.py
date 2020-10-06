@@ -3,6 +3,7 @@ import plotly.graph_objs as go
 from ..viz.fitting import get_color_symbol
 from ..utils import group_per_condition
 from .utils import to_div
+from ..parameters import P
 
 
 def plot_conditions_per_chan(tf_cht, names, statistics='sem'):
@@ -96,7 +97,7 @@ def plot_per_chan(y, s, chan, names):
                 ),
             yaxis=dict(
                 title='change from baseline',
-                range=(-6, 6),
+                range=(-1 * P['viz']['tfr']['max'], P['viz']['tfr']['max'])
                 ),
             ),
     )
