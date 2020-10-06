@@ -49,7 +49,7 @@ P = dict(
         window_size=0.3,
         baseline=dict(
             time=(-0.5, -0.1),
-            type='zscore',  # dB or zscore or percent or relchange
+            type='dB',  # dB or zscore or percent or relchange
             ),
         select=dict(
             freq=(60, 200),  # (60, 200)
@@ -70,6 +70,7 @@ SUBJECTS = {
     'itens': ['1', '2', '3'],
     'lemmer': ['1', '2'],
     'ommen': ['1', '2'],
+    'veere': ['1', ],
     'vledder': ['1', '2', '3'],
     'warmond': ['1', '2'],
     'som705': ['01', ],
