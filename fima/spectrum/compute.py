@@ -11,7 +11,7 @@ def compute_timefreq(data, baseline=True, mean=True):
             data,
             'spectrogram',
             duration=P['spectrum']['window_size'],
-            overlap=0.9,
+            step=0.01,
             taper='dpss',
             halfbandwidth=5)
     else:

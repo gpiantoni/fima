@@ -65,7 +65,7 @@ P = dict(
     viz=dict(
         colorscale=&#39;Jet&#39;,
         tfr=dict(
-            max=5,
+            max=10,
             ),
         tfr_mean=dict(
             max=3,
@@ -73,9 +73,10 @@ P = dict(
         ),
     spectrum=dict(
         method=&#39;spectrogram&#39;,  # spectrogram or morlet
+        window_size=0.3,
         baseline=dict(
             time=(-0.5, -0.1),
-            type=&#39;dB&#39;,
+            type=&#39;dB&#39;,  # dB or zscore or percent or relchange
             ),
         select=dict(
             freq=(60, 200),  # (60, 200)
@@ -96,6 +97,7 @@ SUBJECTS = {
     &#39;itens&#39;: [&#39;1&#39;, &#39;2&#39;, &#39;3&#39;],
     &#39;lemmer&#39;: [&#39;1&#39;, &#39;2&#39;],
     &#39;ommen&#39;: [&#39;1&#39;, &#39;2&#39;],
+    &#39;veere&#39;: [&#39;1&#39;, ],
     &#39;vledder&#39;: [&#39;1&#39;, &#39;2&#39;, &#39;3&#39;],
     &#39;warmond&#39;: [&#39;1&#39;, &#39;2&#39;],
     &#39;som705&#39;: [&#39;01&#39;, ],

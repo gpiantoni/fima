@@ -29,6 +29,7 @@
 from ..viz.fitting import get_color_symbol
 from ..utils import group_per_condition
 from .utils import to_div
+from ..parameters import P
 
 
 def plot_conditions_per_chan(tf_cht, names, statistics=&#39;sem&#39;):
@@ -122,7 +123,7 @@ def plot_per_chan(y, s, chan, names):
                 ),
             yaxis=dict(
                 title=&#39;change from baseline&#39;,
-                range=(-6, 6),
+                range=(-1 * P[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;], P[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;])
                 ),
             ),
     )
@@ -259,7 +260,7 @@ def plot_per_chan(y, s, chan, names):
                 ),
             yaxis=dict(
                 title=&#39;change from baseline&#39;,
-                range=(-6, 6),
+                range=(-1 * P[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;], P[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;])
                 ),
             ),
     )

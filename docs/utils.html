@@ -165,21 +165,7 @@ def create_bool(events, to_select):
     for i, evt in enumerate(events):
         if evt.startswith(to_select):
             i_finger[i] = True
-    return i_finger
-
-
-def get_color_symbol(names):
-    color = []
-    symbol_data = []
-    symbol_model = []
-
-    for m in names:
-        finger, action = m.split()
-        color.append(FINGER_COLOR[finger])
-        symbol_data.append(MOVEMENT_SYMBOL_DATA[action])
-        symbol_model.append(MOVEMENT_SYMBOL_MODEL[action])
-
-    return color, symbol_data, symbol_model</code></pre>
+    return i_finger</code></pre>
 </details>
 </section>
 <section>
@@ -326,29 +312,6 @@ point</p>
     return f&#39;rgb{str(tuple(val_color_0255))}&#39;</code></pre>
 </details>
 </dd>
-<dt id="fima.utils.get_color_symbol"><code class="name flex">
-<span>def <span class="ident">get_color_symbol</span></span>(<span>names)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_color_symbol(names):
-    color = []
-    symbol_data = []
-    symbol_model = []
-
-    for m in names:
-        finger, action = m.split()
-        color.append(FINGER_COLOR[finger])
-        symbol_data.append(MOVEMENT_SYMBOL_DATA[action])
-        symbol_model.append(MOVEMENT_SYMBOL_MODEL[action])
-
-    return color, symbol_data, symbol_model</code></pre>
-</details>
-</dd>
 <dt id="fima.utils.group_per_condition"><code class="name flex">
 <span>def <span class="ident">group_per_condition</span></span>(<span>data, names, operator='mean')</span>
 </code></dt>
@@ -452,11 +415,10 @@ point</p>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="two-column">
+<ul class="">
 <li><code><a title="fima.utils.create_bool" href="#fima.utils.create_bool">create_bool</a></code></li>
 <li><code><a title="fima.utils.find_max_point" href="#fima.utils.find_max_point">find_max_point</a></code></li>
 <li><code><a title="fima.utils.get_color_for_val" href="#fima.utils.get_color_for_val">get_color_for_val</a></code></li>
-<li><code><a title="fima.utils.get_color_symbol" href="#fima.utils.get_color_symbol">get_color_symbol</a></code></li>
 <li><code><a title="fima.utils.group_per_condition" href="#fima.utils.group_per_condition">group_per_condition</a></code></li>
 <li><code><a title="fima.utils.make_name" href="#fima.utils.make_name">make_name</a></code></li>
 </ul>

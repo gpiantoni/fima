@@ -36,7 +36,7 @@ def compute_timefreq(data, baseline=True, mean=True):
         tf = timefrequency(
             data,
             &#39;spectrogram&#39;,
-            duration=0.6,
+            duration=P[&#39;spectrum&#39;][&#39;window_size&#39;],
             overlap=0.9,
             taper=&#39;dpss&#39;,
             halfbandwidth=5)
@@ -117,7 +117,7 @@ def get_chan(tf, freq=None, time=None):
         tf = timefrequency(
             data,
             &#39;spectrogram&#39;,
-            duration=0.6,
+            duration=P[&#39;spectrum&#39;][&#39;window_size&#39;],
             overlap=0.9,
             taper=&#39;dpss&#39;,
             halfbandwidth=5)

@@ -109,7 +109,7 @@ def to_html(divs, filename):
      &lt;/html&gt;
     &#39;&#39;&#39;.format(plotlyjs=get_plotlyjs(), div=&#39;\n&#39;.join(divs))
 
-    with open(filename, &#39;w&#39;) as f:
+    with filename.open(&#39;w&#39;) as f:
         f.write(html)
 
 
@@ -271,7 +271,7 @@ it exists</dd>
      &lt;/html&gt;
     &#39;&#39;&#39;.format(plotlyjs=get_plotlyjs(), div=&#39;\n&#39;.join(divs))
 
-    with open(filename, &#39;w&#39;) as f:
+    with filename.open(&#39;w&#39;) as f:
         f.write(html)</code></pre>
 </details>
 </dd>
