@@ -49,7 +49,8 @@ P = dict(
         window_size=0.3,
         baseline=dict(
             time=(-0.5, -0.1),
-            type='dB',  # dB or zscore or percent or relchange
+            common=True,  # use the same, common baseline for all the trials
+            type='zscore',  # dB or zscore or percent or relchange
             ),
         select=dict(
             freq=(60, 200),  # (60, 200)

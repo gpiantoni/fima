@@ -1,4 +1,4 @@
-from numpy import arange, zeros
+from numpy import arange, zeros, mean, std, log10, moveaxis
 from wonambi.trans import apply_baseline, timefrequency, concatenate, math, select
 
 from ..parameters import P
@@ -28,15 +28,22 @@ def compute_timefreq(data, baseline=True, mean=True):
         t_bool[20:-20:t_step] = True
         tf = select(tf, time=t_bool)
 
-    if baseline:
-        tf = apply_baseline(
-            tf,
-            time=P['spectrum']['baseline']['time'],
-            baseline=P['spectrum']['baseline']['type'])
-
     tf = concatenate(
         tf,
         axis='trial')
+
+    if baseline:
+        if P['spectrum']['baseline']['common']:
+            tf = apply_common_baseline(
+                tf,
+                time=P['spectrum']['baseline']['time'],
+                baseline=P['spectrum']['baseline']['type'])
+
+        else:
+            tf = apply_baseline(
+                tf,
+                time=P['spectrum']['baseline']['time'],
+                baseline=P['spectrum']['baseline']['type'])
 
     if mean:
         tf = math(
@@ -67,3 +74,23 @@ def get_chan(tf, freq=None, time=None):
             ),
         operator_name='mean',
         axis='time')
+
+
+def apply_common_baseline(tf, time, baseline):
+    """Concatenate all the baseline periods for all the conditions. Keep it
+    separate for each channel and each frequency"""
+
+    tf_time = select(tf, time=time)
+
+    X = moveaxis(tf_time.data[0], 1, 2)
+    X = X.reshape((X.shape[0], X.shape[1], -1))
+
+    bline_mean = mean(X, axis=-1)
+    bline_std = std(X, axis=-1)
+
+    if baseline == 'zscore':
+        tf.data[0] = (tf.data[0] - bline_mean[:, None, :, None]) / bline_std[:, None, :, None]
+    elif baseline == 'dB':
+        tf.data[0] = 10 * log10(tf.data[0] / bline_mean[:, None, :, None])
+
+    return tf
