@@ -16,7 +16,7 @@ def plot_tfr_time(tf_time, highlight=None):
                     width=0.5,
                 ),
                 showlegend=False,
-                hovertemplate="time: %{x:.3f}s<br />dB: %{y:.3f}",
+                hovertemplate='time: %{x:.3f}s<br />value: %{y:.3f}',
             ))
 
     fig = go.Figure(
@@ -26,7 +26,7 @@ def plot_tfr_time(tf_time, highlight=None):
                 title='time (s)',
             ),
             yaxis=dict(
-                title='change from baseline (dB)',
+                title='change from baseline ({})'.format(P['spectrum']['baseline']['type']),
                 range=(
                     -1 * P['viz']['tfr_mean']['max'],
                     P['viz']['tfr_mean']['max'],

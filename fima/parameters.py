@@ -41,7 +41,7 @@ P = dict(
             max=10,
             ),
         tfr_mean=dict(
-            max=3,
+            max=5,
             ),
         ),
     spectrum=dict(
@@ -53,7 +53,7 @@ P = dict(
             type='zscore',  # dB or zscore or percent or relchange
             ),
         select=dict(
-            freq=(60, 200),  # (60, 200)
+            freq=(100, 140),  # (60, 200)
             timeinterval=0.3,  # fima/utils.py
             ),
         ),
