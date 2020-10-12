@@ -35,6 +35,13 @@ P = dict(
             n_neighbors=20,
             ),
         ),
+    align=dict(
+        time=(0, 1),
+        threshold=dict(
+            low=0.5,
+            high=3,
+            ),
+        ),
     viz=dict(
         colorscale='Jet',
         tfr=dict(
