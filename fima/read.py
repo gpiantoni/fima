@@ -1,6 +1,7 @@
 """Read the data, based on event type and onset time"""
 from numpy import genfromtxt, isin, isnan
 from bidso.objects import Electrodes
+from wonambi.attr import Freesurfer
 
 from .preproc import read_data
 from .dataglove.read_dataglove import read_physio
@@ -52,6 +53,7 @@ def load(what, subject, run=None, acq=None, event_type=None):
       - 'movements' returns: ndarray
       - 'electrodes'
       - 'surface'
+      - 'freesurfer'
 
     EVENT_TYPE:
       - cues : all cues (to open and close)
@@ -81,7 +83,7 @@ def load(what, subject, run=None, acq=None, event_type=None):
         pattern = f'sub-{subject}_*_acq-{acq}_run-{run}_electrodes.tsv'
         folder = BIDS_DIR
 
-    elif what == 'surface':
+    elif what in ('surface', 'freesurfer'):
         pattern = subject
         folder = FREESURFER_DIR
 
@@ -124,6 +126,9 @@ def load(what, subject, run=None, acq=None, event_type=None):
         elec = load('electrodes', subject, run, acq)
         right_or_left = (elec['x'] > 0).sum() / elec.shape[0]
         return read_surf(filename, right_or_left)
+
+    elif what == 'freesurfer':
+        return Freesurfer(filename)
 
     elif what == 'movements':
         dtypes = [

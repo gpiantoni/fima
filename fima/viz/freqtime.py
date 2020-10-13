@@ -1,12 +1,28 @@
 import plotly.graph_objs as go
 
+from wonambi.attr import Channels
+from wonambi.attr.chan import assign_region_to_channels
+from numpy import c_
+
 from ..viz.fitting import get_color_symbol
 from ..utils import group_per_condition
 from .utils import to_div
 from ..parameters import P
 
 
-def plot_conditions_per_chan(tf_cht, names, statistics='sem'):
+def _compute_regions(fs, elec):
+    chans = Channels(elec['name'], c_[elec['x'], elec['y'], elec['z']])
+    regions = assign_region_to_channels(chans, fs, parc_type='aparc.a2009s')
+    return regions
+
+
+def _get_region(regions, label):
+    for chan in regions.chan:
+        if chan.label == label:
+            return chan.attr['region']
+
+
+def plot_conditions_per_chan(tf_cht, names, statistics='sem', fs=None, elec=None):
     """Plot all the conditions for each channel
 
     Parameters
@@ -26,12 +42,20 @@ def plot_conditions_per_chan(tf_cht, names, statistics='sem'):
     data_m, events = group_per_condition(tf_cht, names, 'mean')
     data_sd, events = group_per_condition(tf_cht, names, statistics)  # you can also use sem
 
+    if elec is not None and fs is not None:
+        regions = _compute_regions(fs, elec)
+
     divs = []
 
     for chan in tf_cht.chan[0]:
         y = data_m(trial=0, chan=chan)
         s = data_sd(trial=0, chan=chan)
         fig = plot_per_chan(y, s, chan, names)
+
+        if elec is not None and fs is not None:
+            region = _get_region(regions, chan)
+            fig.update_layout(title=f'{chan} ({region})')
+
         divs.append(to_div(fig))
 
     return divs

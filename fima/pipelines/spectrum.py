@@ -55,9 +55,11 @@ def pipeline_spectrum(subject, run, event_type='cues'):
 
     try:
         pial = load('surface', subject, run)
+        fs = load('freesurfer', subject, run)
     except Exception:
         print(f'No surfaces for {subject}')
         pial = None
+        fs = None
 
     tf = compute_timefreq(data, mean=False)
     tf_m = math(tf, operator_name='mean', axis='trial_axis')
@@ -83,7 +85,7 @@ def pipeline_spectrum(subject, run, event_type='cues'):
     html_file = SPECTRUM_DIR / event_type / f'{subject}_run-{run}_{event_type}_allchan.html'
 
     tf_cht = get_chantime(tf)
-    divs = plot_conditions_per_chan(tf_cht, names)
+    divs = plot_conditions_per_chan(tf_cht, names, fs=fs, elec=elec)
     to_html(divs, html_file)
 
 
