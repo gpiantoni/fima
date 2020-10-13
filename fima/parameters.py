@@ -27,6 +27,10 @@ FINGERCORREACH_DIR = RESULTS_DIR / 'finger_correach'
 FITTING_DIR = RESULTS_DIR / 'fitting'
 
 P = dict(
+    read=dict(
+        pre=2,
+        post=2,
+        ),
     data_quality=dict(
         histogram=dict(
             contamination=0.04,
@@ -36,7 +40,7 @@ P = dict(
             ),
         ),
     align=dict(
-        time=(0, 1),
+        time=(0, 1.5),
         threshold=dict(
             low=0.5,
             high=3,
@@ -55,7 +59,7 @@ P = dict(
         method='spectrogram',  # spectrogram or morlet
         window_size=0.3,
         baseline=dict(
-            time=(-0.5, -0.1),
+            time=(-1, -0.5),
             common=True,  # use the same, common baseline for all the trials
             type='zscore',  # dB or zscore or percent or relchange
             ),

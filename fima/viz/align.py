@@ -37,8 +37,6 @@ def plot_single_trials_per_cond(t, X, chan=''):
             go.Scatter(
                 x=t,
                 y=X[:, i_trl],
-                line=dict(
-                    color='black'),
             )
         )
 
@@ -55,8 +53,8 @@ def plot_single_trials_per_cond(t, X, chan=''):
             yaxis=dict(
                 title='change from baseline ({})'.format(P['spectrum']['baseline']['type']),
                 range=(
-                    -1 * P['viz']['tfr_mean']['max'],
-                    P['viz']['tfr_mean']['max'],
+                    -1 * P['viz']['tfr']['max'],
+                    P['viz']['tfr']['max'],
                     ),
             ))
         )

@@ -6,6 +6,7 @@ from .preproc import read_data
 from .dataglove.read_dataglove import read_physio
 from .parameters import BIDS_DIR, SCRIPTS_DIR, FREESURFER_DIR
 from .preproc.elec import read_surf
+from .align.maxmin import main_func
 
 
 FINGERS_OPEN = [
@@ -45,7 +46,7 @@ FINGERS_EXTENSION = [
 def load(what, subject, run=None, acq=None, event_type=None):
     """
     WHAT:
-      - 'data' returns: ChanTime, event_names
+      - 'data', 'aligned' returns: ChanTime, event_names
       - 'events' returns: ndarray
       - 'dataglove' returns: ndarray
       - 'movements' returns: ndarray
@@ -68,7 +69,7 @@ def load(what, subject, run=None, acq=None, event_type=None):
     if acq is None:
         acq = '*'
 
-    if what == 'data':
+    if what in ('data', 'aligned'):
         pattern = f'sub-{subject}_*_acq-{acq}_run-{run}_ieeg.eeg'
         folder = BIDS_DIR
 
@@ -103,8 +104,13 @@ def load(what, subject, run=None, acq=None, event_type=None):
         raise ValueError('You need to specify more parameters')
     filename = found[0]
 
-    if what == 'data':
+    if what in ('data', 'aligned'):
         events, onsets = select_events(subject, run, event_type)
+        if what == 'aligned':
+            data = read_data(filename, event_onsets=onsets)
+            offsets = main_func(data, events)
+            onsets = onsets + offsets['t_peak']
+
         return read_data(filename, event_onsets=onsets), events
 
     elif what == 'dataglove':

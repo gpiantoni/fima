@@ -8,12 +8,18 @@ from numpy import (
     )
 from wonambi.trans import select
 
+from ..spectrum.compute import compute_timefreq, get_chantime
 from ..utils import create_bool
 from ..parameters import EVENTS, P
 
 
-def main_func(data):
-    data = select(data, time=P['align']['time'])
+def main_func(data, names):
+
+    tf = compute_timefreq(data, baseline=True, mean=False)
+    tf = get_chantime(tf)
+    tf = select(tf, time=P['align']['time'])
+
+    return find_max_min(tf, names)
 
 
 def find_max_min(data, names):
@@ -44,7 +50,7 @@ def find_max_min(data, names):
             for i_trl in range(n_trl):
                 i_max = indices_max[i_chan, i_trl]
                 bool_threshold = dat[i_chan, :i_max, i_trl] <= P['align']['threshold']['low']
-                if i_max == 0 or bool_threshold.all() is False:
+                if i_max == 0 or not bool_threshold.any():
                     timings['peak'][i_chan, i_trl] = NaN
                     indices_min[i_chan, i_trl] = 0
                 else:
