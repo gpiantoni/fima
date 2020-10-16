@@ -54,13 +54,28 @@ def compute_timefreq(data, baseline=True, mean=True):
     return tf
 
 
-def get_chantime(tf, freq=None):
+def get_chantime(tf, freq=None, baseline=False):
     if freq is None:
         freq = P['spectrum']['select']['freq']
-    return math(
+    out = math(
         select(tf, freq=freq),
         operator_name='mean',
         axis='freq')
+
+    if baseline:
+        if P['spectrum']['baseline']['common']:
+            out = apply_common_baseline(
+                out,
+                time=P['spectrum']['baseline']['time'],
+                baseline=P['spectrum']['baseline']['type'])
+
+        else:
+            out = apply_baseline(
+                out,
+                time=P['spectrum']['baseline']['time'],
+                baseline=P['spectrum']['baseline']['type'])
+
+    return out
 
 
 def get_chan(tf, freq=None, time=None):
@@ -88,9 +103,16 @@ def apply_common_baseline(tf, time, baseline):
     bline_mean = mean(X, axis=-1)
     bline_std = std(X, axis=-1)
 
+    if len(tf.list_of_axes) == 4:
+        bline_m = bline_mean[:, None, :, None]
+        bline_sd = bline_std[:, None, :, None]
+    else:
+        bline_m = bline_mean[:, None, :]
+        bline_sd = bline_std[:, None, :]
+
     if baseline == 'zscore':
-        tf.data[0] = (tf.data[0] - bline_mean[:, None, :, None]) / bline_std[:, None, :, None]
+        tf.data[0] = (tf.data[0] - bline_m) / bline_sd
     elif baseline == 'dB':
-        tf.data[0] = 10 * log10(tf.data[0] / bline_mean[:, None, :, None])
+        tf.data[0] = 10 * log10(tf.data[0] / bline_m)
 
     return tf

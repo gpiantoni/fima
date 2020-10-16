@@ -18,6 +18,7 @@ FREESURFER_DIR = PROJ_DIR / 'freesurfer/'
 
 RESULTS_DIR = PROJ_DIR / 'results'
 DATAGLOVE_DIR = RESULTS_DIR / 'dataglove'
+CONTINUOUS_DIR = RESULTS_DIR / 'continuous'
 OVERVIEW_DIR = RESULTS_DIR / 'data_quality'
 SPECTRUM_DIR = RESULTS_DIR / 'spectrum'
 FINGERS_DIR = RESULTS_DIR / 'fingers'
@@ -56,7 +57,7 @@ P = dict(
             ),
         ),
     spectrum=dict(
-        method='morlet',  # spectrogram or morlet
+        method='spectrogram',  # spectrogram or morlet
         window_size=0.3,
         baseline=dict(
             time=(-1, -0.5),

@@ -47,7 +47,9 @@ FINGERS_EXTENSION = [
 def load(what, subject, run=None, acq=None, event_type=None):
     """
     WHAT:
-      - 'data', 'aligned' returns: ChanTime, event_names
+      - 'continuous' returns: ChanTime, event_names, events_onsets
+      - 'data' returns: ChanTime, event_names
+      - 'aligned' returns: ChanTime, event_names
       - 'events' returns: ndarray
       - 'dataglove' returns: ndarray
       - 'movements' returns: ndarray
@@ -71,7 +73,7 @@ def load(what, subject, run=None, acq=None, event_type=None):
     if acq is None:
         acq = '*'
 
-    if what in ('data', 'aligned'):
+    if what in ('continuous', 'data', 'aligned'):
         pattern = f'sub-{subject}_*_acq-{acq}_run-{run}_ieeg.eeg'
         folder = BIDS_DIR
 
@@ -106,14 +108,20 @@ def load(what, subject, run=None, acq=None, event_type=None):
         raise ValueError('You need to specify more parameters')
     filename = found[0]
 
-    if what in ('data', 'aligned'):
+    if what in ('continuous', 'data', 'aligned'):
         events, onsets = select_events(subject, run, event_type)
+
+        if what == 'continuous':
+            data = read_data(filename, event_onsets=onsets, continuous=True)
+            return data, events, onsets
+
         if what == 'aligned':
             data = read_data(filename, event_onsets=onsets)
             offsets = main_func(data, events)
             onsets = onsets + offsets['t_peak']
 
-        return read_data(filename, event_onsets=onsets), events
+        data = read_data(filename, event_onsets=onsets)
+        return data, events
 
     elif what == 'dataglove':
         return read_physio(filename)
