@@ -24,10 +24,11 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from numpy import arange, zeros, mean, std, log10, moveaxis
+<pre><code class="python">from numpy import arange, zeros
 from wonambi.trans import apply_baseline, timefrequency, concatenate, math, select
 
 from ..parameters import P
+from .baseline import apply_common_baseline
 
 
 def compute_timefreq(data, baseline=True, mean=True):
@@ -80,13 +81,28 @@ def compute_timefreq(data, baseline=True, mean=True):
     return tf
 
 
-def get_chantime(tf, freq=None):
+def get_chantime(tf, freq=None, baseline=False):
     if freq is None:
         freq = P[&#39;spectrum&#39;][&#39;select&#39;][&#39;freq&#39;]
-    return math(
+    out = math(
         select(tf, freq=freq),
         operator_name=&#39;mean&#39;,
         axis=&#39;freq&#39;)
+
+    if baseline:
+        if P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;common&#39;]:
+            out = apply_common_baseline(
+                out,
+                time=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;time&#39;],
+                baseline=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;])
+
+        else:
+            out = apply_baseline(
+                out,
+                time=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;time&#39;],
+                baseline=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;])
+
+    return out
 
 
 def get_chan(tf, freq=None, time=None):
@@ -99,27 +115,7 @@ def get_chan(tf, freq=None, time=None):
             time=time,
             ),
         operator_name=&#39;mean&#39;,
-        axis=&#39;time&#39;)
-
-
-def apply_common_baseline(tf, time, baseline):
-    &#34;&#34;&#34;Concatenate all the baseline periods for all the conditions. Keep it
-    separate for each channel and each frequency&#34;&#34;&#34;
-
-    tf_time = select(tf, time=time)
-
-    X = moveaxis(tf_time.data[0], 1, 2)
-    X = X.reshape((X.shape[0], X.shape[1], -1))
-
-    bline_mean = mean(X, axis=-1)
-    bline_std = std(X, axis=-1)
-
-    if baseline == &#39;zscore&#39;:
-        tf.data[0] = (tf.data[0] - bline_mean[:, None, :, None]) / bline_std[:, None, :, None]
-    elif baseline == &#39;dB&#39;:
-        tf.data[0] = 10 * log10(tf.data[0] / bline_mean[:, None, :, None])
-
-    return tf</code></pre>
+        axis=&#39;time&#39;)</code></pre>
 </details>
 </section>
 <section>
@@ -129,36 +125,6 @@ def apply_common_baseline(tf, time, baseline):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="fima.spectrum.compute.apply_common_baseline"><code class="name flex">
-<span>def <span class="ident">apply_common_baseline</span></span>(<span>tf, time, baseline)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Concatenate all the baseline periods for all the conditions. Keep it
-separate for each channel and each frequency</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def apply_common_baseline(tf, time, baseline):
-    &#34;&#34;&#34;Concatenate all the baseline periods for all the conditions. Keep it
-    separate for each channel and each frequency&#34;&#34;&#34;
-
-    tf_time = select(tf, time=time)
-
-    X = moveaxis(tf_time.data[0], 1, 2)
-    X = X.reshape((X.shape[0], X.shape[1], -1))
-
-    bline_mean = mean(X, axis=-1)
-    bline_std = std(X, axis=-1)
-
-    if baseline == &#39;zscore&#39;:
-        tf.data[0] = (tf.data[0] - bline_mean[:, None, :, None]) / bline_std[:, None, :, None]
-    elif baseline == &#39;dB&#39;:
-        tf.data[0] = 10 * log10(tf.data[0] / bline_mean[:, None, :, None])
-
-    return tf</code></pre>
-</details>
-</dd>
 <dt id="fima.spectrum.compute.compute_timefreq"><code class="name flex">
 <span>def <span class="ident">compute_timefreq</span></span>(<span>data, baseline=True, mean=True)</span>
 </code></dt>
@@ -241,7 +207,7 @@ separate for each channel and each frequency</p></div>
 </details>
 </dd>
 <dt id="fima.spectrum.compute.get_chantime"><code class="name flex">
-<span>def <span class="ident">get_chantime</span></span>(<span>tf, freq=None)</span>
+<span>def <span class="ident">get_chantime</span></span>(<span>tf, freq=None, baseline=False)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -249,13 +215,28 @@ separate for each channel and each frequency</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_chantime(tf, freq=None):
+<pre><code class="python">def get_chantime(tf, freq=None, baseline=False):
     if freq is None:
         freq = P[&#39;spectrum&#39;][&#39;select&#39;][&#39;freq&#39;]
-    return math(
+    out = math(
         select(tf, freq=freq),
         operator_name=&#39;mean&#39;,
-        axis=&#39;freq&#39;)</code></pre>
+        axis=&#39;freq&#39;)
+
+    if baseline:
+        if P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;common&#39;]:
+            out = apply_common_baseline(
+                out,
+                time=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;time&#39;],
+                baseline=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;])
+
+        else:
+            out = apply_baseline(
+                out,
+                time=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;time&#39;],
+                baseline=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;])
+
+    return out</code></pre>
 </details>
 </dd>
 </dl>
@@ -276,7 +257,6 @@ separate for each channel and each frequency</p></div>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="fima.spectrum.compute.apply_common_baseline" href="#fima.spectrum.compute.apply_common_baseline">apply_common_baseline</a></code></li>
 <li><code><a title="fima.spectrum.compute.compute_timefreq" href="#fima.spectrum.compute.compute_timefreq">compute_timefreq</a></code></li>
 <li><code><a title="fima.spectrum.compute.get_chan" href="#fima.spectrum.compute.get_chan">get_chan</a></code></li>
 <li><code><a title="fima.spectrum.compute.get_chantime" href="#fima.spectrum.compute.get_chantime">get_chantime</a></code></li>

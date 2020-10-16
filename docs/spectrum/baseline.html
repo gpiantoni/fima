@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.parameters API documentation</title>
-<meta name="description" content="General parameters useful for all the functions" />
+<title>fima.spectrum.baseline API documentation</title>
+<meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -17,135 +17,63 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.parameters</code></h1>
+<h1 class="title">Module <code>fima.spectrum.baseline</code></h1>
 </header>
 <section id="section-intro">
-<p>General parameters useful for all the functions</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;General parameters useful for all the functions&#34;&#34;&#34;
+<pre><code class="python">from numpy import mean, std, log10, moveaxis
+from wonambi.trans import concatenate, select
 
-from pathlib import Path
-from platform import node
-from .utils import get_color_for_val
-
-
-NYU_DIR = Path(&#39;/Fridge/R01_BAIR/data/nyu/scitran/bair/nyu&#39;)
-
-if node() == &#39;archxps&#39;:
-    PROJ_DIR = Path(&#39;/home/gio/projects/finger_mapping&#39;)
-else:
-    PROJ_DIR = Path(&#39;/Fridge/users/giovanni/projects/finger_mapping&#39;)
-
-SCRIPTS_DIR = PROJ_DIR / &#39;scripts&#39;
-BIDS_DIR = PROJ_DIR / &#39;subjects&#39;
-FREESURFER_DIR = PROJ_DIR / &#39;freesurfer/&#39;
-
-RESULTS_DIR = PROJ_DIR / &#39;results&#39;
-DATAGLOVE_DIR = RESULTS_DIR / &#39;dataglove&#39;
-CONTINUOUS_DIR = RESULTS_DIR / &#39;continuous&#39;
-OVERVIEW_DIR = RESULTS_DIR / &#39;data_quality&#39;
-SPECTRUM_DIR = RESULTS_DIR / &#39;spectrum&#39;
-FINGERS_DIR = RESULTS_DIR / &#39;fingers&#39;
-FINGERBARS_DIR = RESULTS_DIR / &#39;finger_bars&#39;
-FINGERCORR_DIR = RESULTS_DIR / &#39;finger_corr&#39;
-FINGERCORREACH_DIR = RESULTS_DIR / &#39;finger_correach&#39;
-FITTING_DIR = RESULTS_DIR / &#39;fitting&#39;
-
-P = dict(
-    read=dict(
-        pre=2,
-        post=2,
-        ),
-    data_quality=dict(
-        histogram=dict(
-            contamination=0.04,
-            ),
-        spectrum=dict(
-            n_neighbors=20,
-            ),
-        ),
-    align=dict(
-        time=(0, 1.5),
-        threshold=dict(
-            low=0.5,
-            high=3,
-            ),
-        ),
-    viz=dict(
-        colorscale=&#39;Jet&#39;,
-        tfr=dict(
-            max=10,
-            ),
-        tfr_mean=dict(
-            max=5,
-            ),
-        ),
-    spectrum=dict(
-        method=&#39;spectrogram&#39;,  # spectrogram or morlet
-        window_size=0.3,
-        baseline=dict(
-            time=(-1, -0.5),
-            common=True,  # use the same, common baseline for all the trials
-            type=&#39;zscore&#39;,  # dB or zscore or percent or relchange
-            ),
-        select=dict(
-            freq=(100, 140),  # (60, 200)
-            timeinterval=0.3,  # fima/utils.py
-            ),
-        ),
-    )
+from ..parameters import P
 
 
-SUBJECTS = {
-    &#39;drouwen&#39;: [&#39;1&#39;, ],
-    &#39;duiven&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;franeker&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;heek&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;intraop008&#39;: [&#39;1&#39;, ],
-    &#39;intraop013&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;intraop016&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;itens&#39;: [&#39;1&#39;, &#39;2&#39;, &#39;3&#39;],
-    &#39;lemmer&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;ommen&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;veere&#39;: [&#39;1&#39;, ],
-    &#39;vledder&#39;: [&#39;1&#39;, &#39;2&#39;, &#39;3&#39;],
-    &#39;warmond&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;som705&#39;: [&#39;01&#39;, ],
-    }
+def apply_baseline_to_continuous(tf, onsets, baseline=&#39;zscore&#39;):
 
-MOVEMENT_SYMBOL_DATA = {
-    &#39;open&#39;: &#39;circle-open&#39;,
-    &#39;close&#39;: &#39;circle&#39;,
-    }
+    v = []
+    for on in onsets:
+        x = select(tf, time=on + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;time&#39;])
+        v.append(x.data[0])
 
-MOVEMENT_SYMBOL_MODEL = {
-    &#39;open&#39;: &#39;diamond-open&#39;,
-    &#39;close&#39;: &#39;diamond&#39;,
-    }
+    A = concatenate(v, axis=1)
+    bline_m = A.mean(axis=0)
+    bline_sd = A.std(axis=0)
 
-MOVEMENT_LINE = {
-    &#39;open&#39;: &#39;dot&#39;,
-    &#39;close&#39;: &#39;solid&#39;,
-    }
+    if baseline == &#39;zscore&#39;:
+        tf.data[0] = (tf.data[0] - bline_m) / bline_sd
+    elif baseline == &#39;dB&#39;:
+        tf.data[0] = 10 * log10(tf.data[0] / bline_m)
 
-FINGER_COLOR = {
-    &#39;thumb&#39;: get_color_for_val(4, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;index&#39;: get_color_for_val(3, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;middle&#39;: get_color_for_val(2, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;ring&#39;: get_color_for_val(1, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;little&#39;: get_color_for_val(0, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-}
-
-FINGERS = list(FINGER_COLOR)
+    return tf
 
 
-EVENTS = []
-for action in MOVEMENT_LINE:
-    for f in FINGERS:
-        EVENTS.append(f&#39;{f} {action}&#39;)</code></pre>
+def apply_common_baseline(tf, time, baseline):
+    &#34;&#34;&#34;Concatenate all the baseline periods for all the conditions. Keep it
+    separate for each channel and each frequency&#34;&#34;&#34;
+
+    tf_time = select(tf, time=time)
+
+    X = moveaxis(tf_time.data[0], 1, 2)
+    X = X.reshape((X.shape[0], X.shape[1], -1))
+
+    bline_mean = mean(X, axis=-1)
+    bline_std = std(X, axis=-1)
+
+    if len(tf.list_of_axes) == 4:
+        bline_m = bline_mean[:, None, :, None]
+        bline_sd = bline_std[:, None, :, None]
+    else:
+        bline_m = bline_mean[:, None, :]
+        bline_sd = bline_std[:, None, :]
+
+    if baseline == &#39;zscore&#39;:
+        tf.data[0] = (tf.data[0] - bline_m) / bline_sd
+    elif baseline == &#39;dB&#39;:
+        tf.data[0] = 10 * log10(tf.data[0] / bline_m)
+
+    return tf</code></pre>
 </details>
 </section>
 <section>
@@ -153,6 +81,74 @@ for action in MOVEMENT_LINE:
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="fima.spectrum.baseline.apply_baseline_to_continuous"><code class="name flex">
+<span>def <span class="ident">apply_baseline_to_continuous</span></span>(<span>tf, onsets, baseline='zscore')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def apply_baseline_to_continuous(tf, onsets, baseline=&#39;zscore&#39;):
+
+    v = []
+    for on in onsets:
+        x = select(tf, time=on + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;time&#39;])
+        v.append(x.data[0])
+
+    A = concatenate(v, axis=1)
+    bline_m = A.mean(axis=0)
+    bline_sd = A.std(axis=0)
+
+    if baseline == &#39;zscore&#39;:
+        tf.data[0] = (tf.data[0] - bline_m) / bline_sd
+    elif baseline == &#39;dB&#39;:
+        tf.data[0] = 10 * log10(tf.data[0] / bline_m)
+
+    return tf</code></pre>
+</details>
+</dd>
+<dt id="fima.spectrum.baseline.apply_common_baseline"><code class="name flex">
+<span>def <span class="ident">apply_common_baseline</span></span>(<span>tf, time, baseline)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Concatenate all the baseline periods for all the conditions. Keep it
+separate for each channel and each frequency</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def apply_common_baseline(tf, time, baseline):
+    &#34;&#34;&#34;Concatenate all the baseline periods for all the conditions. Keep it
+    separate for each channel and each frequency&#34;&#34;&#34;
+
+    tf_time = select(tf, time=time)
+
+    X = moveaxis(tf_time.data[0], 1, 2)
+    X = X.reshape((X.shape[0], X.shape[1], -1))
+
+    bline_mean = mean(X, axis=-1)
+    bline_std = std(X, axis=-1)
+
+    if len(tf.list_of_axes) == 4:
+        bline_m = bline_mean[:, None, :, None]
+        bline_sd = bline_std[:, None, :, None]
+    else:
+        bline_m = bline_mean[:, None, :]
+        bline_sd = bline_std[:, None, :]
+
+    if baseline == &#39;zscore&#39;:
+        tf.data[0] = (tf.data[0] - bline_m) / bline_sd
+    elif baseline == &#39;dB&#39;:
+        tf.data[0] = 10 * log10(tf.data[0] / bline_m)
+
+    return tf</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -165,7 +161,13 @@ for action in MOVEMENT_LINE:
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="fima" href="index.html">fima</a></code></li>
+<li><code><a title="fima.spectrum" href="index.html">fima.spectrum</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="fima.spectrum.baseline.apply_baseline_to_continuous" href="#fima.spectrum.baseline.apply_baseline_to_continuous">apply_baseline_to_continuous</a></code></li>
+<li><code><a title="fima.spectrum.baseline.apply_common_baseline" href="#fima.spectrum.baseline.apply_common_baseline">apply_common_baseline</a></code></li>
 </ul>
 </li>
 </ul>

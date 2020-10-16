@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.parameters API documentation</title>
-<meta name="description" content="General parameters useful for all the functions" />
+<title>fima.pipelines.continuous API documentation</title>
+<meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -17,135 +17,58 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.parameters</code></h1>
+<h1 class="title">Module <code>fima.pipelines.continuous</code></h1>
 </header>
 <section id="section-intro">
-<p>General parameters useful for all the functions</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;General parameters useful for all the functions&#34;&#34;&#34;
-
-from pathlib import Path
-from platform import node
-from .utils import get_color_for_val
-
-
-NYU_DIR = Path(&#39;/Fridge/R01_BAIR/data/nyu/scitran/bair/nyu&#39;)
-
-if node() == &#39;archxps&#39;:
-    PROJ_DIR = Path(&#39;/home/gio/projects/finger_mapping&#39;)
-else:
-    PROJ_DIR = Path(&#39;/Fridge/users/giovanni/projects/finger_mapping&#39;)
-
-SCRIPTS_DIR = PROJ_DIR / &#39;scripts&#39;
-BIDS_DIR = PROJ_DIR / &#39;subjects&#39;
-FREESURFER_DIR = PROJ_DIR / &#39;freesurfer/&#39;
-
-RESULTS_DIR = PROJ_DIR / &#39;results&#39;
-DATAGLOVE_DIR = RESULTS_DIR / &#39;dataglove&#39;
-CONTINUOUS_DIR = RESULTS_DIR / &#39;continuous&#39;
-OVERVIEW_DIR = RESULTS_DIR / &#39;data_quality&#39;
-SPECTRUM_DIR = RESULTS_DIR / &#39;spectrum&#39;
-FINGERS_DIR = RESULTS_DIR / &#39;fingers&#39;
-FINGERBARS_DIR = RESULTS_DIR / &#39;finger_bars&#39;
-FINGERCORR_DIR = RESULTS_DIR / &#39;finger_corr&#39;
-FINGERCORREACH_DIR = RESULTS_DIR / &#39;finger_correach&#39;
-FITTING_DIR = RESULTS_DIR / &#39;fitting&#39;
-
-P = dict(
-    read=dict(
-        pre=2,
-        post=2,
-        ),
-    data_quality=dict(
-        histogram=dict(
-            contamination=0.04,
-            ),
-        spectrum=dict(
-            n_neighbors=20,
-            ),
-        ),
-    align=dict(
-        time=(0, 1.5),
-        threshold=dict(
-            low=0.5,
-            high=3,
-            ),
-        ),
-    viz=dict(
-        colorscale=&#39;Jet&#39;,
-        tfr=dict(
-            max=10,
-            ),
-        tfr_mean=dict(
-            max=5,
-            ),
-        ),
-    spectrum=dict(
-        method=&#39;spectrogram&#39;,  # spectrogram or morlet
-        window_size=0.3,
-        baseline=dict(
-            time=(-1, -0.5),
-            common=True,  # use the same, common baseline for all the trials
-            type=&#39;zscore&#39;,  # dB or zscore or percent or relchange
-            ),
-        select=dict(
-            freq=(100, 140),  # (60, 200)
-            timeinterval=0.3,  # fima/utils.py
-            ),
-        ),
-    )
+<pre><code class="python">from ..read import load
+from ..spectrum import compute_timefreq, get_chantime
+from ..spectrum.baseline import apply_baseline_to_continuous
+from ..parameters import CONTINUOUS_DIR, SUBJECTS, P
+from ..viz import to_html
+from ..viz.continuous import plot_continuous
 
 
-SUBJECTS = {
-    &#39;drouwen&#39;: [&#39;1&#39;, ],
-    &#39;duiven&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;franeker&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;heek&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;intraop008&#39;: [&#39;1&#39;, ],
-    &#39;intraop013&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;intraop016&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;itens&#39;: [&#39;1&#39;, &#39;2&#39;, &#39;3&#39;],
-    &#39;lemmer&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;ommen&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;veere&#39;: [&#39;1&#39;, ],
-    &#39;vledder&#39;: [&#39;1&#39;, &#39;2&#39;, &#39;3&#39;],
-    &#39;warmond&#39;: [&#39;1&#39;, &#39;2&#39;],
-    &#39;som705&#39;: [&#39;01&#39;, ],
-    }
-
-MOVEMENT_SYMBOL_DATA = {
-    &#39;open&#39;: &#39;circle-open&#39;,
-    &#39;close&#39;: &#39;circle&#39;,
-    }
-
-MOVEMENT_SYMBOL_MODEL = {
-    &#39;open&#39;: &#39;diamond-open&#39;,
-    &#39;close&#39;: &#39;diamond&#39;,
-    }
-
-MOVEMENT_LINE = {
-    &#39;open&#39;: &#39;dot&#39;,
-    &#39;close&#39;: &#39;solid&#39;,
-    }
-
-FINGER_COLOR = {
-    &#39;thumb&#39;: get_color_for_val(4, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;index&#39;: get_color_for_val(3, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;middle&#39;: get_color_for_val(2, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;ring&#39;: get_color_for_val(1, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;little&#39;: get_color_for_val(0, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-}
-
-FINGERS = list(FINGER_COLOR)
+def pipeline_continuous_all(event_type=&#39;cues&#39;, baseline=False):
+    for subject, runs in SUBJECTS.items():
+        for run in runs:
+            print(f&#39;{subject} / {run}&#39;)
+            try:
+                pipeline_continuous(subject, run, event_type)
+            except Exception as err:
+                print(err)
 
 
-EVENTS = []
-for action in MOVEMENT_LINE:
-    for f in FINGERS:
-        EVENTS.append(f&#39;{f} {action}&#39;)</code></pre>
+def pipeline_continuous(subject, run, event_type=&#39;cues&#39;, baseline=False):
+    &#34;&#34;&#34;Run pipeline to compute power spectrum on one participant, one run
+
+    Parameters
+    ----------
+    subject : str
+        subject code
+    run : str
+        number of the run of interest
+    event_type : str
+        event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
+        &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
+    &#34;&#34;&#34;
+    data, events, onsets = load(&#39;continuous&#39;, subject, run, event_type=event_type)
+
+    tf = compute_timefreq(data, baseline=False, mean=False)
+    tf_cht = get_chantime(tf)
+    if baseline:
+        tf_cht = apply_baseline_to_continuous(tf_cht, onsets)
+        baseline_name = &#39;_&#39; + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]
+    else:
+        baseline_name = &#39;&#39;
+
+    divs = plot_continuous(tf_cht, onsets, events)
+
+    html_file = CONTINUOUS_DIR / event_type / f&#39;{subject}_run-{run}_{event_type}{baseline_name}.html&#39;
+    to_html(divs, html_file)</code></pre>
 </details>
 </section>
 <section>
@@ -153,6 +76,76 @@ for action in MOVEMENT_LINE:
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="fima.pipelines.continuous.pipeline_continuous"><code class="name flex">
+<span>def <span class="ident">pipeline_continuous</span></span>(<span>subject, run, event_type='cues', baseline=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Run pipeline to compute power spectrum on one participant, one run</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>subject</code></strong> :&ensp;<code>str</code></dt>
+<dd>subject code</dd>
+<dt><strong><code>run</code></strong> :&ensp;<code>str</code></dt>
+<dd>number of the run of interest</dd>
+<dt><strong><code>event_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>event type used to identify the trials (one of 'cues', 'open', 'close',
+'movements', 'extension', 'flexion')</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pipeline_continuous(subject, run, event_type=&#39;cues&#39;, baseline=False):
+    &#34;&#34;&#34;Run pipeline to compute power spectrum on one participant, one run
+
+    Parameters
+    ----------
+    subject : str
+        subject code
+    run : str
+        number of the run of interest
+    event_type : str
+        event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
+        &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
+    &#34;&#34;&#34;
+    data, events, onsets = load(&#39;continuous&#39;, subject, run, event_type=event_type)
+
+    tf = compute_timefreq(data, baseline=False, mean=False)
+    tf_cht = get_chantime(tf)
+    if baseline:
+        tf_cht = apply_baseline_to_continuous(tf_cht, onsets)
+        baseline_name = &#39;_&#39; + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]
+    else:
+        baseline_name = &#39;&#39;
+
+    divs = plot_continuous(tf_cht, onsets, events)
+
+    html_file = CONTINUOUS_DIR / event_type / f&#39;{subject}_run-{run}_{event_type}{baseline_name}.html&#39;
+    to_html(divs, html_file)</code></pre>
+</details>
+</dd>
+<dt id="fima.pipelines.continuous.pipeline_continuous_all"><code class="name flex">
+<span>def <span class="ident">pipeline_continuous_all</span></span>(<span>event_type='cues', baseline=False)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pipeline_continuous_all(event_type=&#39;cues&#39;, baseline=False):
+    for subject, runs in SUBJECTS.items():
+        for run in runs:
+            print(f&#39;{subject} / {run}&#39;)
+            try:
+                pipeline_continuous(subject, run, event_type)
+            except Exception as err:
+                print(err)</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -165,7 +158,13 @@ for action in MOVEMENT_LINE:
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="fima" href="index.html">fima</a></code></li>
+<li><code><a title="fima.pipelines" href="index.html">fima.pipelines</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="fima.pipelines.continuous.pipeline_continuous" href="#fima.pipelines.continuous.pipeline_continuous">pipeline_continuous</a></code></li>
+<li><code><a title="fima.pipelines.continuous.pipeline_continuous_all" href="#fima.pipelines.continuous.pipeline_continuous_all">pipeline_continuous_all</a></code></li>
 </ul>
 </li>
 </ul>

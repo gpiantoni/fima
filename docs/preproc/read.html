@@ -30,7 +30,7 @@ from wonambi.trans import montage
 from ..parameters import P
 
 
-def read_data(filename, event_onsets):
+def read_data(filename, event_onsets, continuous=False):
 
     d = BIDSEEG(filename)
     chans = d.channels[
@@ -39,7 +39,13 @@ def read_data(filename, event_onsets):
          (d.channels[&#39;type&#39;] == &#39;SEEG&#39;))
         ]
 
-    data = d.read_data(events=event_onsets, pre=P[&#39;read&#39;][&#39;pre&#39;], post=P[&#39;read&#39;][&#39;post&#39;], chan=list(chans[&#39;name&#39;]))
+    if continuous:
+        data = d.read_data(
+            begtime=event_onsets[0] - P[&#39;read&#39;][&#39;pre&#39;],
+            endtime=event_onsets[-1] + P[&#39;read&#39;][&#39;post&#39;],
+            chan=list(chans[&#39;name&#39;]))
+    else:
+        data = d.read_data(events=event_onsets, pre=P[&#39;read&#39;][&#39;pre&#39;], post=P[&#39;read&#39;][&#39;post&#39;], chan=list(chans[&#39;name&#39;]))
     data = montage(data, ref_to_avg=True)
 
     return data</code></pre>
@@ -53,7 +59,7 @@ def read_data(filename, event_onsets):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="fima.preproc.read.read_data"><code class="name flex">
-<span>def <span class="ident">read_data</span></span>(<span>filename, event_onsets)</span>
+<span>def <span class="ident">read_data</span></span>(<span>filename, event_onsets, continuous=False)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -61,7 +67,7 @@ def read_data(filename, event_onsets):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def read_data(filename, event_onsets):
+<pre><code class="python">def read_data(filename, event_onsets, continuous=False):
 
     d = BIDSEEG(filename)
     chans = d.channels[
@@ -70,7 +76,13 @@ def read_data(filename, event_onsets):
          (d.channels[&#39;type&#39;] == &#39;SEEG&#39;))
         ]
 
-    data = d.read_data(events=event_onsets, pre=P[&#39;read&#39;][&#39;pre&#39;], post=P[&#39;read&#39;][&#39;post&#39;], chan=list(chans[&#39;name&#39;]))
+    if continuous:
+        data = d.read_data(
+            begtime=event_onsets[0] - P[&#39;read&#39;][&#39;pre&#39;],
+            endtime=event_onsets[-1] + P[&#39;read&#39;][&#39;post&#39;],
+            chan=list(chans[&#39;name&#39;]))
+    else:
+        data = d.read_data(events=event_onsets, pre=P[&#39;read&#39;][&#39;pre&#39;], post=P[&#39;read&#39;][&#39;post&#39;], chan=list(chans[&#39;name&#39;]))
     data = montage(data, ref_to_avg=True)
 
     return data</code></pre>

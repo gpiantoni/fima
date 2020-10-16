@@ -8,6 +8,8 @@ from ..pipelines import (
     pipeline_fingers_all,
     )
 
+from ..parameters import P
+
 
 def main():
     """Command line function to compute the analyzses"""
@@ -20,6 +22,9 @@ def main():
         help='Plot the time-course continuously in the high-frequency range',
         )
     action.set_defaults(function='continuous')
+    action.add_argument(
+        '--baseline', action='store_true',
+        help='Baseline correction with ' + P['spectrum']['baseline']['type'])
 
     action = list_pipelines.add_parser(
         'spectrum',
@@ -64,7 +69,9 @@ def main():
     print(args)
 
     if args.function == 'continuous':
-        pipeline_continuous_all()
+        pipeline_continuous_all(
+            baseline=args.baseline,
+            )
 
     elif args.function == 'spectrum':
         pipeline_spectrum_all(

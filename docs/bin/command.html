@@ -28,10 +28,13 @@
 
 from argparse import ArgumentParser
 from ..pipelines import (
+    pipeline_continuous_all,
     pipeline_spectrum_all,
     pipeline_fitting_all,
     pipeline_fingers_all,
     )
+
+from ..parameters import P
 
 
 def main():
@@ -39,6 +42,15 @@ def main():
     parser = ArgumentParser(description=&#39;Analysis finger mapping&#39;)
 
     list_pipelines = parser.add_subparsers(title=&#39;Pipelines&#39;, help=&#39;&#39;)
+
+    action = list_pipelines.add_parser(
+        &#39;continuous&#39;,
+        help=&#39;Plot the time-course continuously in the high-frequency range&#39;,
+        )
+    action.set_defaults(function=&#39;continuous&#39;)
+    action.add_argument(
+        &#39;--baseline&#39;, action=&#39;store_true&#39;,
+        help=&#39;Baseline correction with &#39; + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;])
 
     action = list_pipelines.add_parser(
         &#39;spectrum&#39;,
@@ -82,7 +94,12 @@ def main():
     args = parser.parse_args()
     print(args)
 
-    if args.function == &#39;spectrum&#39;:
+    if args.function == &#39;continuous&#39;:
+        pipeline_continuous_all(
+            baseline=args.baseline,
+            )
+
+    elif args.function == &#39;spectrum&#39;:
         pipeline_spectrum_all(
             subject_only=args.subject)
 
@@ -123,6 +140,15 @@ if __name__ == &#39;__main__&#39;:
     list_pipelines = parser.add_subparsers(title=&#39;Pipelines&#39;, help=&#39;&#39;)
 
     action = list_pipelines.add_parser(
+        &#39;continuous&#39;,
+        help=&#39;Plot the time-course continuously in the high-frequency range&#39;,
+        )
+    action.set_defaults(function=&#39;continuous&#39;)
+    action.add_argument(
+        &#39;--baseline&#39;, action=&#39;store_true&#39;,
+        help=&#39;Baseline correction with &#39; + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;])
+
+    action = list_pipelines.add_parser(
         &#39;spectrum&#39;,
         help=&#39;Compute Time-Frequency Analysis&#39;,
         )
@@ -164,7 +190,12 @@ if __name__ == &#39;__main__&#39;:
     args = parser.parse_args()
     print(args)
 
-    if args.function == &#39;spectrum&#39;:
+    if args.function == &#39;continuous&#39;:
+        pipeline_continuous_all(
+            baseline=args.baseline,
+            )
+
+    elif args.function == &#39;spectrum&#39;:
         pipeline_spectrum_all(
             subject_only=args.subject)
 
