@@ -1,5 +1,5 @@
-from numpy import mean, std, log10, moveaxis
-from wonambi.trans import concatenate, select
+from numpy import mean, std, log10, moveaxis, concatenate
+from wonambi.trans import select
 
 from ..parameters import P
 
