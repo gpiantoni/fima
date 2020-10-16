@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.viz.tfr_time API documentation</title>
+<title>fima.viz.align API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,64 +17,114 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.viz.tfr_time</code></h1>
+<h1 class="title">Module <code>fima.viz.align</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import plotly.graph_objects as go
+<pre><code class="python">import plotly.graph_objs as go
+
 
 from ..parameters import P
 
 
-def plot_tfr_time(tf_time, highlight=None):
+def plot():
+    divs = []
+    for i_chan, chan in enumerate(tf_cht.chan[0]):
+        fig = plot_single_trials_per_cond(t, X[i_chan, :, :], chan)
+        divs.append(to_div(fig))
+
+    to_html(divs, Path(&#39;/home/gio/projects/finger_mapping/results/example.html&#39;))
+
+
+def plot_single_trials_per_cond(t, X, chan=&#39;&#39;):
+    &#34;&#34;&#34;Plot single traces for all the trials in one condition
+
+    Parameters
+    ----------
+    t : (n, ) array
+        vector with time information
+    X : (n, trl) array
+        vector with data (time X trials)
+    chan : str
+        name of channel
+
+    Returns
+    -------
+    instance of Figure
+    &#34;&#34;&#34;
+    n_trl = X.shape[1]
+
     traces = []
-    for chan in tf_time.chan[0]:
+    for i_trl in range(n_trl):
         traces.append(
             go.Scatter(
-                x=tf_time.time[0],
-                y=tf_time(trial=0, chan=chan),
-                name=chan,
-                line=dict(
-                    color=&#39;black&#39;,
-                    width=0.5,
-                ),
-                showlegend=False,
-                hovertemplate=&#39;time: %{x:.3f}s&lt;br /&gt;value: %{y:.3f}&#39;,
-            ))
+                x=t,
+                y=X[:, i_trl],
+            )
+        )
 
     fig = go.Figure(
         data=traces,
         layout=go.Layout(
+            showlegend=False,
+            title=dict(
+                text=chan,
+            ),
             xaxis=dict(
                 title=&#39;time (s)&#39;,
             ),
             yaxis=dict(
                 title=&#39;change from baseline ({})&#39;.format(P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]),
                 range=(
+                    -1 * P[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;],
+                    P[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;],
+                    ),
+            ))
+        )
+
+    return fig
+
+
+def plot_mean_and_slope(t, X_mean_chan, est):
+    &#34;&#34;&#34;Plot mean across electrodes and the slope used for estimation
+    &#34;&#34;&#34;
+    t0 = t[est[&#39;i_zero&#39;]:est[&#39;i_max&#39;]]
+    x0 = t0 * est[&#39;b&#39;] + est[&#39;a&#39;]
+
+    fig = go.Figure(data=[
+        go.Scatter(
+            x=t,
+            y=X_mean_chan,
+            line=dict(
+                color=&#39;black&#39;),
+            ),
+        go.Scatter(
+            x=t0,
+            y=x0,
+            mode=&#39;lines+markers&#39;,
+            line=dict(
+                color=&#39;red&#39;),
+            )
+        ],
+        layout=go.Layout(
+            showlegend=False,
+            title=dict(
+                text=est[&#39;chan&#39;],
+                ),
+            xaxis=dict(
+                title=&#39;time (s)&#39;,
+                ),
+            yaxis=dict(
+                title=&#39;change from baseline ({})&#39;.format(P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]),
+                range=(
                     -1 * P[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
                     P[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
                     ),
-                )
-            )
+                ))
         )
-
-    if highlight is not None:
-        fig.add_shape(
-            type=&#34;rect&#34;,
-            xref=&#34;x&#34;,
-            yref=&#34;paper&#34;,
-            x0=highlight[0],
-            y0=0,
-            x1=highlight[1],
-            y1=1,
-            fillcolor=&#34;LightSalmon&#34;,
-            opacity=0.5,
-            layer=&#34;below&#34;,
-            line_width=0,
-            )
 
     return fig</code></pre>
 </details>
@@ -86,8 +136,8 @@ def plot_tfr_time(tf_time, highlight=None):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="fima.viz.tfr_time.plot_tfr_time"><code class="name flex">
-<span>def <span class="ident">plot_tfr_time</span></span>(<span>tf_time, highlight=None)</span>
+<dt id="fima.viz.align.plot"><code class="name flex">
+<span>def <span class="ident">plot</span></span>(<span>)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -95,52 +145,133 @@ def plot_tfr_time(tf_time, highlight=None):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def plot_tfr_time(tf_time, highlight=None):
-    traces = []
-    for chan in tf_time.chan[0]:
-        traces.append(
-            go.Scatter(
-                x=tf_time.time[0],
-                y=tf_time(trial=0, chan=chan),
-                name=chan,
-                line=dict(
-                    color=&#39;black&#39;,
-                    width=0.5,
-                ),
-                showlegend=False,
-                hovertemplate=&#39;time: %{x:.3f}s&lt;br /&gt;value: %{y:.3f}&#39;,
-            ))
+<pre><code class="python">def plot():
+    divs = []
+    for i_chan, chan in enumerate(tf_cht.chan[0]):
+        fig = plot_single_trials_per_cond(t, X[i_chan, :, :], chan)
+        divs.append(to_div(fig))
 
-    fig = go.Figure(
-        data=traces,
+    to_html(divs, Path(&#39;/home/gio/projects/finger_mapping/results/example.html&#39;))</code></pre>
+</details>
+</dd>
+<dt id="fima.viz.align.plot_mean_and_slope"><code class="name flex">
+<span>def <span class="ident">plot_mean_and_slope</span></span>(<span>t, X_mean_chan, est)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Plot mean across electrodes and the slope used for estimation</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_mean_and_slope(t, X_mean_chan, est):
+    &#34;&#34;&#34;Plot mean across electrodes and the slope used for estimation
+    &#34;&#34;&#34;
+    t0 = t[est[&#39;i_zero&#39;]:est[&#39;i_max&#39;]]
+    x0 = t0 * est[&#39;b&#39;] + est[&#39;a&#39;]
+
+    fig = go.Figure(data=[
+        go.Scatter(
+            x=t,
+            y=X_mean_chan,
+            line=dict(
+                color=&#39;black&#39;),
+            ),
+        go.Scatter(
+            x=t0,
+            y=x0,
+            mode=&#39;lines+markers&#39;,
+            line=dict(
+                color=&#39;red&#39;),
+            )
+        ],
         layout=go.Layout(
+            showlegend=False,
+            title=dict(
+                text=est[&#39;chan&#39;],
+                ),
             xaxis=dict(
                 title=&#39;time (s)&#39;,
-            ),
+                ),
             yaxis=dict(
                 title=&#39;change from baseline ({})&#39;.format(P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]),
                 range=(
                     -1 * P[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
                     P[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
                     ),
-                )
+                ))
+        )
+
+    return fig</code></pre>
+</details>
+</dd>
+<dt id="fima.viz.align.plot_single_trials_per_cond"><code class="name flex">
+<span>def <span class="ident">plot_single_trials_per_cond</span></span>(<span>t, X, chan='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Plot single traces for all the trials in one condition</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>t</code></strong> :&ensp;<code>(n, ) array</code></dt>
+<dd>vector with time information</dd>
+<dt><strong><code>X</code></strong> :&ensp;<code>(n, trl) array</code></dt>
+<dd>vector with data (time X trials)</dd>
+<dt><strong><code>chan</code></strong> :&ensp;<code>str</code></dt>
+<dd>name of channel</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>instance</code> of <code>Figure</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_single_trials_per_cond(t, X, chan=&#39;&#39;):
+    &#34;&#34;&#34;Plot single traces for all the trials in one condition
+
+    Parameters
+    ----------
+    t : (n, ) array
+        vector with time information
+    X : (n, trl) array
+        vector with data (time X trials)
+    chan : str
+        name of channel
+
+    Returns
+    -------
+    instance of Figure
+    &#34;&#34;&#34;
+    n_trl = X.shape[1]
+
+    traces = []
+    for i_trl in range(n_trl):
+        traces.append(
+            go.Scatter(
+                x=t,
+                y=X[:, i_trl],
             )
         )
 
-    if highlight is not None:
-        fig.add_shape(
-            type=&#34;rect&#34;,
-            xref=&#34;x&#34;,
-            yref=&#34;paper&#34;,
-            x0=highlight[0],
-            y0=0,
-            x1=highlight[1],
-            y1=1,
-            fillcolor=&#34;LightSalmon&#34;,
-            opacity=0.5,
-            layer=&#34;below&#34;,
-            line_width=0,
-            )
+    fig = go.Figure(
+        data=traces,
+        layout=go.Layout(
+            showlegend=False,
+            title=dict(
+                text=chan,
+            ),
+            xaxis=dict(
+                title=&#39;time (s)&#39;,
+            ),
+            yaxis=dict(
+                title=&#39;change from baseline ({})&#39;.format(P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]),
+                range=(
+                    -1 * P[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;],
+                    P[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;],
+                    ),
+            ))
+        )
 
     return fig</code></pre>
 </details>
@@ -163,7 +294,9 @@ def plot_tfr_time(tf_time, highlight=None):
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="fima.viz.tfr_time.plot_tfr_time" href="#fima.viz.tfr_time.plot_tfr_time">plot_tfr_time</a></code></li>
+<li><code><a title="fima.viz.align.plot" href="#fima.viz.align.plot">plot</a></code></li>
+<li><code><a title="fima.viz.align.plot_mean_and_slope" href="#fima.viz.align.plot_mean_and_slope">plot_mean_and_slope</a></code></li>
+<li><code><a title="fima.viz.align.plot_single_trials_per_cond" href="#fima.viz.align.plot_single_trials_per_cond">plot_single_trials_per_cond</a></code></li>
 </ul>
 </li>
 </ul>

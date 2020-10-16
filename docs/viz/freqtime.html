@@ -26,13 +26,29 @@
 </summary>
 <pre><code class="python">import plotly.graph_objs as go
 
+from wonambi.attr import Channels
+from wonambi.attr.chan import assign_region_to_channels
+from numpy import c_
+
 from ..viz.fitting import get_color_symbol
 from ..utils import group_per_condition
 from .utils import to_div
 from ..parameters import P
 
 
-def plot_conditions_per_chan(tf_cht, names, statistics=&#39;sem&#39;):
+def _compute_regions(fs, elec):
+    chans = Channels(elec[&#39;name&#39;], c_[elec[&#39;x&#39;], elec[&#39;y&#39;], elec[&#39;z&#39;]])
+    regions = assign_region_to_channels(chans, fs, parc_type=&#39;aparc.a2009s&#39;, exclude_regions=(&#39;White&#39;, &#39;WM&#39;, &#39;Unknown&#39;))
+    return regions
+
+
+def _get_region(regions, label):
+    for chan in regions.chan:
+        if chan.label == label:
+            return chan.attr[&#39;region&#39;]
+
+
+def plot_conditions_per_chan(tf_cht, names, statistics=&#39;sem&#39;, fs=None, elec=None):
     &#34;&#34;&#34;Plot all the conditions for each channel
 
     Parameters
@@ -52,12 +68,20 @@ def plot_conditions_per_chan(tf_cht, names, statistics=&#39;sem&#39;):
     data_m, events = group_per_condition(tf_cht, names, &#39;mean&#39;)
     data_sd, events = group_per_condition(tf_cht, names, statistics)  # you can also use sem
 
+    if elec is not None and fs is not None:
+        regions = _compute_regions(fs, elec)
+
     divs = []
 
     for chan in tf_cht.chan[0]:
         y = data_m(trial=0, chan=chan)
         s = data_sd(trial=0, chan=chan)
         fig = plot_per_chan(y, s, chan, names)
+
+        if elec is not None and fs is not None:
+            region = _get_region(regions, chan)
+            fig.update_layout(title=f&#39;{chan} ({region})&#39;)
+
         divs.append(to_div(fig))
 
     return divs
@@ -138,7 +162,7 @@ def plot_per_chan(y, s, chan, names):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="fima.viz.freqtime.plot_conditions_per_chan"><code class="name flex">
-<span>def <span class="ident">plot_conditions_per_chan</span></span>(<span>tf_cht, names, statistics='sem')</span>
+<span>def <span class="ident">plot_conditions_per_chan</span></span>(<span>tf_cht, names, statistics='sem', fs=None, elec=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Plot all the conditions for each channel</p>
@@ -160,7 +184,7 @@ def plot_per_chan(y, s, chan, names):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def plot_conditions_per_chan(tf_cht, names, statistics=&#39;sem&#39;):
+<pre><code class="python">def plot_conditions_per_chan(tf_cht, names, statistics=&#39;sem&#39;, fs=None, elec=None):
     &#34;&#34;&#34;Plot all the conditions for each channel
 
     Parameters
@@ -180,12 +204,20 @@ def plot_per_chan(y, s, chan, names):
     data_m, events = group_per_condition(tf_cht, names, &#39;mean&#39;)
     data_sd, events = group_per_condition(tf_cht, names, statistics)  # you can also use sem
 
+    if elec is not None and fs is not None:
+        regions = _compute_regions(fs, elec)
+
     divs = []
 
     for chan in tf_cht.chan[0]:
         y = data_m(trial=0, chan=chan)
         s = data_sd(trial=0, chan=chan)
         fig = plot_per_chan(y, s, chan, names)
+
+        if elec is not None and fs is not None:
+            region = _get_region(regions, chan)
+            fig.update_layout(title=f&#39;{chan} ({region})&#39;)
+
         divs.append(to_div(fig))
 
     return divs</code></pre>

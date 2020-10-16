@@ -28,11 +28,13 @@
 <pre><code class="python">&#34;&#34;&#34;Read the data, based on event type and onset time&#34;&#34;&#34;
 from numpy import genfromtxt, isin, isnan
 from bidso.objects import Electrodes
+from wonambi.attr import Freesurfer
 
 from .preproc import read_data
 from .dataglove.read_dataglove import read_physio
 from .parameters import BIDS_DIR, SCRIPTS_DIR, FREESURFER_DIR
 from .preproc.elec import read_surf
+from .align.maxmin import main_func
 
 
 FINGERS_OPEN = [
@@ -72,12 +74,13 @@ FINGERS_EXTENSION = [
 def load(what, subject, run=None, acq=None, event_type=None):
     &#34;&#34;&#34;
     WHAT:
-      - &#39;data&#39; returns: ChanTime, event_names
+      - &#39;data&#39;, &#39;aligned&#39; returns: ChanTime, event_names
       - &#39;events&#39; returns: ndarray
       - &#39;dataglove&#39; returns: ndarray
       - &#39;movements&#39; returns: ndarray
       - &#39;electrodes&#39;
       - &#39;surface&#39;
+      - &#39;freesurfer&#39;
 
     EVENT_TYPE:
       - cues : all cues (to open and close)
@@ -95,7 +98,7 @@ def load(what, subject, run=None, acq=None, event_type=None):
     if acq is None:
         acq = &#39;*&#39;
 
-    if what == &#39;data&#39;:
+    if what in (&#39;data&#39;, &#39;aligned&#39;):
         pattern = f&#39;sub-{subject}_*_acq-{acq}_run-{run}_ieeg.eeg&#39;
         folder = BIDS_DIR
 
@@ -107,7 +110,7 @@ def load(what, subject, run=None, acq=None, event_type=None):
         pattern = f&#39;sub-{subject}_*_acq-{acq}_run-{run}_electrodes.tsv&#39;
         folder = BIDS_DIR
 
-    elif what == &#39;surface&#39;:
+    elif what in (&#39;surface&#39;, &#39;freesurfer&#39;):
         pattern = subject
         folder = FREESURFER_DIR
 
@@ -130,8 +133,13 @@ def load(what, subject, run=None, acq=None, event_type=None):
         raise ValueError(&#39;You need to specify more parameters&#39;)
     filename = found[0]
 
-    if what == &#39;data&#39;:
+    if what in (&#39;data&#39;, &#39;aligned&#39;):
         events, onsets = select_events(subject, run, event_type)
+        if what == &#39;aligned&#39;:
+            data = read_data(filename, event_onsets=onsets)
+            offsets = main_func(data, events)
+            onsets = onsets + offsets[&#39;t_peak&#39;]
+
         return read_data(filename, event_onsets=onsets), events
 
     elif what == &#39;dataglove&#39;:
@@ -145,6 +153,9 @@ def load(what, subject, run=None, acq=None, event_type=None):
         elec = load(&#39;electrodes&#39;, subject, run, acq)
         right_or_left = (elec[&#39;x&#39;] &gt; 0).sum() / elec.shape[0]
         return read_surf(filename, right_or_left)
+
+    elif what == &#39;freesurfer&#39;:
+        return Freesurfer(filename)
 
     elif what == &#39;movements&#39;:
         dtypes = [
@@ -230,12 +241,13 @@ def select_events(subject, run, t):
 <dd>
 <div class="desc"><h2 id="what">What</h2>
 <ul>
-<li>'data' returns: ChanTime, event_names</li>
+<li>'data', 'aligned' returns: ChanTime, event_names</li>
 <li>'events' returns: ndarray</li>
 <li>'dataglove' returns: ndarray</li>
 <li>'movements' returns: ndarray</li>
 <li>'electrodes'</li>
 <li>'surface'</li>
+<li>'freesurfer'</li>
 </ul>
 <h2 id="event_type">Event_Type</h2>
 <ul>
@@ -253,12 +265,13 @@ def select_events(subject, run, t):
 <pre><code class="python">def load(what, subject, run=None, acq=None, event_type=None):
     &#34;&#34;&#34;
     WHAT:
-      - &#39;data&#39; returns: ChanTime, event_names
+      - &#39;data&#39;, &#39;aligned&#39; returns: ChanTime, event_names
       - &#39;events&#39; returns: ndarray
       - &#39;dataglove&#39; returns: ndarray
       - &#39;movements&#39; returns: ndarray
       - &#39;electrodes&#39;
       - &#39;surface&#39;
+      - &#39;freesurfer&#39;
 
     EVENT_TYPE:
       - cues : all cues (to open and close)
@@ -276,7 +289,7 @@ def select_events(subject, run, t):
     if acq is None:
         acq = &#39;*&#39;
 
-    if what == &#39;data&#39;:
+    if what in (&#39;data&#39;, &#39;aligned&#39;):
         pattern = f&#39;sub-{subject}_*_acq-{acq}_run-{run}_ieeg.eeg&#39;
         folder = BIDS_DIR
 
@@ -288,7 +301,7 @@ def select_events(subject, run, t):
         pattern = f&#39;sub-{subject}_*_acq-{acq}_run-{run}_electrodes.tsv&#39;
         folder = BIDS_DIR
 
-    elif what == &#39;surface&#39;:
+    elif what in (&#39;surface&#39;, &#39;freesurfer&#39;):
         pattern = subject
         folder = FREESURFER_DIR
 
@@ -311,8 +324,13 @@ def select_events(subject, run, t):
         raise ValueError(&#39;You need to specify more parameters&#39;)
     filename = found[0]
 
-    if what == &#39;data&#39;:
+    if what in (&#39;data&#39;, &#39;aligned&#39;):
         events, onsets = select_events(subject, run, event_type)
+        if what == &#39;aligned&#39;:
+            data = read_data(filename, event_onsets=onsets)
+            offsets = main_func(data, events)
+            onsets = onsets + offsets[&#39;t_peak&#39;]
+
         return read_data(filename, event_onsets=onsets), events
 
     elif what == &#39;dataglove&#39;:
@@ -326,6 +344,9 @@ def select_events(subject, run, t):
         elec = load(&#39;electrodes&#39;, subject, run, acq)
         right_or_left = (elec[&#39;x&#39;] &gt; 0).sum() / elec.shape[0]
         return read_surf(filename, right_or_left)
+
+    elif what == &#39;freesurfer&#39;:
+        return Freesurfer(filename)
 
     elif what == &#39;movements&#39;:
         dtypes = [

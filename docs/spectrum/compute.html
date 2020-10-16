@@ -24,7 +24,7 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from numpy import arange, zeros
+<pre><code class="python">from numpy import arange, zeros, mean, std, log10, moveaxis
 from wonambi.trans import apply_baseline, timefrequency, concatenate, math, select
 
 from ..parameters import P
@@ -37,7 +37,7 @@ def compute_timefreq(data, baseline=True, mean=True):
             data,
             &#39;spectrogram&#39;,
             duration=P[&#39;spectrum&#39;][&#39;window_size&#39;],
-            overlap=0.9,
+            step=0.01,
             taper=&#39;dpss&#39;,
             halfbandwidth=5)
     else:
@@ -54,15 +54,22 @@ def compute_timefreq(data, baseline=True, mean=True):
         t_bool[20:-20:t_step] = True
         tf = select(tf, time=t_bool)
 
-    if baseline:
-        tf = apply_baseline(
-            tf,
-            time=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;time&#39;],
-            baseline=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;])
-
     tf = concatenate(
         tf,
         axis=&#39;trial&#39;)
+
+    if baseline:
+        if P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;common&#39;]:
+            tf = apply_common_baseline(
+                tf,
+                time=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;time&#39;],
+                baseline=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;])
+
+        else:
+            tf = apply_baseline(
+                tf,
+                time=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;time&#39;],
+                baseline=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;])
 
     if mean:
         tf = math(
@@ -92,7 +99,27 @@ def get_chan(tf, freq=None, time=None):
             time=time,
             ),
         operator_name=&#39;mean&#39;,
-        axis=&#39;time&#39;)</code></pre>
+        axis=&#39;time&#39;)
+
+
+def apply_common_baseline(tf, time, baseline):
+    &#34;&#34;&#34;Concatenate all the baseline periods for all the conditions. Keep it
+    separate for each channel and each frequency&#34;&#34;&#34;
+
+    tf_time = select(tf, time=time)
+
+    X = moveaxis(tf_time.data[0], 1, 2)
+    X = X.reshape((X.shape[0], X.shape[1], -1))
+
+    bline_mean = mean(X, axis=-1)
+    bline_std = std(X, axis=-1)
+
+    if baseline == &#39;zscore&#39;:
+        tf.data[0] = (tf.data[0] - bline_mean[:, None, :, None]) / bline_std[:, None, :, None]
+    elif baseline == &#39;dB&#39;:
+        tf.data[0] = 10 * log10(tf.data[0] / bline_mean[:, None, :, None])
+
+    return tf</code></pre>
 </details>
 </section>
 <section>
@@ -102,6 +129,36 @@ def get_chan(tf, freq=None, time=None):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="fima.spectrum.compute.apply_common_baseline"><code class="name flex">
+<span>def <span class="ident">apply_common_baseline</span></span>(<span>tf, time, baseline)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Concatenate all the baseline periods for all the conditions. Keep it
+separate for each channel and each frequency</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def apply_common_baseline(tf, time, baseline):
+    &#34;&#34;&#34;Concatenate all the baseline periods for all the conditions. Keep it
+    separate for each channel and each frequency&#34;&#34;&#34;
+
+    tf_time = select(tf, time=time)
+
+    X = moveaxis(tf_time.data[0], 1, 2)
+    X = X.reshape((X.shape[0], X.shape[1], -1))
+
+    bline_mean = mean(X, axis=-1)
+    bline_std = std(X, axis=-1)
+
+    if baseline == &#39;zscore&#39;:
+        tf.data[0] = (tf.data[0] - bline_mean[:, None, :, None]) / bline_std[:, None, :, None]
+    elif baseline == &#39;dB&#39;:
+        tf.data[0] = 10 * log10(tf.data[0] / bline_mean[:, None, :, None])
+
+    return tf</code></pre>
+</details>
+</dd>
 <dt id="fima.spectrum.compute.compute_timefreq"><code class="name flex">
 <span>def <span class="ident">compute_timefreq</span></span>(<span>data, baseline=True, mean=True)</span>
 </code></dt>
@@ -118,7 +175,7 @@ def get_chan(tf, freq=None, time=None):
             data,
             &#39;spectrogram&#39;,
             duration=P[&#39;spectrum&#39;][&#39;window_size&#39;],
-            overlap=0.9,
+            step=0.01,
             taper=&#39;dpss&#39;,
             halfbandwidth=5)
     else:
@@ -135,15 +192,22 @@ def get_chan(tf, freq=None, time=None):
         t_bool[20:-20:t_step] = True
         tf = select(tf, time=t_bool)
 
-    if baseline:
-        tf = apply_baseline(
-            tf,
-            time=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;time&#39;],
-            baseline=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;])
-
     tf = concatenate(
         tf,
         axis=&#39;trial&#39;)
+
+    if baseline:
+        if P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;common&#39;]:
+            tf = apply_common_baseline(
+                tf,
+                time=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;time&#39;],
+                baseline=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;])
+
+        else:
+            tf = apply_baseline(
+                tf,
+                time=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;time&#39;],
+                baseline=P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;])
 
     if mean:
         tf = math(
@@ -212,6 +276,7 @@ def get_chan(tf, freq=None, time=None):
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="fima.spectrum.compute.apply_common_baseline" href="#fima.spectrum.compute.apply_common_baseline">apply_common_baseline</a></code></li>
 <li><code><a title="fima.spectrum.compute.compute_timefreq" href="#fima.spectrum.compute.compute_timefreq">compute_timefreq</a></code></li>
 <li><code><a title="fima.spectrum.compute.get_chan" href="#fima.spectrum.compute.get_chan">get_chan</a></code></li>
 <li><code><a title="fima.spectrum.compute.get_chantime" href="#fima.spectrum.compute.get_chantime">get_chantime</a></code></li>
