@@ -91,6 +91,24 @@ def get_chan(tf, freq=None, time=None):
         axis='time')
 
 
+def apply_baseline_to_continuous(tf, onsets, baseline='zscore'):
+
+     v = []
+    for on in onsets:
+        x = select(tf_cht, time=on + P['spectrum']['baseline']['time'])
+        v.append(x.data[0])
+
+    A = concatenate(v, axis=1)
+    bline_m = A.mean(axis=0)
+    bline_sd = A.std(axis=0)
+
+    if baseline == 'zscore':
+        tf.data[0] = ((tf.data[0] - bline_m) / bline_sd
+    elif baseline == 'dB':
+        tf.data[0] = 10 * log10(tf.data[0] / bline_m)
+
+    return tf
+
 def apply_common_baseline(tf, time, baseline):
     """Concatenate all the baseline periods for all the conditions. Keep it
     separate for each channel and each frequency"""

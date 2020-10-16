@@ -2,6 +2,7 @@
 
 from argparse import ArgumentParser
 from ..pipelines import (
+    pipeline_continuous_all,
     pipeline_spectrum_all,
     pipeline_fitting_all,
     pipeline_fingers_all,
@@ -13,6 +14,12 @@ def main():
     parser = ArgumentParser(description='Analysis finger mapping')
 
     list_pipelines = parser.add_subparsers(title='Pipelines', help='')
+
+    action = list_pipelines.add_parser(
+        'continuous',
+        help='Plot the time-course continuously in the high-frequency range',
+        )
+    action.set_defaults(function='continuous')
 
     action = list_pipelines.add_parser(
         'spectrum',
@@ -56,7 +63,10 @@ def main():
     args = parser.parse_args()
     print(args)
 
-    if args.function == 'spectrum':
+    if args.function == 'continuous':
+        pipeline_continuous_all()
+
+    elif args.function == 'spectrum':
         pipeline_spectrum_all(
             subject_only=args.subject)
 
