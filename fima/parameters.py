@@ -56,7 +56,7 @@ P = dict(
             ),
         ),
     spectrum=dict(
-        method='spectrogram',  # spectrogram or morlet
+        method='morlet',  # spectrogram or morlet
         window_size=0.3,
         baseline=dict(
             time=(-1, -0.5),
