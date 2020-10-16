@@ -11,7 +11,7 @@ def pipeline_continuous_all(event_type='cues', baseline=False):
         for run in runs:
             print(f'{subject} / {run}')
             try:
-                pipeline_continuous(subject, run, event_type)
+                pipeline_continuous(subject, run, event_type, baseline)
             except Exception as err:
                 print(err)
 

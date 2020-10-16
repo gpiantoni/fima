@@ -36,6 +36,7 @@ def plot_continuous_per_chan(tf_cht, onsets, events, chan):
                 ),
             yaxis=dict(
                 title='power spectral density (μV²)',
+                range=(-1, 10),
                 ),
             ))
 
