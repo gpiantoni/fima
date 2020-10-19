@@ -12,8 +12,8 @@ def apply_baseline_to_continuous(tf, onsets, baseline='zscore'):
         v.append(x.data[0])
 
     A = concatenate(v, axis=1)
-    bline_m = A.mean(axis=0)
-    bline_sd = A.std(axis=0)
+    bline_m = A.mean(axis=1)[:, :, None]
+    bline_sd = A.std(axis=1)[:, :, None]
 
     if baseline == 'zscore':
         tf.data[0] = (tf.data[0] - bline_m) / bline_sd

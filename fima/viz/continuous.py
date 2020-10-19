@@ -9,6 +9,8 @@ def plot_continuous(tf_cht, onsets, events):
     divs = []
     for chan in tf_cht.chan[0]:
         fig = plot_continuous_per_chan(tf_cht, onsets, events, chan)
+        if fig is None:
+            continue
         divs.append(to_div(fig))
 
     return divs
@@ -16,6 +18,8 @@ def plot_continuous(tf_cht, onsets, events):
 
 def plot_continuous_per_chan(tf_cht, onsets, events, chan):
     dat = tf_cht(trial=0, trial_axis='trial000000', chan=chan)
+    if max(abs(dat)) < 20:
+        return None
 
     fig = go.Figure(data=[
         go.Scatter(
@@ -36,7 +40,7 @@ def plot_continuous_per_chan(tf_cht, onsets, events, chan):
                 ),
             yaxis=dict(
                 title='power spectral density (μV²)',
-                range=(-1, 10),
+                range=(-1, 30),
                 ),
             ))
 
