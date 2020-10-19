@@ -20,6 +20,7 @@ def read_data(filename, event_onsets, continuous=False):
             chan=list(chans['name']))
     else:
         data = d.read_data(events=event_onsets, pre=P['read']['pre'], post=P['read']['post'], chan=list(chans['name']))
+
     data = montage(data, ref_to_avg=True)
 
     return data

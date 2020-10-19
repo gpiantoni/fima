@@ -5,12 +5,16 @@ from numpy import (
     max,
     NaN,
     where,
+    zeros,
     )
 from wonambi.trans import select
 
 from ..spectrum.compute import compute_timefreq, get_chantime
 from ..utils import create_bool
 from ..parameters import EVENTS, P
+
+USE_MAX_CHANNEL_ONLY = True
+CRITICAL_TIMEPOINTS = ('t_inflection', 't_midpoint', 't_peak')
 
 
 def main_func(data, names):
@@ -27,20 +31,30 @@ def find_max_min(data, names):
     t = data.time[0]
     dat_cond = data(trial=0)
 
-    all_offsets = empty((data.number_of('trial_axis')[0]), [('t_inflection', '<f8'), ('t_midpoint', '<f8'), ('t_peak', '<f8')])
+    DTYPES = [(timepoint, '<f8') for timepoint in CRITICAL_TIMEPOINTS]
+    all_offsets = empty((data.number_of('trial_axis')[0]), DTYPES)
 
     for ev in EVENTS:
         select_trl = create_bool(names, ev)
         dat_allchan = dat_cond[:, :, select_trl]
 
         dat_mean = dat_allchan.mean(axis=2)
-        bool_chan = max(dat_mean, axis=1) >= P['align']['threshold']['high']
+        if USE_MAX_CHANNEL_ONLY:
+            m = dat_mean.mean(axis=1)
+            bool_chan = zeros(m.shape[0], dtype=bool)
+            bool_chan[argmax(m)] = True
+        else:
+            bool_chan = max(dat_mean, axis=1) >= P['align']['threshold']['high']
+
+        channels = ', '.join(f'"{x}"' for x in data.chan[0][bool_chan])
+        print(f'For realign condition "{ev}", using channels {channels}')
+
         dat = dat_allchan[bool_chan, :, :]
 
         n_chan = bool_chan.sum()
         n_trl = select_trl.sum()
 
-        timings = empty((n_chan, n_trl), dtype=([('peak', '<f8'), ('t_inflection', '<f8'), ('t_midpoint', '<f8'), ('t_peak', '<f8')]))
+        timings = empty((n_chan, n_trl), dtype=([('peak', '<f8'), ] + DTYPES))
 
         indices_max = argmax(dat, axis=1)
         values_max = max(dat, axis=1)

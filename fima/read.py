@@ -7,7 +7,7 @@ from .preproc import read_data
 from .dataglove.read_dataglove import read_physio
 from .parameters import BIDS_DIR, SCRIPTS_DIR, FREESURFER_DIR
 from .preproc.elec import read_surf
-from .align.maxmin import main_func
+from .align.maxmin import main_func, CRITICAL_TIMEPOINTS
 
 
 FINGERS_OPEN = [
@@ -43,13 +43,15 @@ FINGERS_EXTENSION = [
     'little extension',
     ]
 
+timepoints = ', '.join(f"'{x}'" for x in CRITICAL_TIMEPOINTS)
+
 
 def load(what, subject, run=None, acq=None, event_type=None):
-    """
+    f"""
     WHAT:
       - 'continuous' returns: ChanTime, event_names, events_onsets
       - 'data' returns: ChanTime, event_names
-      - 'aligned' returns: ChanTime, event_names
+      -  {timepoints} returns: ChanTime, event_names
       - 'events' returns: ndarray
       - 'dataglove' returns: ndarray
       - 'movements' returns: ndarray
@@ -73,7 +75,7 @@ def load(what, subject, run=None, acq=None, event_type=None):
     if acq is None:
         acq = '*'
 
-    if what in ('continuous', 'data', 'aligned'):
+    if what in ('continuous', 'data') or what in CRITICAL_TIMEPOINTS:
         pattern = f'sub-{subject}_*_acq-{acq}_run-{run}_ieeg.eeg'
         folder = BIDS_DIR
 
@@ -108,17 +110,17 @@ def load(what, subject, run=None, acq=None, event_type=None):
         raise ValueError('You need to specify more parameters')
     filename = found[0]
 
-    if what in ('continuous', 'data', 'aligned'):
+    if what in ('continuous', 'data') or what in CRITICAL_TIMEPOINTS:
         events, onsets = select_events(subject, run, event_type)
 
         if what == 'continuous':
             data = read_data(filename, event_onsets=onsets, continuous=True)
             return data, events, onsets
 
-        if what == 'aligned':
+        if what in CRITICAL_TIMEPOINTS:
             data = read_data(filename, event_onsets=onsets)
             offsets = main_func(data, events)
-            onsets = onsets + offsets['t_peak']
+            onsets = onsets + offsets[what]
 
         data = read_data(filename, event_onsets=onsets)
         return data, events
