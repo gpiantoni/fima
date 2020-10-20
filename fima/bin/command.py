@@ -6,6 +6,7 @@ from ..pipelines import (
     pipeline_spectrum_all,
     pipeline_fitting_all,
     pipeline_fingers_all,
+    pipeline_flexext_all,
     )
 
 from ..parameters import P
@@ -31,6 +32,15 @@ def main():
         help='Compute Time-Frequency Analysis',
         )
     action.set_defaults(function='spectrum')
+    action.add_argument(
+        '-S', '--subject', default=None,
+        help='Run analysis only on one subject')
+
+    action = list_pipelines.add_parser(
+        'flex_ext',
+        help='',
+        )
+    action.set_defaults(function='flex_ext')
     action.add_argument(
         '-S', '--subject', default=None,
         help='Run analysis only on one subject')
@@ -75,6 +85,10 @@ def main():
 
     elif args.function == 'spectrum':
         pipeline_spectrum_all(
+            subject_only=args.subject)
+
+    elif args.function == 'flex_ext':
+        pipeline_flexext_all(
             subject_only=args.subject)
 
     elif args.function == 'fingers':

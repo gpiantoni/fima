@@ -79,14 +79,14 @@ def get_chantime(tf, freq=None, baseline=False):
     return out
 
 
-def get_chan(tf, freq=None, time=None):
+def get_chan(tf, freq=None, baseline=False, time=None, operator_name='mean'):
     if time is None:
         time = P['spectrum']['select']['time']
-    tf = get_chantime(tf, freq=freq)
+    tf = get_chantime(tf, freq=freq, baseline=baseline)
     return math(
         select(
             tf,
             time=time,
             ),
-        operator_name='mean',
+        operator_name=operator_name,
         axis='time')
