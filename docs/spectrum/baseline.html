@@ -24,8 +24,8 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from numpy import mean, std, log10, moveaxis
-from wonambi.trans import concatenate, select
+<pre><code class="python">from numpy import mean, std, log10, moveaxis, concatenate
+from wonambi.trans import select
 
 from ..parameters import P
 
@@ -38,8 +38,8 @@ def apply_baseline_to_continuous(tf, onsets, baseline=&#39;zscore&#39;):
         v.append(x.data[0])
 
     A = concatenate(v, axis=1)
-    bline_m = A.mean(axis=0)
-    bline_sd = A.std(axis=0)
+    bline_m = A.mean(axis=1)[:, :, None]
+    bline_sd = A.std(axis=1)[:, :, None]
 
     if baseline == &#39;zscore&#39;:
         tf.data[0] = (tf.data[0] - bline_m) / bline_sd
@@ -100,8 +100,8 @@ def apply_common_baseline(tf, time, baseline):
         v.append(x.data[0])
 
     A = concatenate(v, axis=1)
-    bline_m = A.mean(axis=0)
-    bline_sd = A.std(axis=0)
+    bline_m = A.mean(axis=1)[:, :, None]
+    bline_sd = A.std(axis=1)[:, :, None]
 
     if baseline == &#39;zscore&#39;:
         tf.data[0] = (tf.data[0] - bline_m) / bline_sd

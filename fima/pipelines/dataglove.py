@@ -1,4 +1,4 @@
-from ..dataglove.plot import plot_dataglove
+from ..viz.dataglove import plot_dataglove
 from ..read import load
 from ..viz import to_div, to_html
 from ..parameters import DATAGLOVE_DIR, SUBJECTS

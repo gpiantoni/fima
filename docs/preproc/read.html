@@ -34,9 +34,8 @@ def read_data(filename, event_onsets, continuous=False):
 
     d = BIDSEEG(filename)
     chans = d.channels[
-        (d.channels[&#39;status&#39;] == &#39;good&#39;) &amp;
-        ((d.channels[&#39;type&#39;] == &#39;ECOG&#39;) |
-         (d.channels[&#39;type&#39;] == &#39;SEEG&#39;))
+        (d.channels[&#39;status&#39;] == &#39;good&#39;)
+        &amp; ((d.channels[&#39;type&#39;] == &#39;ECOG&#39;) | (d.channels[&#39;type&#39;] == &#39;SEEG&#39;))
         ]
 
     if continuous:
@@ -46,6 +45,7 @@ def read_data(filename, event_onsets, continuous=False):
             chan=list(chans[&#39;name&#39;]))
     else:
         data = d.read_data(events=event_onsets, pre=P[&#39;read&#39;][&#39;pre&#39;], post=P[&#39;read&#39;][&#39;post&#39;], chan=list(chans[&#39;name&#39;]))
+
     data = montage(data, ref_to_avg=True)
 
     return data</code></pre>
@@ -71,9 +71,8 @@ def read_data(filename, event_onsets, continuous=False):
 
     d = BIDSEEG(filename)
     chans = d.channels[
-        (d.channels[&#39;status&#39;] == &#39;good&#39;) &amp;
-        ((d.channels[&#39;type&#39;] == &#39;ECOG&#39;) |
-         (d.channels[&#39;type&#39;] == &#39;SEEG&#39;))
+        (d.channels[&#39;status&#39;] == &#39;good&#39;)
+        &amp; ((d.channels[&#39;type&#39;] == &#39;ECOG&#39;) | (d.channels[&#39;type&#39;] == &#39;SEEG&#39;))
         ]
 
     if continuous:
@@ -83,6 +82,7 @@ def read_data(filename, event_onsets, continuous=False):
             chan=list(chans[&#39;name&#39;]))
     else:
         data = d.read_data(events=event_onsets, pre=P[&#39;read&#39;][&#39;pre&#39;], post=P[&#39;read&#39;][&#39;post&#39;], chan=list(chans[&#39;name&#39;]))
+
     data = montage(data, ref_to_avg=True)
 
     return data</code></pre>

@@ -35,6 +35,8 @@ def plot_continuous(tf_cht, onsets, events):
     divs = []
     for chan in tf_cht.chan[0]:
         fig = plot_continuous_per_chan(tf_cht, onsets, events, chan)
+        if fig is None:
+            continue
         divs.append(to_div(fig))
 
     return divs
@@ -42,6 +44,8 @@ def plot_continuous(tf_cht, onsets, events):
 
 def plot_continuous_per_chan(tf_cht, onsets, events, chan):
     dat = tf_cht(trial=0, trial_axis=&#39;trial000000&#39;, chan=chan)
+    if max(abs(dat)) &lt; 20:
+        return None
 
     fig = go.Figure(data=[
         go.Scatter(
@@ -62,6 +66,7 @@ def plot_continuous_per_chan(tf_cht, onsets, events, chan):
                 ),
             yaxis=dict(
                 title=&#39;power spectral density (μV²)&#39;,
+                range=(-1, 30),
                 ),
             ))
 
@@ -118,6 +123,8 @@ def plot_continuous_per_chan(tf_cht, onsets, events, chan):
     divs = []
     for chan in tf_cht.chan[0]:
         fig = plot_continuous_per_chan(tf_cht, onsets, events, chan)
+        if fig is None:
+            continue
         divs.append(to_div(fig))
 
     return divs</code></pre>
@@ -134,6 +141,8 @@ def plot_continuous_per_chan(tf_cht, onsets, events, chan):
 </summary>
 <pre><code class="python">def plot_continuous_per_chan(tf_cht, onsets, events, chan):
     dat = tf_cht(trial=0, trial_axis=&#39;trial000000&#39;, chan=chan)
+    if max(abs(dat)) &lt; 20:
+        return None
 
     fig = go.Figure(data=[
         go.Scatter(
@@ -154,6 +163,7 @@ def plot_continuous_per_chan(tf_cht, onsets, events, chan):
                 ),
             yaxis=dict(
                 title=&#39;power spectral density (μV²)&#39;,
+                range=(-1, 30),
                 ),
             ))
 

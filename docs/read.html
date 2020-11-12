@@ -34,7 +34,7 @@ from .preproc import read_data
 from .dataglove.read_dataglove import read_physio
 from .parameters import BIDS_DIR, SCRIPTS_DIR, FREESURFER_DIR
 from .preproc.elec import read_surf
-from .align.maxmin import main_func
+from .align.maxmin import main_func, CRITICAL_TIMEPOINTS
 
 
 FINGERS_OPEN = [
@@ -70,13 +70,15 @@ FINGERS_EXTENSION = [
     &#39;little extension&#39;,
     ]
 
+timepoints = &#39;, &#39;.join(f&#34;&#39;{x}&#39;&#34; for x in CRITICAL_TIMEPOINTS)
+
 
 def load(what, subject, run=None, acq=None, event_type=None):
-    &#34;&#34;&#34;
+    f&#34;&#34;&#34;
     WHAT:
       - &#39;continuous&#39; returns: ChanTime, event_names, events_onsets
       - &#39;data&#39; returns: ChanTime, event_names
-      - &#39;aligned&#39; returns: ChanTime, event_names
+      -  {timepoints} returns: ChanTime, event_names
       - &#39;events&#39; returns: ndarray
       - &#39;dataglove&#39; returns: ndarray
       - &#39;movements&#39; returns: ndarray
@@ -98,9 +100,12 @@ def load(what, subject, run=None, acq=None, event_type=None):
         run = str(run)
 
     if acq is None:
-        acq = &#39;*&#39;
+        if subject == &#39;ommen&#39;:
+            acq = &#39;blackrock&#39;
+        else:
+            acq = &#39;*&#39;
 
-    if what in (&#39;continuous&#39;, &#39;data&#39;, &#39;aligned&#39;):
+    if what in (&#39;continuous&#39;, &#39;data&#39;) or what in CRITICAL_TIMEPOINTS:
         pattern = f&#39;sub-{subject}_*_acq-{acq}_run-{run}_ieeg.eeg&#39;
         folder = BIDS_DIR
 
@@ -135,17 +140,17 @@ def load(what, subject, run=None, acq=None, event_type=None):
         raise ValueError(&#39;You need to specify more parameters&#39;)
     filename = found[0]
 
-    if what in (&#39;continuous&#39;, &#39;data&#39;, &#39;aligned&#39;):
+    if what in (&#39;continuous&#39;, &#39;data&#39;) or what in CRITICAL_TIMEPOINTS:
         events, onsets = select_events(subject, run, event_type)
 
         if what == &#39;continuous&#39;:
             data = read_data(filename, event_onsets=onsets, continuous=True)
             return data, events, onsets
 
-        if what == &#39;aligned&#39;:
+        if what in CRITICAL_TIMEPOINTS:
             data = read_data(filename, event_onsets=onsets)
             offsets = main_func(data, events)
-            onsets = onsets + offsets[&#39;t_peak&#39;]
+            onsets = onsets + offsets[what]
 
         data = read_data(filename, event_onsets=onsets)
         return data, events
@@ -247,37 +252,17 @@ def select_events(subject, run, t):
 <span>def <span class="ident">load</span></span>(<span>what, subject, run=None, acq=None, event_type=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><h2 id="what">What</h2>
-<ul>
-<li>'continuous' returns: ChanTime, event_names, events_onsets</li>
-<li>'data' returns: ChanTime, event_names</li>
-<li>'aligned' returns: ChanTime, event_names</li>
-<li>'events' returns: ndarray</li>
-<li>'dataglove' returns: ndarray</li>
-<li>'movements' returns: ndarray</li>
-<li>'electrodes'</li>
-<li>'surface'</li>
-<li>'freesurfer'</li>
-</ul>
-<h2 id="event_type">Event_Type</h2>
-<ul>
-<li>cues : all cues (to open and close)</li>
-<li>open : cues to open fingers</li>
-<li>close : cues to close fingers</li>
-<li>movements : all actual movements (from dataglove)</li>
-<li>extension : actual extension of all fingers</li>
-<li>flexion : actual flexion of all fingers</li>
-</ul></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def load(what, subject, run=None, acq=None, event_type=None):
-    &#34;&#34;&#34;
+    f&#34;&#34;&#34;
     WHAT:
       - &#39;continuous&#39; returns: ChanTime, event_names, events_onsets
       - &#39;data&#39; returns: ChanTime, event_names
-      - &#39;aligned&#39; returns: ChanTime, event_names
+      -  {timepoints} returns: ChanTime, event_names
       - &#39;events&#39; returns: ndarray
       - &#39;dataglove&#39; returns: ndarray
       - &#39;movements&#39; returns: ndarray
@@ -299,9 +284,12 @@ def select_events(subject, run, t):
         run = str(run)
 
     if acq is None:
-        acq = &#39;*&#39;
+        if subject == &#39;ommen&#39;:
+            acq = &#39;blackrock&#39;
+        else:
+            acq = &#39;*&#39;
 
-    if what in (&#39;continuous&#39;, &#39;data&#39;, &#39;aligned&#39;):
+    if what in (&#39;continuous&#39;, &#39;data&#39;) or what in CRITICAL_TIMEPOINTS:
         pattern = f&#39;sub-{subject}_*_acq-{acq}_run-{run}_ieeg.eeg&#39;
         folder = BIDS_DIR
 
@@ -336,17 +324,17 @@ def select_events(subject, run, t):
         raise ValueError(&#39;You need to specify more parameters&#39;)
     filename = found[0]
 
-    if what in (&#39;continuous&#39;, &#39;data&#39;, &#39;aligned&#39;):
+    if what in (&#39;continuous&#39;, &#39;data&#39;) or what in CRITICAL_TIMEPOINTS:
         events, onsets = select_events(subject, run, event_type)
 
         if what == &#39;continuous&#39;:
             data = read_data(filename, event_onsets=onsets, continuous=True)
             return data, events, onsets
 
-        if what == &#39;aligned&#39;:
+        if what in CRITICAL_TIMEPOINTS:
             data = read_data(filename, event_onsets=onsets)
             offsets = main_func(data, events)
-            onsets = onsets + offsets[&#39;t_peak&#39;]
+            onsets = onsets + offsets[what]
 
         data = read_data(filename, event_onsets=onsets)
         return data, events

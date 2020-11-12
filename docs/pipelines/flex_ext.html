@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.viz API documentation</title>
-<meta name="description" content="Functions to plot the results of the analyses" />
+<title>fima.pipelines.flex_ext API documentation</title>
+<meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -17,70 +17,135 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.viz</code></h1>
+<h1 class="title">Module <code>fima.pipelines.flex_ext</code></h1>
 </header>
 <section id="section-intro">
-<p>Functions to plot the results of the analyses</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;Functions to plot the results of the analyses&#34;&#34;&#34;
-from .tfr_chan import plot_tfr
-from .tfr_time import plot_tfr_time
-from .surf import plot_surf
-from .utils import to_div, to_html, to_png
-from .freqtime import plot_conditions_per_chan</code></pre>
+<pre><code class="python">from scipy.stats import ttest_ind
+
+from ..spectrum import compute_timefreq, get_chan
+from ..parameters import SUBJECTS, FINGERS
+from ..read import load
+from ..utils import group_per_condition, create_bool
+
+
+def pipeline_flexext_all(event_type=&#39;cues&#39;, subject_only=None):
+    for subject, runs in SUBJECTS.items():
+        if subject_only is not None and subject != subject_only:
+            continue
+        for run in runs:
+            print(f&#39;{subject} / {run}&#39;)
+            try:
+                pipeline_flexext(subject, run, event_type)
+            except Exception as err:
+                print(err)
+
+
+def pipeline_flexext(subject, run, event_type=&#39;cues&#39;):
+
+    data, events = load(&#39;data&#39;, subject, run, event_type=event_type)
+
+    tf = compute_timefreq(data, baseline=False, mean=False)
+
+    tf_ch = get_chan(tf, baseline=True, time=(-1, 1), operator_name=&#39;amax&#39;)
+    tf_m = group_per_condition(tf_ch, events, &#39;mean&#39;)[0]
+    bool_chan = (tf_m.data[0] &gt; 15).any(axis=1)
+
+    for finger in FINGERS:
+        print(&#39;&#39;)
+        print(finger)
+        ev = finger + &#39; open&#39;
+        select_trl = create_bool(events, ev)
+        x0 = tf_ch.data[0][bool_chan, :][:, select_trl]
+
+        ev = finger + &#39; close&#39;
+        select_trl = create_bool(events, ev)
+        x1 = tf_ch.data[0][bool_chan, :][:, select_trl]
+
+        t = ttest_ind(x0, x1, axis=1)
+
+        for i, chan in enumerate(tf_ch.chan[0][bool_chan]):
+            if t.pvalue[i] &gt; 0.05:
+                continue
+            if t.statistic[i] &gt; 0:
+                print(f&#39;chan &#34;{chan}&#34; has higher power for &#34;extension&#34; than &#34;flexion&#34;&#39;)
+            else:
+                print(f&#39;chan &#34;{chan}&#34; has higher power for &#34;flexion&#34; than &#34;extension&#34;&#39;)</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="fima.viz.align" href="align.html">fima.viz.align</a></code></dt>
+<dt id="fima.pipelines.flex_ext.pipeline_flexext"><code class="name flex">
+<span>def <span class="ident">pipeline_flexext</span></span>(<span>subject, run, event_type='cues')</span>
+</code></dt>
 <dd>
 <div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pipeline_flexext(subject, run, event_type=&#39;cues&#39;):
+
+    data, events = load(&#39;data&#39;, subject, run, event_type=event_type)
+
+    tf = compute_timefreq(data, baseline=False, mean=False)
+
+    tf_ch = get_chan(tf, baseline=True, time=(-1, 1), operator_name=&#39;amax&#39;)
+    tf_m = group_per_condition(tf_ch, events, &#39;mean&#39;)[0]
+    bool_chan = (tf_m.data[0] &gt; 15).any(axis=1)
+
+    for finger in FINGERS:
+        print(&#39;&#39;)
+        print(finger)
+        ev = finger + &#39; open&#39;
+        select_trl = create_bool(events, ev)
+        x0 = tf_ch.data[0][bool_chan, :][:, select_trl]
+
+        ev = finger + &#39; close&#39;
+        select_trl = create_bool(events, ev)
+        x1 = tf_ch.data[0][bool_chan, :][:, select_trl]
+
+        t = ttest_ind(x0, x1, axis=1)
+
+        for i, chan in enumerate(tf_ch.chan[0][bool_chan]):
+            if t.pvalue[i] &gt; 0.05:
+                continue
+            if t.statistic[i] &gt; 0:
+                print(f&#39;chan &#34;{chan}&#34; has higher power for &#34;extension&#34; than &#34;flexion&#34;&#39;)
+            else:
+                print(f&#39;chan &#34;{chan}&#34; has higher power for &#34;flexion&#34; than &#34;extension&#34;&#39;)</code></pre>
+</details>
 </dd>
-<dt><code class="name"><a title="fima.viz.continuous" href="continuous.html">fima.viz.continuous</a></code></dt>
+<dt id="fima.pipelines.flex_ext.pipeline_flexext_all"><code class="name flex">
+<span>def <span class="ident">pipeline_flexext_all</span></span>(<span>event_type='cues', subject_only=None)</span>
+</code></dt>
 <dd>
 <div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.dataglove" href="dataglove.html">fima.viz.dataglove</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.finger_channels" href="finger_channels.html">fima.viz.finger_channels</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.fitting" href="fitting.html">fima.viz.fitting</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.freqtime" href="freqtime.html">fima.viz.freqtime</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.surf" href="surf.html">fima.viz.surf</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.tfr_chan" href="tfr_chan.html">fima.viz.tfr_chan</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.tfr_time" href="tfr_time.html">fima.viz.tfr_time</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.utils" href="utils.html">fima.viz.utils</a></code></dt>
-<dd>
-<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pipeline_flexext_all(event_type=&#39;cues&#39;, subject_only=None):
+    for subject, runs in SUBJECTS.items():
+        if subject_only is not None and subject != subject_only:
+            continue
+        for run in runs:
+            print(f&#39;{subject} / {run}&#39;)
+            try:
+                pipeline_flexext(subject, run, event_type)
+            except Exception as err:
+                print(err)</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -93,21 +158,13 @@ from .freqtime import plot_conditions_per_chan</code></pre>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="fima" href="../index.html">fima</a></code></li>
+<li><code><a title="fima.pipelines" href="index.html">fima.pipelines</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="fima.viz.align" href="align.html">fima.viz.align</a></code></li>
-<li><code><a title="fima.viz.continuous" href="continuous.html">fima.viz.continuous</a></code></li>
-<li><code><a title="fima.viz.dataglove" href="dataglove.html">fima.viz.dataglove</a></code></li>
-<li><code><a title="fima.viz.finger_channels" href="finger_channels.html">fima.viz.finger_channels</a></code></li>
-<li><code><a title="fima.viz.fitting" href="fitting.html">fima.viz.fitting</a></code></li>
-<li><code><a title="fima.viz.freqtime" href="freqtime.html">fima.viz.freqtime</a></code></li>
-<li><code><a title="fima.viz.surf" href="surf.html">fima.viz.surf</a></code></li>
-<li><code><a title="fima.viz.tfr_chan" href="tfr_chan.html">fima.viz.tfr_chan</a></code></li>
-<li><code><a title="fima.viz.tfr_time" href="tfr_time.html">fima.viz.tfr_time</a></code></li>
-<li><code><a title="fima.viz.utils" href="utils.html">fima.viz.utils</a></code></li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="fima.pipelines.flex_ext.pipeline_flexext" href="#fima.pipelines.flex_ext.pipeline_flexext">pipeline_flexext</a></code></li>
+<li><code><a title="fima.pipelines.flex_ext.pipeline_flexext_all" href="#fima.pipelines.flex_ext.pipeline_flexext_all">pipeline_flexext_all</a></code></li>
 </ul>
 </li>
 </ul>

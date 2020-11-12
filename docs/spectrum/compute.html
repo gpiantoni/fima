@@ -105,16 +105,16 @@ def get_chantime(tf, freq=None, baseline=False):
     return out
 
 
-def get_chan(tf, freq=None, time=None):
+def get_chan(tf, freq=None, baseline=False, time=None, operator_name=&#39;mean&#39;):
     if time is None:
         time = P[&#39;spectrum&#39;][&#39;select&#39;][&#39;time&#39;]
-    tf = get_chantime(tf, freq=freq)
+    tf = get_chantime(tf, freq=freq, baseline=baseline)
     return math(
         select(
             tf,
             time=time,
             ),
-        operator_name=&#39;mean&#39;,
+        operator_name=operator_name,
         axis=&#39;time&#39;)</code></pre>
 </details>
 </section>
@@ -185,7 +185,7 @@ def get_chan(tf, freq=None, time=None):
 </details>
 </dd>
 <dt id="fima.spectrum.compute.get_chan"><code class="name flex">
-<span>def <span class="ident">get_chan</span></span>(<span>tf, freq=None, time=None)</span>
+<span>def <span class="ident">get_chan</span></span>(<span>tf, freq=None, baseline=False, time=None, operator_name='mean')</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -193,16 +193,16 @@ def get_chan(tf, freq=None, time=None):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_chan(tf, freq=None, time=None):
+<pre><code class="python">def get_chan(tf, freq=None, baseline=False, time=None, operator_name=&#39;mean&#39;):
     if time is None:
         time = P[&#39;spectrum&#39;][&#39;select&#39;][&#39;time&#39;]
-    tf = get_chantime(tf, freq=freq)
+    tf = get_chantime(tf, freq=freq, baseline=baseline)
     return math(
         select(
             tf,
             time=time,
             ),
-        operator_name=&#39;mean&#39;,
+        operator_name=operator_name,
         axis=&#39;time&#39;)</code></pre>
 </details>
 </dd>

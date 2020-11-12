@@ -32,6 +32,7 @@ from ..pipelines import (
     pipeline_spectrum_all,
     pipeline_fitting_all,
     pipeline_fingers_all,
+    pipeline_flexext_all,
     )
 
 from ..parameters import P
@@ -57,6 +58,15 @@ def main():
         help=&#39;Compute Time-Frequency Analysis&#39;,
         )
     action.set_defaults(function=&#39;spectrum&#39;)
+    action.add_argument(
+        &#39;-S&#39;, &#39;--subject&#39;, default=None,
+        help=&#39;Run analysis only on one subject&#39;)
+
+    action = list_pipelines.add_parser(
+        &#39;flex_ext&#39;,
+        help=&#39;&#39;,
+        )
+    action.set_defaults(function=&#39;flex_ext&#39;)
     action.add_argument(
         &#39;-S&#39;, &#39;--subject&#39;, default=None,
         help=&#39;Run analysis only on one subject&#39;)
@@ -101,6 +111,10 @@ def main():
 
     elif args.function == &#39;spectrum&#39;:
         pipeline_spectrum_all(
+            subject_only=args.subject)
+
+    elif args.function == &#39;flex_ext&#39;:
+        pipeline_flexext_all(
             subject_only=args.subject)
 
     elif args.function == &#39;fingers&#39;:
@@ -158,6 +172,15 @@ if __name__ == &#39;__main__&#39;:
         help=&#39;Run analysis only on one subject&#39;)
 
     action = list_pipelines.add_parser(
+        &#39;flex_ext&#39;,
+        help=&#39;&#39;,
+        )
+    action.set_defaults(function=&#39;flex_ext&#39;)
+    action.add_argument(
+        &#39;-S&#39;, &#39;--subject&#39;, default=None,
+        help=&#39;Run analysis only on one subject&#39;)
+
+    action = list_pipelines.add_parser(
         &#39;fingers&#39;,
         help=&#39;Analyze each finger individually&#39;,
         )
@@ -197,6 +220,10 @@ if __name__ == &#39;__main__&#39;:
 
     elif args.function == &#39;spectrum&#39;:
         pipeline_spectrum_all(
+            subject_only=args.subject)
+
+    elif args.function == &#39;flex_ext&#39;:
+        pipeline_flexext_all(
             subject_only=args.subject)
 
     elif args.function == &#39;fingers&#39;:
