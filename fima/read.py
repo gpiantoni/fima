@@ -73,7 +73,10 @@ def load(what, subject, run=None, acq=None, event_type=None):
         run = str(run)
 
     if acq is None:
-        acq = '*'
+        if subject == 'ommen':
+            acq = 'blackrock'
+        else:
+            acq = '*'
 
     if what in ('continuous', 'data') or what in CRITICAL_TIMEPOINTS:
         pattern = f'sub-{subject}_*_acq-{acq}_run-{run}_ieeg.eeg'
