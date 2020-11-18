@@ -1,5 +1,6 @@
 """Read the data, based on event type and onset time"""
-from numpy import genfromtxt, isin, isnan
+from numpy import genfromtxt, isin, isnan, empty, NaN
+from numpy.lib.recfunctions import append_fields
 from bidso.objects import Electrodes
 from wonambi.attr import Freesurfer
 
@@ -95,7 +96,7 @@ def load(what, subject, run=None, acq=None, event_type=None):
         folder = FREESURFER_DIR
 
     elif what == 'dataglove':
-        pattern = f'sub-{subject}_*_rec-dataglove_run-{run}_physio.tsv.gz'
+        pattern = f'sub-{subject}_*_run-{run}_recording-dataglove_physio.tsv.gz'
         folder = BIDS_DIR
 
     elif what == 'movements':
@@ -152,14 +153,26 @@ def load(what, subject, run=None, acq=None, event_type=None):
         return genfromtxt(filename, delimiter='\t', skip_header=1, dtype=dtypes)
 
     elif what == 'events':
+        with filename.open() as f:
+            x = f.readline()
+        n_columns = x.count('\t') + 1
         dtypes = [
             ('onset', 'float'),
             ('duration', 'float'),
             ('trial_type', 'U4096'),
-            ('response_time', 'float'),  # if -1, it means that we can reject trial
             ('value', 'int')
             ]
-        return genfromtxt(filename, delimiter='\t', skip_header=1, dtype=dtypes)
+        if n_columns == 5:
+            dtypes.insert(3, ('response_time', 'float'))  # if -1, it means that we can reject trial
+
+        events = genfromtxt(filename, delimiter='\t', skip_header=1, dtype=dtypes)
+
+        if n_columns == 4:
+            x = empty(len(events), dtype='float')
+            x.fill(NaN)
+            events = append_fields(events, 'response_time', x, usemask=False)
+
+        return events
 
 
 def select_events(subject, run, t):

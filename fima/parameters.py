@@ -13,7 +13,7 @@ else:
     PROJ_DIR = Path('/Fridge/users/giovanni/projects/finger_mapping')
 
 SCRIPTS_DIR = PROJ_DIR / 'scripts'
-BIDS_DIR = PROJ_DIR / 'subjects'
+BIDS_DIR = PROJ_DIR / 'subjects2'
 FREESURFER_DIR = PROJ_DIR / 'freesurfer/'
 
 RESULTS_DIR = PROJ_DIR / 'results'
@@ -73,20 +73,78 @@ P = dict(
 
 
 SUBJECTS = {
-    'drouwen': ['1', ],
-    'duiven': ['1', '2'],
-    'franeker': ['1', '2'],
-    'heek': ['1', '2'],
-    'intraop008': ['1', ],
-    'intraop013': ['1', '2'],
-    'intraop016': ['1', '2'],
-    'itens': ['1', '2', '3'],
-    'lemmer': ['1', '2'],
-    'ommen': ['1', '2'],
-    'veere': ['1', ],
-    'vledder': ['1', '2', '3'],
-    'warmond': ['1', '2'],
-    'som705': ['01', ],
+    'drouwen': {
+        '1': [],
+        },
+    'duiven': {
+        '1': [
+            (237, 243),
+            ],
+        '2': [],
+        },
+    'franeker': {
+        '1': [],
+        '2': [],
+        },
+    'heek': {
+        '1': [
+            (190, 194),
+            ],
+        '2': [
+            (21, 28),
+            ],
+        },
+    'intraop008': {
+        '1': [
+            (85, 86),
+            (112.5, 113),
+            (345, 346),
+            ],
+        },
+    'intraop013': {
+        '1': [
+            (36, 37),
+            (63.5, 64.5),
+            ],
+        '2': [
+            (27.5, 29.5),
+            (33.5, 40),
+            (247.5, 249),
+            (257, 261),
+            ],
+        },
+    'intraop016': {
+        '1': [],
+        },
+    'itens': {
+        '1': [
+            (215, 216),
+            ],
+        '2': [],
+        '3': [],
+        },
+    'lemmer': {
+        '1': [],
+        '2': [],
+        },
+    'ommen': {
+        '1': [],
+        '2': [],
+        },
+    'veere': {
+        '1': [],
+        },
+    'vledder': {
+        '2': [],
+        '3': [],
+        },
+    'warmond': {
+        '1': [],
+        '2': [],
+        },
+    'som705': {
+        '01': [],
+        },
     }
 
 MOVEMENT_SYMBOL_DATA = {
