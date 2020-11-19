@@ -6,9 +6,9 @@ from wonambi.attr import Freesurfer
 
 from .preproc import read_data
 from .dataglove.read_dataglove import read_physio
-from .parameters import BIDS_DIR, SCRIPTS_DIR, FREESURFER_DIR
 from .preproc.elec import read_surf
 from .align.maxmin import main_func, CRITICAL_TIMEPOINTS
+from .parameters import BIDS_DIR, SCRIPTS_DIR, FREESURFER_DIR, SUBJECTS
 
 
 FINGERS_OPEN = [
@@ -119,6 +119,7 @@ def load(what, subject, run=None, acq=None, event_type=None):
 
         if what == 'continuous':
             data = read_data(filename, event_onsets=onsets, continuous=True)
+            data = _hide_artifacts(data, SUBJECTS[subject][run])
             return data, events, onsets
 
         if what in CRITICAL_TIMEPOINTS:
@@ -225,3 +226,12 @@ def select_events(subject, run, t):
     event_onsets = events['onset'][i_evt]
     event_types = events['trial_type'][i_evt]
     return event_types, event_onsets
+
+
+def _hide_artifacts(data, periods):
+
+    for p in periods:
+        i = (p[0] < data.time[0]) & (data.time[0] <= p[1])
+        data.data[0][:, i] = NaN
+
+    return data
