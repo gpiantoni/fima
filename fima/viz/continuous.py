@@ -1,13 +1,16 @@
 import plotly.graph_objs as go
 
+from .utils import select_significant_channels
 from ..viz import to_div
 from ..parameters import FINGER_COLOR, MOVEMENT_LINE
 
 
 def plot_continuous(tf_cht, onsets, events):
 
+    chans = select_significant_channels(tf_cht, onsets)
+
     divs = []
-    for chan in tf_cht.chan[0]:
+    for chan in chans:
         fig = plot_continuous_per_chan(tf_cht, onsets, events, chan)
         if fig is None:
             continue
@@ -18,8 +21,6 @@ def plot_continuous(tf_cht, onsets, events):
 
 def plot_continuous_per_chan(tf_cht, onsets, events, chan):
     dat = tf_cht(trial=0, trial_axis='trial000000', chan=chan)
-    if max(abs(dat)) < 20:
-        return None
 
     fig = go.Figure(data=[
         go.Scatter(

@@ -1,6 +1,6 @@
 """Miscellaneous functions that might be useful across modules"""
 from bidso import file_Core
-from numpy import argmax, unravel_index, zeros, std, sqrt, median, moveaxis
+from numpy import argmax, unravel_index, zeros, std, sqrt, median, moveaxis, NaN
 from ast import literal_eval
 from numpy import arange, array, clip, where
 from plotly.colors import sequential, cyclical, diverging
@@ -139,3 +139,24 @@ def create_bool(events, to_select):
         if evt.startswith(to_select):
             i_finger[i] = True
     return i_finger
+
+
+def hide_artifacts(data, periods):
+    """Cover artifact periods with NaN.
+
+    Parameters
+    ----------
+    data : instance of wonambi.Data
+        data can be raw data or time-frequency data
+    periods : list of tuple of 2 float
+        list of start and end times that should be covered in NaN
+
+    Returns
+    -------
+    instance of wonambi.Data
+    """
+    for p in periods:
+        i = (p[0] < data.time[0]) & (data.time[0] <= p[1])
+        data.data[0][:, i] = NaN
+
+    return data

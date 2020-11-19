@@ -31,7 +31,7 @@ def pipeline_continuous(subject, run, event_type='cues', baseline=False):
     """
     data, events, onsets = load('continuous', subject, run, event_type=event_type)
 
-    tf = compute_timefreq(data, baseline=False, mean=False)
+    tf = compute_timefreq(data, artifacts=SUBJECTS[subject][run], baseline=False, mean=False)
     tf_cht = get_chantime(tf)
     if baseline:
         tf_cht = apply_baseline_to_continuous(tf_cht, onsets)

@@ -1,4 +1,8 @@
 from plotly.offline import plot, get_plotlyjs
+from wonambi.trans import select
+
+from numpy import isnan, array
+from scipy.stats import ttest_rel
 
 from ..parameters import P, MOVEMENT_SYMBOL_DATA, MOVEMENT_SYMBOL_MODEL
 from ..utils import get_color_for_val
@@ -107,3 +111,42 @@ def to_png(fig, png_name):
     png_name.parent.mkdir(exist_ok=True, parents=True)
     with png_name.open('wb') as f:
         f.write(fig.to_image('png'))
+
+
+def select_significant_channels(data, onsets, threshold=0.05):
+    """Select channels that show a significant difference between the period
+    before onset and the period after the onset.
+
+    Parameters
+    ----------
+    data : instance of wonambi.data
+        continuous data (already converted to z-score or dB)
+    onsets : array
+        array of
+    threshold : float
+        p-value to consider it significant
+
+    Returns
+    -------
+    list of str
+        list of significant array
+    """
+    PRESTIM = 1
+    POSTSTIM = 1
+    v_pre = []
+    v_post = []
+    for on in onsets:
+        d = select(data, time=(on - PRESTIM, on))
+        v_pre.append(d(trial=0, trial_axis='trial000000').mean(axis=1))
+        d = select(data, time=(on, on + POSTSTIM))
+        v_post.append(d(trial=0, trial_axis='trial000000').mean(axis=1))
+
+    v_pre = array(v_pre)
+    v_post = array(v_post)
+
+    artifact = isnan(v_pre[:, 0]) | isnan(v_post[:, 0])
+    res = ttest_rel(v_post[~artifact, :], v_pre[~artifact, :], axis=0)
+
+    i_significant = (res.pvalue <= 0.05)
+    significant_chan = data.chan[0][i_significant]
+    return significant_chan
