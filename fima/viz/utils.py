@@ -107,7 +107,7 @@ def to_png(fig, png_name):
         f.write(fig.to_image('png'))
 
 
-def select_significant_channels(data, onsets, threshold=0.05):
+def select_significant_channels(data, onsets, threshold=0.0005):
     """Select channels that show a significant difference between the period
     before onset and the period after the onset.
 
@@ -141,12 +141,12 @@ def select_significant_channels(data, onsets, threshold=0.05):
     artifact = isnan(v_pre[:, 0]) | isnan(v_post[:, 0])
     res = ttest_rel(v_post[~artifact, :], v_pre[~artifact, :], axis=0)
 
-    i_significant = (res.pvalue <= 0.05)
+    i_significant = (res.pvalue <= threshold)
     significant_chan = data.chan[0][i_significant]
 
     out = []
     for i in where(i_significant)[0]:
         out.append(f'{data.chan[0][i]:<6}:{res.pvalue[i]: .3f}')
-    lg.debug('; '.join(out))
+    lg.info('; '.join(out))
 
     return significant_chan

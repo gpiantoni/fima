@@ -133,7 +133,7 @@ def to_png(fig, png_name):
         f.write(fig.to_image(&#39;png&#39;))
 
 
-def select_significant_channels(data, onsets, threshold=0.05):
+def select_significant_channels(data, onsets, threshold=0.0005):
     &#34;&#34;&#34;Select channels that show a significant difference between the period
     before onset and the period after the onset.
 
@@ -167,13 +167,13 @@ def select_significant_channels(data, onsets, threshold=0.05):
     artifact = isnan(v_pre[:, 0]) | isnan(v_post[:, 0])
     res = ttest_rel(v_post[~artifact, :], v_pre[~artifact, :], axis=0)
 
-    i_significant = (res.pvalue &lt;= 0.05)
+    i_significant = (res.pvalue &lt;= threshold)
     significant_chan = data.chan[0][i_significant]
 
     out = []
     for i in where(i_significant)[0]:
         out.append(f&#39;{data.chan[0][i]:&lt;6}:{res.pvalue[i]: .3f}&#39;)
-    lg.debug(&#39;; &#39;.join(out))
+    lg.info(&#39;; &#39;.join(out))
 
     return significant_chan</code></pre>
 </details>
@@ -239,7 +239,7 @@ def select_significant_channels(data, onsets, threshold=0.05):
 </details>
 </dd>
 <dt id="fima.viz.utils.select_significant_channels"><code class="name flex">
-<span>def <span class="ident">select_significant_channels</span></span>(<span>data, onsets, threshold=0.05)</span>
+<span>def <span class="ident">select_significant_channels</span></span>(<span>data, onsets, threshold=0.0005)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Select channels that show a significant difference between the period
@@ -262,7 +262,7 @@ before onset and the period after the onset.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def select_significant_channels(data, onsets, threshold=0.05):
+<pre><code class="python">def select_significant_channels(data, onsets, threshold=0.0005):
     &#34;&#34;&#34;Select channels that show a significant difference between the period
     before onset and the period after the onset.
 
@@ -296,13 +296,13 @@ before onset and the period after the onset.</p>
     artifact = isnan(v_pre[:, 0]) | isnan(v_post[:, 0])
     res = ttest_rel(v_post[~artifact, :], v_pre[~artifact, :], axis=0)
 
-    i_significant = (res.pvalue &lt;= 0.05)
+    i_significant = (res.pvalue &lt;= threshold)
     significant_chan = data.chan[0][i_significant]
 
     out = []
     for i in where(i_significant)[0]:
         out.append(f&#39;{data.chan[0][i]:&lt;6}:{res.pvalue[i]: .3f}&#39;)
-    lg.debug(&#39;; &#39;.join(out))
+    lg.info(&#39;; &#39;.join(out))
 
     return significant_chan</code></pre>
 </details>

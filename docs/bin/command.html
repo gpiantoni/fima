@@ -115,6 +115,7 @@ def main():
         LEVEL = DEBUG
         FORMAT = &#39;{asctime:&lt;10}{levelname:&lt;8}{filename:&lt;20} (l.{lineno: 4d}): {message}&#39;
 
+    lg.setLevel(LEVEL)
     DATE_FORMAT = &#39;%H:%M:%S&#39;
     handler = StreamHandler()
     handler.setLevel(LEVEL)
@@ -232,6 +233,7 @@ if __name__ == &#39;__main__&#39;:
         LEVEL = DEBUG
         FORMAT = &#39;{asctime:&lt;10}{levelname:&lt;8}{filename:&lt;20} (l.{lineno: 4d}): {message}&#39;
 
+    lg.setLevel(LEVEL)
     DATE_FORMAT = &#39;%H:%M:%S&#39;
     handler = StreamHandler()
     handler.setLevel(LEVEL)

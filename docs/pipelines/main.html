@@ -25,9 +25,13 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from logging import getLogger
+from functools import partial
+from multiprocessing import Pool
 
 from .continuous import pipeline_continuous
 from ..parameters import SUBJECTS
+
+N_CPU = 8
 
 
 lg = getLogger(__name__)
@@ -46,12 +50,19 @@ def pipeline_fima(pipeline=None, subject_only=None, parallel=False, kwargs=None)
     subject_only : str
         compute pipeline only for this participant
     &#34;&#34;&#34;
-    for subject, runs in SUBJECTS.items():
-        if subject_only is not None and subject != subject_only:
-            continue
-        for run in runs:
-            lg.info(f&#39;{subject} / {run}&#39;)
-            sub_pipeline(subject, run, pipeline, kwargs)
+    func = partial(sub_pipeline, pipeline=pipeline, kwargs=kwargs)
+    if parallel:
+        args = gen_subject_run()
+        with Pool(processes=N_CPU) as p:
+            p.starmap(func, args)
+
+    else:
+        for subject, runs in SUBJECTS.items():
+            if subject_only is not None and subject != subject_only:
+                continue
+
+            for run in runs:
+                lg.info(f&#39;{subject} / {run}&#39;)
 
 
 def sub_pipeline(subject, run, pipeline, kwargs):
@@ -78,7 +89,16 @@ def sub_pipeline(subject, run, pipeline, kwargs):
         pipeline_fitting_all(
             model_name=args.model,
             response=args.response,
-            subject_only=args.subject)</code></pre>
+            subject_only=args.subject)
+
+
+def gen_subject_run():
+    val = []
+    for subj, runs in SUBJECTS.items():
+        for run in runs:
+            val.append((subj, run))
+
+    return val</code></pre>
 </details>
 </section>
 <section>
@@ -88,6 +108,24 @@ def sub_pipeline(subject, run, pipeline, kwargs):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="fima.pipelines.main.gen_subject_run"><code class="name flex">
+<span>def <span class="ident">gen_subject_run</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def gen_subject_run():
+    val = []
+    for subj, runs in SUBJECTS.items():
+        for run in runs:
+            val.append((subj, run))
+
+    return val</code></pre>
+</details>
+</dd>
 <dt id="fima.pipelines.main.pipeline_fima"><code class="name flex">
 <span>def <span class="ident">pipeline_fima</span></span>(<span>pipeline=None, subject_only=None, parallel=False, kwargs=None)</span>
 </code></dt>
@@ -120,12 +158,19 @@ def sub_pipeline(subject, run, pipeline, kwargs):
     subject_only : str
         compute pipeline only for this participant
     &#34;&#34;&#34;
-    for subject, runs in SUBJECTS.items():
-        if subject_only is not None and subject != subject_only:
-            continue
-        for run in runs:
-            lg.info(f&#39;{subject} / {run}&#39;)
-            sub_pipeline(subject, run, pipeline, kwargs)</code></pre>
+    func = partial(sub_pipeline, pipeline=pipeline, kwargs=kwargs)
+    if parallel:
+        args = gen_subject_run()
+        with Pool(processes=N_CPU) as p:
+            p.starmap(func, args)
+
+    else:
+        for subject, runs in SUBJECTS.items():
+            if subject_only is not None and subject != subject_only:
+                continue
+
+            for run in runs:
+                lg.info(f&#39;{subject} / {run}&#39;)</code></pre>
 </details>
 </dd>
 <dt id="fima.pipelines.main.sub_pipeline"><code class="name flex">
@@ -182,6 +227,7 @@ def sub_pipeline(subject, run, pipeline, kwargs):
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="fima.pipelines.main.gen_subject_run" href="#fima.pipelines.main.gen_subject_run">gen_subject_run</a></code></li>
 <li><code><a title="fima.pipelines.main.pipeline_fima" href="#fima.pipelines.main.pipeline_fima">pipeline_fima</a></code></li>
 <li><code><a title="fima.pipelines.main.sub_pipeline" href="#fima.pipelines.main.sub_pipeline">sub_pipeline</a></code></li>
 </ul>

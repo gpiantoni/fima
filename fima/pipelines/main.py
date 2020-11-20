@@ -1,7 +1,11 @@
 from logging import getLogger
+from functools import partial
+from multiprocessing import Pool
 
 from .continuous import pipeline_continuous
 from ..parameters import SUBJECTS
+
+N_CPU = 8
 
 
 lg = getLogger(__name__)
@@ -20,12 +24,19 @@ def pipeline_fima(pipeline=None, subject_only=None, parallel=False, kwargs=None)
     subject_only : str
         compute pipeline only for this participant
     """
-    for subject, runs in SUBJECTS.items():
-        if subject_only is not None and subject != subject_only:
-            continue
-        for run in runs:
-            lg.info(f'{subject} / {run}')
-            sub_pipeline(subject, run, pipeline, kwargs)
+    func = partial(sub_pipeline, pipeline=pipeline, kwargs=kwargs)
+    if parallel:
+        args = gen_subject_run()
+        with Pool(processes=N_CPU) as p:
+            p.starmap(func, args)
+
+    else:
+        for subject, runs in SUBJECTS.items():
+            if subject_only is not None and subject != subject_only:
+                continue
+
+            for run in runs:
+                lg.info(f'{subject} / {run}')
 
 
 def sub_pipeline(subject, run, pipeline, kwargs):
@@ -53,3 +64,12 @@ def sub_pipeline(subject, run, pipeline, kwargs):
             model_name=args.model,
             response=args.response,
             subject_only=args.subject)
+
+
+def gen_subject_run():
+    val = []
+    for subj, runs in SUBJECTS.items():
+        for run in runs:
+            val.append((subj, run))
+
+    return val
