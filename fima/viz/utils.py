@@ -1,6 +1,6 @@
 from logging import getLogger
 
-from numpy import isnan, array
+from numpy import isnan, array, where
 from plotly.offline import plot, get_plotlyjs
 from scipy.stats import ttest_rel
 from wonambi.trans import select
@@ -68,6 +68,7 @@ def to_html(divs, filename):
         it exists
     """
     filename.parent.mkdir(exist_ok=True, parents=True)
+    lg.debug(f'Saving {len(divs)} plots to {filename}')
 
     html = '''
         <html>
@@ -142,4 +143,10 @@ def select_significant_channels(data, onsets, threshold=0.05):
 
     i_significant = (res.pvalue <= 0.05)
     significant_chan = data.chan[0][i_significant]
+
+    out = []
+    for i in where(i_significant)[0]:
+        out.append(f'{data.chan[0][i]:<6}:{res.pvalue[i]: .3f}')
+    lg.debug('; '.join(out))
+
     return significant_chan

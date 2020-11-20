@@ -51,16 +51,15 @@ def pipeline_fima(pipeline=None, subject_only=None, parallel=False, kwargs=None)
             continue
         for run in runs:
             lg.info(f&#39;{subject} / {run}&#39;)
-            try:
-                sub_pipeline(pipeline, subject, run)
-            except Exception as err:
-                print(err)
+            sub_pipeline(subject, run, pipeline, kwargs)
 
 
 def sub_pipeline(subject, run, pipeline, kwargs):
 
     if pipeline == &#39;continuous&#39;:
         pipeline_continuous(
+            subject,
+            run,
             baseline=kwargs[&#39;baseline&#39;],
             )
 
@@ -126,10 +125,7 @@ def sub_pipeline(subject, run, pipeline, kwargs):
             continue
         for run in runs:
             lg.info(f&#39;{subject} / {run}&#39;)
-            try:
-                sub_pipeline(pipeline, subject, run)
-            except Exception as err:
-                print(err)</code></pre>
+            sub_pipeline(subject, run, pipeline, kwargs)</code></pre>
 </details>
 </dd>
 <dt id="fima.pipelines.main.sub_pipeline"><code class="name flex">
@@ -145,6 +141,8 @@ def sub_pipeline(subject, run, pipeline, kwargs):
 
     if pipeline == &#39;continuous&#39;:
         pipeline_continuous(
+            subject,
+            run,
             baseline=kwargs[&#39;baseline&#39;],
             )
 

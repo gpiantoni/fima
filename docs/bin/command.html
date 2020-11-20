@@ -27,12 +27,13 @@
 <pre><code class="python">#!/usr/bin/env python3
 
 from argparse import ArgumentParser, RawTextHelpFormatter
-from logging import getLogger, INFO, DEBUG, basicConfig
+from logging import getLogger, INFO, DEBUG, StreamHandler, Formatter
 
 from ..pipelines import pipeline_fima
 from ..parameters import P
 
 lg = getLogger(&#39;fima&#39;)
+lg.setLevel(DEBUG)
 
 
 def main():
@@ -112,16 +113,24 @@ def main():
 
     elif args.log[:1].lower() == &#39;d&#39;:
         LEVEL = DEBUG
-        FORMAT = &#39;{asctime:&lt;10}{levelname:&lt;20}(l. {lineno: 5d}): {message}&#39;
+        FORMAT = &#39;{asctime:&lt;10}{levelname:&lt;8}{filename:&lt;20} (l.{lineno: 4d}): {message}&#39;
 
     DATE_FORMAT = &#39;%H:%M:%S&#39;
-    basicConfig(format=FORMAT, datefmt=DATE_FORMAT, style=&#39;{&#39;, level=LEVEL)
+    handler = StreamHandler()
+    handler.setLevel(LEVEL)
+    formatter = Formatter(fmt=FORMAT, datefmt=DATE_FORMAT, style=&#39;{&#39;)
+    handler.setFormatter(formatter)
+    lg.addHandler(handler)
 
     kwargs = {}
     if args.function == &#39;continuous&#39;:
         kwargs[&#39;baseline&#39;] = args.baseline
 
-    pipeline_fima(args.function, kwargs)
+    pipeline_fima(
+        args.function,
+        subject_only=args.subject,
+        parallel=args.parallel,
+        kwargs=kwargs)
 
 
 if __name__ == &#39;__main__&#39;:
@@ -221,16 +230,24 @@ if __name__ == &#39;__main__&#39;:
 
     elif args.log[:1].lower() == &#39;d&#39;:
         LEVEL = DEBUG
-        FORMAT = &#39;{asctime:&lt;10}{levelname:&lt;20}(l. {lineno: 5d}): {message}&#39;
+        FORMAT = &#39;{asctime:&lt;10}{levelname:&lt;8}{filename:&lt;20} (l.{lineno: 4d}): {message}&#39;
 
     DATE_FORMAT = &#39;%H:%M:%S&#39;
-    basicConfig(format=FORMAT, datefmt=DATE_FORMAT, style=&#39;{&#39;, level=LEVEL)
+    handler = StreamHandler()
+    handler.setLevel(LEVEL)
+    formatter = Formatter(fmt=FORMAT, datefmt=DATE_FORMAT, style=&#39;{&#39;)
+    handler.setFormatter(formatter)
+    lg.addHandler(handler)
 
     kwargs = {}
     if args.function == &#39;continuous&#39;:
         kwargs[&#39;baseline&#39;] = args.baseline
 
-    pipeline_fima(args.function, kwargs)</code></pre>
+    pipeline_fima(
+        args.function,
+        subject_only=args.subject,
+        parallel=args.parallel,
+        kwargs=kwargs)</code></pre>
 </details>
 </dd>
 </dl>

@@ -25,16 +25,15 @@ def pipeline_fima(pipeline=None, subject_only=None, parallel=False, kwargs=None)
             continue
         for run in runs:
             lg.info(f'{subject} / {run}')
-            try:
-                sub_pipeline(pipeline, subject, run)
-            except Exception as err:
-                print(err)
+            sub_pipeline(subject, run, pipeline, kwargs)
 
 
 def sub_pipeline(subject, run, pipeline, kwargs):
 
     if pipeline == 'continuous':
         pipeline_continuous(
+            subject,
+            run,
             baseline=kwargs['baseline'],
             )
 

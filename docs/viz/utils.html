@@ -26,7 +26,7 @@
 </summary>
 <pre><code class="python">from logging import getLogger
 
-from numpy import isnan, array
+from numpy import isnan, array, where
 from plotly.offline import plot, get_plotlyjs
 from scipy.stats import ttest_rel
 from wonambi.trans import select
@@ -94,6 +94,7 @@ def to_html(divs, filename):
         it exists
     &#34;&#34;&#34;
     filename.parent.mkdir(exist_ok=True, parents=True)
+    lg.debug(f&#39;Saving {len(divs)} plots to {filename}&#39;)
 
     html = &#39;&#39;&#39;
         &lt;html&gt;
@@ -168,6 +169,12 @@ def select_significant_channels(data, onsets, threshold=0.05):
 
     i_significant = (res.pvalue &lt;= 0.05)
     significant_chan = data.chan[0][i_significant]
+
+    out = []
+    for i in where(i_significant)[0]:
+        out.append(f&#39;{data.chan[0][i]:&lt;6}:{res.pvalue[i]: .3f}&#39;)
+    lg.debug(&#39;; &#39;.join(out))
+
     return significant_chan</code></pre>
 </details>
 </section>
@@ -291,6 +298,12 @@ before onset and the period after the onset.</p>
 
     i_significant = (res.pvalue &lt;= 0.05)
     significant_chan = data.chan[0][i_significant]
+
+    out = []
+    for i in where(i_significant)[0]:
+        out.append(f&#39;{data.chan[0][i]:&lt;6}:{res.pvalue[i]: .3f}&#39;)
+    lg.debug(&#39;; &#39;.join(out))
+
     return significant_chan</code></pre>
 </details>
 </dd>
@@ -358,6 +371,7 @@ it exists</dd>
         it exists
     &#34;&#34;&#34;
     filename.parent.mkdir(exist_ok=True, parents=True)
+    lg.debug(f&#39;Saving {len(divs)} plots to {filename}&#39;)
 
     html = &#39;&#39;&#39;
         &lt;html&gt;

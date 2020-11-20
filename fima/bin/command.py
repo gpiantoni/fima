@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser, RawTextHelpFormatter
-from logging import getLogger, INFO, DEBUG, basicConfig
+from logging import getLogger, INFO, DEBUG, StreamHandler, Formatter
 
 from ..pipelines import pipeline_fima
 from ..parameters import P
 
 lg = getLogger('fima')
+lg.setLevel(DEBUG)
 
 
 def main():
@@ -86,16 +87,24 @@ def main():
 
     elif args.log[:1].lower() == 'd':
         LEVEL = DEBUG
-        FORMAT = '{asctime:<10}{levelname:<20}(l. {lineno: 5d}): {message}'
+        FORMAT = '{asctime:<10}{levelname:<8}{filename:<20} (l.{lineno: 4d}): {message}'
 
     DATE_FORMAT = '%H:%M:%S'
-    basicConfig(format=FORMAT, datefmt=DATE_FORMAT, style='{', level=LEVEL)
+    handler = StreamHandler()
+    handler.setLevel(LEVEL)
+    formatter = Formatter(fmt=FORMAT, datefmt=DATE_FORMAT, style='{')
+    handler.setFormatter(formatter)
+    lg.addHandler(handler)
 
     kwargs = {}
     if args.function == 'continuous':
         kwargs['baseline'] = args.baseline
 
-    pipeline_fima(args.function, kwargs)
+    pipeline_fima(
+        args.function,
+        subject_only=args.subject,
+        parallel=args.parallel,
+        kwargs=kwargs)
 
 
 if __name__ == '__main__':

@@ -1,8 +1,12 @@
+from logging import getLogger
+
 import plotly.graph_objs as go
 
 from .utils import select_significant_channels
 from ..viz import to_div
 from ..parameters import FINGER_COLOR, MOVEMENT_LINE
+
+lg = getLogger(__name__)
 
 
 def plot_continuous(tf_cht, onsets, events):
@@ -11,6 +15,7 @@ def plot_continuous(tf_cht, onsets, events):
 
     divs = []
     for chan in chans:
+        lg.debug(f'Plotting {chan}')
         fig = plot_continuous_per_chan(tf_cht, onsets, events, chan)
         if fig is None:
             continue
