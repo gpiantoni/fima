@@ -1,4 +1,4 @@
-from numpy import mean, std, log10, moveaxis, concatenate
+from numpy import mean, std, log10, moveaxis, concatenate, nanmean, nanstd
 from wonambi.trans import select
 
 from ..parameters import P
@@ -12,8 +12,8 @@ def apply_baseline_to_continuous(tf, onsets, baseline='zscore'):
         v.append(x.data[0])
 
     A = concatenate(v, axis=1)
-    bline_m = A.mean(axis=1)[:, :, None]
-    bline_sd = A.std(axis=1)[:, :, None]
+    bline_m = nanmean(A, axis=1)[:, :, None]
+    bline_sd = nanstd(A, axis=1)[:, :, None]
 
     if baseline == 'zscore':
         tf.data[0] = (tf.data[0] - bline_m) / bline_sd

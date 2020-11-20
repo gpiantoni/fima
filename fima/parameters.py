@@ -17,15 +17,6 @@ BIDS_DIR = PROJ_DIR / 'subjects2'
 FREESURFER_DIR = PROJ_DIR / 'freesurfer/'
 
 RESULTS_DIR = PROJ_DIR / 'results'
-DATAGLOVE_DIR = RESULTS_DIR / 'dataglove'
-CONTINUOUS_DIR = RESULTS_DIR / 'continuous'
-OVERVIEW_DIR = RESULTS_DIR / 'data_quality'
-SPECTRUM_DIR = RESULTS_DIR / 'spectrum'
-FINGERS_DIR = RESULTS_DIR / 'fingers'
-FINGERBARS_DIR = RESULTS_DIR / 'finger_bars'
-FINGERCORR_DIR = RESULTS_DIR / 'finger_corr'
-FINGERCORREACH_DIR = RESULTS_DIR / 'finger_correach'
-FITTING_DIR = RESULTS_DIR / 'fitting'
 
 P = dict(
     read=dict(
@@ -78,7 +69,7 @@ SUBJECTS = {
         },
     'duiven': {
         '1': [
-            (237, 243),
+            (225, 243),
             ],
         '2': [],
         },

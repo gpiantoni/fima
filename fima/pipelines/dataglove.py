@@ -1,13 +1,7 @@
 from ..viz.dataglove import plot_dataglove
 from ..read import load
 from ..viz import to_div, to_html
-from ..parameters import DATAGLOVE_DIR, SUBJECTS
-
-
-def pipeline_dataglove_all():
-    for subject, runs in SUBJECTS.items():
-        for run in runs:
-            pipeline_dataglove(subject, run)
+from ..parameters import DATAGLOVE_DIR
 
 
 def pipeline_dataglove(subject, run):

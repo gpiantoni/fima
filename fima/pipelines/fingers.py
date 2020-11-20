@@ -11,24 +11,6 @@ from scipy.stats import norm as normdist
 from wonambi import Data
 
 
-def pipeline_fingers_all(event_type='cues', bars=False, corr=False, each=False):
-
-    for subject, runs in SUBJECTS.items():
-        for run in runs:
-            print(f'{subject} / {run}')
-            try:
-                if bars:
-                    pipeline_fingerbars(subject, run, event_type)
-                elif corr:
-                    pipeline_finger_correlations(subject, run, event_type)
-                elif each:
-                    pipeline_finger_correlations_each(subject, run, event_type)
-                else:
-                    pipeline_fingers(subject, run, event_type)
-            except Exception as err:
-                print(err)
-
-
 def pipeline_fingers(subject, run, event_type='cues'):
     v, chans = find_activity_per_finger(subject, run)
     fig = plot_finger_chan(v, chans)

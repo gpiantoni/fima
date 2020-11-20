@@ -6,18 +6,6 @@ from ..read import load
 from ..utils import group_per_condition, create_bool
 
 
-def pipeline_flexext_all(event_type='cues', subject_only=None):
-    for subject, runs in SUBJECTS.items():
-        if subject_only is not None and subject != subject_only:
-            continue
-        for run in runs:
-            print(f'{subject} / {run}')
-            try:
-                pipeline_flexext(subject, run, event_type)
-            except Exception as err:
-                print(err)
-
-
 def pipeline_flexext(subject, run, event_type='cues'):
 
     data, events = load('data', subject, run, event_type=event_type)

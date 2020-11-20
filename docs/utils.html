@@ -27,7 +27,7 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Miscellaneous functions that might be useful across modules&#34;&#34;&#34;
 from bidso import file_Core
-from numpy import argmax, unravel_index, zeros, std, sqrt, median, moveaxis
+from numpy import argmax, unravel_index, zeros, std, sqrt, median, moveaxis, NaN
 from ast import literal_eval
 from numpy import arange, array, clip, where
 from plotly.colors import sequential, cyclical, diverging
@@ -165,7 +165,28 @@ def create_bool(events, to_select):
     for i, evt in enumerate(events):
         if evt.startswith(to_select):
             i_finger[i] = True
-    return i_finger</code></pre>
+    return i_finger
+
+
+def hide_artifacts(data, periods):
+    &#34;&#34;&#34;Cover artifact periods with NaN.
+
+    Parameters
+    ----------
+    data : instance of wonambi.Data
+        data can be raw data or time-frequency data
+    periods : list of tuple of 2 float
+        list of start and end times that should be covered in NaN
+
+    Returns
+    -------
+    instance of wonambi.Data
+    &#34;&#34;&#34;
+    for p in periods:
+        i = (p[0] &lt; data.time[0]) &amp; (data.time[0] &lt;= p[1])
+        data.data[0][:, i] = NaN
+
+    return data</code></pre>
 </details>
 </section>
 <section>
@@ -348,6 +369,48 @@ point</p>
     return out, array(EVENTS)</code></pre>
 </details>
 </dd>
+<dt id="fima.utils.hide_artifacts"><code class="name flex">
+<span>def <span class="ident">hide_artifacts</span></span>(<span>data, periods)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Cover artifact periods with NaN.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>instance</code> of <code>wonambi.Data</code></dt>
+<dd>data can be raw data or time-frequency data</dd>
+<dt><strong><code>periods</code></strong> :&ensp;<code>list</code> of <code>tuple</code> of <code>2 float</code></dt>
+<dd>list of start and end times that should be covered in NaN</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>instance</code> of <code>wonambi.Data</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def hide_artifacts(data, periods):
+    &#34;&#34;&#34;Cover artifact periods with NaN.
+
+    Parameters
+    ----------
+    data : instance of wonambi.Data
+        data can be raw data or time-frequency data
+    periods : list of tuple of 2 float
+        list of start and end times that should be covered in NaN
+
+    Returns
+    -------
+    instance of wonambi.Data
+    &#34;&#34;&#34;
+    for p in periods:
+        i = (p[0] &lt; data.time[0]) &amp; (data.time[0] &lt;= p[1])
+        data.data[0][:, i] = NaN
+
+    return data</code></pre>
+</details>
+</dd>
 <dt id="fima.utils.make_name"><code class="name flex">
 <span>def <span class="ident">make_name</span></span>(<span>filename, event_type, ext='.html')</span>
 </code></dt>
@@ -415,11 +478,12 @@ point</p>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="fima.utils.create_bool" href="#fima.utils.create_bool">create_bool</a></code></li>
 <li><code><a title="fima.utils.find_max_point" href="#fima.utils.find_max_point">find_max_point</a></code></li>
 <li><code><a title="fima.utils.get_color_for_val" href="#fima.utils.get_color_for_val">get_color_for_val</a></code></li>
 <li><code><a title="fima.utils.group_per_condition" href="#fima.utils.group_per_condition">group_per_condition</a></code></li>
+<li><code><a title="fima.utils.hide_artifacts" href="#fima.utils.hide_artifacts">hide_artifacts</a></code></li>
 <li><code><a title="fima.utils.make_name" href="#fima.utils.make_name">make_name</a></code></li>
 </ul>
 </li>

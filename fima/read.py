@@ -8,7 +8,7 @@ from .preproc import read_data
 from .dataglove.read_dataglove import read_physio
 from .preproc.elec import read_surf
 from .align.maxmin import main_func, CRITICAL_TIMEPOINTS
-from .parameters import BIDS_DIR, SCRIPTS_DIR, FREESURFER_DIR, SUBJECTS
+from .parameters import BIDS_DIR, SCRIPTS_DIR, FREESURFER_DIR
 
 
 FINGERS_OPEN = [

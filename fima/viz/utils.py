@@ -1,20 +1,13 @@
-from plotly.offline import plot, get_plotlyjs
-from wonambi.trans import select
+from logging import getLogger
 
 from numpy import isnan, array
+from plotly.offline import plot, get_plotlyjs
 from scipy.stats import ttest_rel
+from wonambi.trans import select
 
-from ..parameters import P, MOVEMENT_SYMBOL_DATA, MOVEMENT_SYMBOL_MODEL
-from ..utils import get_color_for_val
+from ..parameters import FINGER_COLOR, MOVEMENT_SYMBOL_DATA, MOVEMENT_SYMBOL_MODEL
 
-
-FINGER_COLOR = {
-    'thumb': get_color_for_val(4, P['viz']['colorscale'], -1, 5),
-    'index': get_color_for_val(3, P['viz']['colorscale'], -1, 5),
-    'middle': get_color_for_val(2, P['viz']['colorscale'], -1, 5),
-    'ring': get_color_for_val(1, P['viz']['colorscale'], -1, 5),
-    'little': get_color_for_val(0, P['viz']['colorscale'], -1, 5),
-}
+lg = getLogger(__name__)
 
 
 def get_color_symbol(names):

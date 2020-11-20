@@ -10,28 +10,6 @@ from ..utils import find_max_point
 from wonambi.trans import math
 
 
-def pipeline_spectrum_all(event_type='cues', subject_only=None):
-    """Run pipeline to compute power spectrum on all the participants
-
-    Parameters
-    ----------
-    event_type : str
-        event type used to identify the trials (one of 'cues', 'open', 'close',
-        'movements', 'extension', 'flexion')
-    subject_only : str
-        compute pipeline only for this participant
-    """
-    for subject, runs in SUBJECTS.items():
-        if subject_only is not None and subject != subject_only:
-            continue
-        for run in runs:
-            print(f'{subject} / {run}')
-            try:
-                pipeline_spectrum(subject, run, event_type)
-            except Exception as err:
-                print(err)
-
-
 def pipeline_spectrum(subject, run, event_type='cues'):
     """Run pipeline to compute power spectrum on one participant, one run
 

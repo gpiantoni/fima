@@ -25,6 +25,10 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from plotly.offline import plot, get_plotlyjs
+from wonambi.trans import select
+
+from numpy import isnan, array
+from scipy.stats import ttest_rel
 
 from ..parameters import P, MOVEMENT_SYMBOL_DATA, MOVEMENT_SYMBOL_MODEL
 from ..utils import get_color_for_val
@@ -132,7 +136,46 @@ def to_png(fig, png_name):
     fig = fig.update_layout(width=1600, height=900)
     png_name.parent.mkdir(exist_ok=True, parents=True)
     with png_name.open(&#39;wb&#39;) as f:
-        f.write(fig.to_image(&#39;png&#39;))</code></pre>
+        f.write(fig.to_image(&#39;png&#39;))
+
+
+def select_significant_channels(data, onsets, threshold=0.05):
+    &#34;&#34;&#34;Select channels that show a significant difference between the period
+    before onset and the period after the onset.
+
+    Parameters
+    ----------
+    data : instance of wonambi.data
+        continuous data (already converted to z-score or dB)
+    onsets : array
+        array of
+    threshold : float
+        p-value to consider it significant
+
+    Returns
+    -------
+    list of str
+        list of significant array
+    &#34;&#34;&#34;
+    PRESTIM = 1
+    POSTSTIM = 1
+    v_pre = []
+    v_post = []
+    for on in onsets:
+        d = select(data, time=(on - PRESTIM, on))
+        v_pre.append(d(trial=0, trial_axis=&#39;trial000000&#39;).mean(axis=1))
+        d = select(data, time=(on, on + POSTSTIM))
+        v_post.append(d(trial=0, trial_axis=&#39;trial000000&#39;).mean(axis=1))
+
+    v_pre = array(v_pre)
+    v_post = array(v_post)
+
+    artifact = isnan(v_pre[:, 0]) | isnan(v_post[:, 0])
+    res = ttest_rel(v_post[~artifact, :], v_pre[~artifact, :], axis=0)
+
+    i_significant = (res.pvalue &lt;= 0.05)
+    significant_chan = data.chan[0][i_significant]
+    return significant_chan</code></pre>
 </details>
 </section>
 <section>
@@ -193,6 +236,69 @@ def to_png(fig, png_name):
         symbol_model.append(MOVEMENT_SYMBOL_MODEL[action])
 
     return color, symbol_data, symbol_model</code></pre>
+</details>
+</dd>
+<dt id="fima.viz.utils.select_significant_channels"><code class="name flex">
+<span>def <span class="ident">select_significant_channels</span></span>(<span>data, onsets, threshold=0.05)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Select channels that show a significant difference between the period
+before onset and the period after the onset.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>instance</code> of <code>wonambi.data</code></dt>
+<dd>continuous data (already converted to z-score or dB)</dd>
+<dt><strong><code>onsets</code></strong> :&ensp;<code>array</code></dt>
+<dd>array of</dd>
+<dt><strong><code>threshold</code></strong> :&ensp;<code>float</code></dt>
+<dd>p-value to consider it significant</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code> of <code>str</code></dt>
+<dd>list of significant array</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def select_significant_channels(data, onsets, threshold=0.05):
+    &#34;&#34;&#34;Select channels that show a significant difference between the period
+    before onset and the period after the onset.
+
+    Parameters
+    ----------
+    data : instance of wonambi.data
+        continuous data (already converted to z-score or dB)
+    onsets : array
+        array of
+    threshold : float
+        p-value to consider it significant
+
+    Returns
+    -------
+    list of str
+        list of significant array
+    &#34;&#34;&#34;
+    PRESTIM = 1
+    POSTSTIM = 1
+    v_pre = []
+    v_post = []
+    for on in onsets:
+        d = select(data, time=(on - PRESTIM, on))
+        v_pre.append(d(trial=0, trial_axis=&#39;trial000000&#39;).mean(axis=1))
+        d = select(data, time=(on, on + POSTSTIM))
+        v_post.append(d(trial=0, trial_axis=&#39;trial000000&#39;).mean(axis=1))
+
+    v_pre = array(v_pre)
+    v_post = array(v_post)
+
+    artifact = isnan(v_pre[:, 0]) | isnan(v_post[:, 0])
+    res = ttest_rel(v_post[~artifact, :], v_pre[~artifact, :], axis=0)
+
+    i_significant = (res.pvalue &lt;= 0.05)
+    significant_chan = data.chan[0][i_significant]
+    return significant_chan</code></pre>
 </details>
 </dd>
 <dt id="fima.viz.utils.to_div"><code class="name flex">
@@ -336,6 +442,7 @@ on plotly calling an external function to do the actual plotting (orca)</p></div
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="fima.viz.utils.get_color_symbol" href="#fima.viz.utils.get_color_symbol">get_color_symbol</a></code></li>
+<li><code><a title="fima.viz.utils.select_significant_channels" href="#fima.viz.utils.select_significant_channels">select_significant_channels</a></code></li>
 <li><code><a title="fima.viz.utils.to_div" href="#fima.viz.utils.to_div">to_div</a></code></li>
 <li><code><a title="fima.viz.utils.to_html" href="#fima.viz.utils.to_html">to_html</a></code></li>
 <li><code><a title="fima.viz.utils.to_png" href="#fima.viz.utils.to_png">to_png</a></code></li>
