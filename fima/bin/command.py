@@ -41,6 +41,12 @@ def main():
         help='Baseline correction with ' + P['spectrum']['baseline']['type'])
 
     action = list_pipelines.add_parser(
+        'dataglove',
+        help='Plot the time-course of the dataglove',
+        )
+    action.set_defaults(function='dataglove')
+
+    action = list_pipelines.add_parser(
         'spectrum',
         help='Compute Time-Frequency Analysis',
         )

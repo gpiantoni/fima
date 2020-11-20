@@ -133,9 +133,6 @@ SUBJECTS = {
         '1': [],
         '2': [],
         },
-    'som705': {
-        '01': [],
-        },
     }
 
 MOVEMENT_SYMBOL_DATA = {

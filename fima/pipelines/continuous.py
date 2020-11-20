@@ -42,5 +42,5 @@ def pipeline_continuous(subject, run, event_type='cues', baseline=False):
     lg.info(f'{subject:<10}/ {run} Plotting continuous')
     divs = plot_continuous(tf_cht, onsets, events)
 
-    html_file = RESULTS_DIR / 'continuous' / event_type / f'{subject}_run-{run}_{event_type}{baseline_name}.html'
+    html_file = RESULTS_DIR / 'dataglove' / event_type / f'{subject}_run-{run}_{event_type}{baseline_name}.html'
     to_html(divs, html_file)

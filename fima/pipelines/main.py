@@ -4,6 +4,7 @@ from multiprocessing import Pool
 from os import nice
 
 from .continuous import pipeline_continuous
+from .dataglove import pipeline_dataglove
 from ..parameters import SUBJECTS
 
 
@@ -35,7 +36,7 @@ def pipeline_fima(pipeline=None, subject_only=None, parallel=False, kwargs=None)
                 continue
 
             for run in runs:
-                lg.info(f'{subject} / {run}')
+                lg.info(f'{subject:<10}/ {run}')
                 func(subject, run)
 
 
@@ -46,6 +47,12 @@ def sub_pipeline(subject, run, pipeline, kwargs):
             subject,
             run,
             baseline=kwargs['baseline'],
+            )
+
+    elif pipeline == 'dataglove':
+        pipeline_dataglove(
+            subject,
+            run,
             )
 
     elif pipeline == 'spectrum':
