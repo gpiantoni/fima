@@ -1,11 +1,10 @@
 from logging import getLogger
 from functools import partial
 from multiprocessing import Pool
+from os import nice
 
 from .continuous import pipeline_continuous
 from ..parameters import SUBJECTS
-
-N_CPU = 8
 
 
 lg = getLogger(__name__)
@@ -27,7 +26,7 @@ def pipeline_fima(pipeline=None, subject_only=None, parallel=False, kwargs=None)
     func = partial(sub_pipeline, pipeline=pipeline, kwargs=kwargs)
     if parallel:
         args = gen_subject_run()
-        with Pool(processes=N_CPU) as p:
+        with Pool(initializer=be_nice) as p:
             p.starmap(func, args)
 
     else:
@@ -37,6 +36,7 @@ def pipeline_fima(pipeline=None, subject_only=None, parallel=False, kwargs=None)
 
             for run in runs:
                 lg.info(f'{subject} / {run}')
+                func(subject, run)
 
 
 def sub_pipeline(subject, run, pipeline, kwargs):
@@ -73,3 +73,8 @@ def gen_subject_run():
             val.append((subj, run))
 
     return val
+
+
+def be_nice():
+    nice(10)
+

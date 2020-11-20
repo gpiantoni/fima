@@ -23,23 +23,23 @@ def pipeline_continuous(subject, run, event_type='cues', baseline=False):
         event type used to identify the trials (one of 'cues', 'open', 'close',
         'movements', 'extension', 'flexion')
     """
-    lg.debug(f'Loading data for {subject} / {run} (events: {event_type})')
+    lg.info(f'{subject:<10}/ {run} Loading data for events: {event_type}')
     data, events, onsets = load('continuous', subject, run, event_type=event_type)
 
-    lg.debug('Computing timefreq (baseline=False, mean=False)')
+    lg.info(f'{subject:<10}/ {run} Computing timefreq (baseline=False, mean=False)')
     tf = compute_timefreq(data, artifacts=SUBJECTS[subject][run], baseline=False, mean=False)
 
-    lg.debug('Selecting frequency')
+    lg.info(f'{subject:<10}/ {run} Selecting frequency')
     tf_cht = get_chantime(tf)
 
     if baseline:
-        lg.debug('Applying baseline to continuous')
+        lg.info(f'{subject:<10}/ {run} Applying baseline to continuous')
         tf_cht = apply_baseline_to_continuous(tf_cht, onsets)
         baseline_name = '_' + P['spectrum']['baseline']['type']
     else:
         baseline_name = ''
 
-    lg.debug('Plotting continuous')
+    lg.info(f'{subject:<10}/ {run} Plotting continuous')
     divs = plot_continuous(tf_cht, onsets, events)
 
     html_file = RESULTS_DIR / 'continuous' / event_type / f'{subject}_run-{run}_{event_type}{baseline_name}.html'
