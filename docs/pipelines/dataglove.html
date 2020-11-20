@@ -27,13 +27,6 @@
 <pre><code class="python">from ..viz.dataglove import plot_dataglove
 from ..read import load
 from ..viz import to_div, to_html
-from ..parameters import DATAGLOVE_DIR, SUBJECTS
-
-
-def pipeline_dataglove_all():
-    for subject, runs in SUBJECTS.items():
-        for run in runs:
-            pipeline_dataglove(subject, run)
 
 
 def pipeline_dataglove(subject, run):
@@ -78,21 +71,6 @@ def pipeline_dataglove(subject, run):
     to_html([to_div(fig), ], DATAGLOVE_DIR / fig_name)</code></pre>
 </details>
 </dd>
-<dt id="fima.pipelines.dataglove.pipeline_dataglove_all"><code class="name flex">
-<span>def <span class="ident">pipeline_dataglove_all</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def pipeline_dataglove_all():
-    for subject, runs in SUBJECTS.items():
-        for run in runs:
-            pipeline_dataglove(subject, run)</code></pre>
-</details>
-</dd>
 </dl>
 </section>
 <section>
@@ -112,7 +90,6 @@ def pipeline_dataglove(subject, run):
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="fima.pipelines.dataglove.pipeline_dataglove" href="#fima.pipelines.dataglove.pipeline_dataglove">pipeline_dataglove</a></code></li>
-<li><code><a title="fima.pipelines.dataglove.pipeline_dataglove_all" href="#fima.pipelines.dataglove.pipeline_dataglove_all">pipeline_dataglove_all</a></code></li>
 </ul>
 </li>
 </ul>

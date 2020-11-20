@@ -2,7 +2,6 @@ from ..fingers.max_activity import find_activity_per_finger, find_tstat_per_fing
 from ..viz.finger_channels import plot_finger_chan
 from ..fingers.viz import plot_fingerbars
 from ..viz import to_div, to_html, plot_surf
-from ..parameters import FINGERS_DIR, SUBJECTS, FINGERBARS_DIR, FINGERCORR_DIR, FINGERCORREACH_DIR
 from ..fingers.correlation import plot_heatmap, plot_finger_chan_2
 from ..read import load
 

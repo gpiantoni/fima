@@ -32,18 +32,6 @@ from ..read import load
 from ..utils import group_per_condition, create_bool
 
 
-def pipeline_flexext_all(event_type=&#39;cues&#39;, subject_only=None):
-    for subject, runs in SUBJECTS.items():
-        if subject_only is not None and subject != subject_only:
-            continue
-        for run in runs:
-            print(f&#39;{subject} / {run}&#39;)
-            try:
-                pipeline_flexext(subject, run, event_type)
-            except Exception as err:
-                print(err)
-
-
 def pipeline_flexext(subject, run, event_type=&#39;cues&#39;):
 
     data, events = load(&#39;data&#39;, subject, run, event_type=event_type)
@@ -124,27 +112,6 @@ def pipeline_flexext(subject, run, event_type=&#39;cues&#39;):
                 print(f&#39;chan &#34;{chan}&#34; has higher power for &#34;flexion&#34; than &#34;extension&#34;&#39;)</code></pre>
 </details>
 </dd>
-<dt id="fima.pipelines.flex_ext.pipeline_flexext_all"><code class="name flex">
-<span>def <span class="ident">pipeline_flexext_all</span></span>(<span>event_type='cues', subject_only=None)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def pipeline_flexext_all(event_type=&#39;cues&#39;, subject_only=None):
-    for subject, runs in SUBJECTS.items():
-        if subject_only is not None and subject != subject_only:
-            continue
-        for run in runs:
-            print(f&#39;{subject} / {run}&#39;)
-            try:
-                pipeline_flexext(subject, run, event_type)
-            except Exception as err:
-                print(err)</code></pre>
-</details>
-</dd>
 </dl>
 </section>
 <section>
@@ -164,7 +131,6 @@ def pipeline_flexext(subject, run, event_type=&#39;cues&#39;):
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="fima.pipelines.flex_ext.pipeline_flexext" href="#fima.pipelines.flex_ext.pipeline_flexext">pipeline_flexext</a></code></li>
-<li><code><a title="fima.pipelines.flex_ext.pipeline_flexext_all" href="#fima.pipelines.flex_ext.pipeline_flexext_all">pipeline_flexext_all</a></code></li>
 </ul>
 </li>
 </ul>

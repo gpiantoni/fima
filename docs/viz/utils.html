@@ -24,23 +24,16 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from plotly.offline import plot, get_plotlyjs
-from wonambi.trans import select
+<pre><code class="python">from logging import getLogger
 
 from numpy import isnan, array
+from plotly.offline import plot, get_plotlyjs
 from scipy.stats import ttest_rel
+from wonambi.trans import select
 
-from ..parameters import P, MOVEMENT_SYMBOL_DATA, MOVEMENT_SYMBOL_MODEL
-from ..utils import get_color_for_val
+from ..parameters import FINGER_COLOR, MOVEMENT_SYMBOL_DATA, MOVEMENT_SYMBOL_MODEL
 
-
-FINGER_COLOR = {
-    &#39;thumb&#39;: get_color_for_val(4, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;index&#39;: get_color_for_val(3, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;middle&#39;: get_color_for_val(2, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;ring&#39;: get_color_for_val(1, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;little&#39;: get_color_for_val(0, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-}
+lg = getLogger(__name__)
 
 
 def get_color_symbol(names):

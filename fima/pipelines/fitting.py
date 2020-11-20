@@ -5,7 +5,6 @@ from ..utils import group_per_condition
 from ..spectrum.compute import compute_timefreq, get_chantime
 from ..read import load
 from ..viz import to_div, to_html
-from ..parameters import FITTING_DIR, SUBJECTS, P
 
 from numpy import nanmax
 from wonambi.trans import math

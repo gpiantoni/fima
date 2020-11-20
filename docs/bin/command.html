@@ -26,21 +26,33 @@
 </summary>
 <pre><code class="python">#!/usr/bin/env python3
 
-from argparse import ArgumentParser
-from ..pipelines import (
-    pipeline_continuous_all,
-    pipeline_spectrum_all,
-    pipeline_fitting_all,
-    pipeline_fingers_all,
-    pipeline_flexext_all,
-    )
+from argparse import ArgumentParser, RawTextHelpFormatter
+from logging import getLogger, INFO, DEBUG, basicConfig
 
+from ..pipelines import pipeline_fima
 from ..parameters import P
+
+lg = getLogger(&#39;fima&#39;)
 
 
 def main():
     &#34;&#34;&#34;Command line function to compute the analyzses&#34;&#34;&#34;
-    parser = ArgumentParser(description=&#39;Analysis finger mapping&#39;)
+    parser = ArgumentParser(
+        formatter_class=RawTextHelpFormatter,
+        description=&#39;Analysis finger mapping&#39;)
+
+    parser.add_argument(
+        &#39;-p&#39;, &#39;--parallel&#39;,
+        action=&#39;store_true&#39;,
+        help=&#39;Run analysis for all the subjects in parallel&#39;)
+    parser.add_argument(
+        &#39;-s&#39;, &#39;--subject&#39;, default=None,
+        help=&#39;Run analysis only on one subject&#39;)
+    parser.add_argument(
+        &#39;-l&#39;, &#39;--log&#39;,
+        default=&#39;info&#39;,
+        help=&#39;Logging level: info (default), debug&#39;,
+        )
 
     list_pipelines = parser.add_subparsers(title=&#39;Pipelines&#39;, help=&#39;&#39;)
 
@@ -58,18 +70,12 @@ def main():
         help=&#39;Compute Time-Frequency Analysis&#39;,
         )
     action.set_defaults(function=&#39;spectrum&#39;)
-    action.add_argument(
-        &#39;-S&#39;, &#39;--subject&#39;, default=None,
-        help=&#39;Run analysis only on one subject&#39;)
 
     action = list_pipelines.add_parser(
         &#39;flex_ext&#39;,
         help=&#39;&#39;,
         )
     action.set_defaults(function=&#39;flex_ext&#39;)
-    action.add_argument(
-        &#39;-S&#39;, &#39;--subject&#39;, default=None,
-        help=&#39;Run analysis only on one subject&#39;)
 
     action = list_pipelines.add_parser(
         &#39;fingers&#39;,
@@ -97,34 +103,25 @@ def main():
     action.add_argument(
         &#39;--response&#39;, default=None,
         help=&#39;If specify, use all the datapoints (options: &#34;mean&#34;)&#39;)
-    action.add_argument(
-        &#39;-S&#39;, &#39;--subject&#39;, default=None,
-        help=&#39;Run analysis only on one subject&#39;)
 
     args = parser.parse_args()
-    print(args)
 
+    if args.log[:1].lower() == &#39;i&#39;:
+        LEVEL = INFO
+        FORMAT = &#39;{asctime:&lt;10}{message}&#39;
+
+    elif args.log[:1].lower() == &#39;d&#39;:
+        LEVEL = DEBUG
+        FORMAT = &#39;{asctime:&lt;10}{levelname:&lt;20}(l. {lineno: 5d}): {message}&#39;
+
+    DATE_FORMAT = &#39;%H:%M:%S&#39;
+    basicConfig(format=FORMAT, datefmt=DATE_FORMAT, style=&#39;{&#39;, level=LEVEL)
+
+    kwargs = {}
     if args.function == &#39;continuous&#39;:
-        pipeline_continuous_all(
-            baseline=args.baseline,
-            )
+        kwargs[&#39;baseline&#39;] = args.baseline
 
-    elif args.function == &#39;spectrum&#39;:
-        pipeline_spectrum_all(
-            subject_only=args.subject)
-
-    elif args.function == &#39;flex_ext&#39;:
-        pipeline_flexext_all(
-            subject_only=args.subject)
-
-    elif args.function == &#39;fingers&#39;:
-        pipeline_fingers_all(bars=args.bars, corr=args.corr, each=args.each)
-
-    elif args.function == &#39;fitting&#39;:
-        pipeline_fitting_all(
-            model_name=args.model,
-            response=args.response,
-            subject_only=args.subject)
+    pipeline_fima(args.function, kwargs)
 
 
 if __name__ == &#39;__main__&#39;:
@@ -149,7 +146,22 @@ if __name__ == &#39;__main__&#39;:
 </summary>
 <pre><code class="python">def main():
     &#34;&#34;&#34;Command line function to compute the analyzses&#34;&#34;&#34;
-    parser = ArgumentParser(description=&#39;Analysis finger mapping&#39;)
+    parser = ArgumentParser(
+        formatter_class=RawTextHelpFormatter,
+        description=&#39;Analysis finger mapping&#39;)
+
+    parser.add_argument(
+        &#39;-p&#39;, &#39;--parallel&#39;,
+        action=&#39;store_true&#39;,
+        help=&#39;Run analysis for all the subjects in parallel&#39;)
+    parser.add_argument(
+        &#39;-s&#39;, &#39;--subject&#39;, default=None,
+        help=&#39;Run analysis only on one subject&#39;)
+    parser.add_argument(
+        &#39;-l&#39;, &#39;--log&#39;,
+        default=&#39;info&#39;,
+        help=&#39;Logging level: info (default), debug&#39;,
+        )
 
     list_pipelines = parser.add_subparsers(title=&#39;Pipelines&#39;, help=&#39;&#39;)
 
@@ -167,18 +179,12 @@ if __name__ == &#39;__main__&#39;:
         help=&#39;Compute Time-Frequency Analysis&#39;,
         )
     action.set_defaults(function=&#39;spectrum&#39;)
-    action.add_argument(
-        &#39;-S&#39;, &#39;--subject&#39;, default=None,
-        help=&#39;Run analysis only on one subject&#39;)
 
     action = list_pipelines.add_parser(
         &#39;flex_ext&#39;,
         help=&#39;&#39;,
         )
     action.set_defaults(function=&#39;flex_ext&#39;)
-    action.add_argument(
-        &#39;-S&#39;, &#39;--subject&#39;, default=None,
-        help=&#39;Run analysis only on one subject&#39;)
 
     action = list_pipelines.add_parser(
         &#39;fingers&#39;,
@@ -206,34 +212,25 @@ if __name__ == &#39;__main__&#39;:
     action.add_argument(
         &#39;--response&#39;, default=None,
         help=&#39;If specify, use all the datapoints (options: &#34;mean&#34;)&#39;)
-    action.add_argument(
-        &#39;-S&#39;, &#39;--subject&#39;, default=None,
-        help=&#39;Run analysis only on one subject&#39;)
 
     args = parser.parse_args()
-    print(args)
 
+    if args.log[:1].lower() == &#39;i&#39;:
+        LEVEL = INFO
+        FORMAT = &#39;{asctime:&lt;10}{message}&#39;
+
+    elif args.log[:1].lower() == &#39;d&#39;:
+        LEVEL = DEBUG
+        FORMAT = &#39;{asctime:&lt;10}{levelname:&lt;20}(l. {lineno: 5d}): {message}&#39;
+
+    DATE_FORMAT = &#39;%H:%M:%S&#39;
+    basicConfig(format=FORMAT, datefmt=DATE_FORMAT, style=&#39;{&#39;, level=LEVEL)
+
+    kwargs = {}
     if args.function == &#39;continuous&#39;:
-        pipeline_continuous_all(
-            baseline=args.baseline,
-            )
+        kwargs[&#39;baseline&#39;] = args.baseline
 
-    elif args.function == &#39;spectrum&#39;:
-        pipeline_spectrum_all(
-            subject_only=args.subject)
-
-    elif args.function == &#39;flex_ext&#39;:
-        pipeline_flexext_all(
-            subject_only=args.subject)
-
-    elif args.function == &#39;fingers&#39;:
-        pipeline_fingers_all(bars=args.bars, corr=args.corr, each=args.each)
-
-    elif args.function == &#39;fitting&#39;:
-        pipeline_fitting_all(
-            model_name=args.model,
-            response=args.response,
-            subject_only=args.subject)</code></pre>
+    pipeline_fima(args.function, kwargs)</code></pre>
 </details>
 </dd>
 </dl>

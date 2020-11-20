@@ -3,7 +3,6 @@ from numpy import argmax, empty, asanyarray, array, not_equal, nonzero, diff, ap
 
 from ..spectrum import compute_timefreq, get_chan, get_chantime
 from ..viz import plot_tfr, plot_tfr_time, to_div, to_html, plot_surf, plot_conditions_per_chan
-from ..parameters import SPECTRUM_DIR, SUBJECTS, P
 from ..read import load
 from ..utils import find_max_point
 

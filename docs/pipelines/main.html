@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.pipelines.continuous API documentation</title>
+<title>fima.pipelines.main API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.pipelines.continuous</code></h1>
+<h1 class="title">Module <code>fima.pipelines.main</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -26,50 +26,60 @@
 </summary>
 <pre><code class="python">from logging import getLogger
 
-from ..read import load
-from ..spectrum import compute_timefreq, get_chantime
-from ..spectrum.baseline import apply_baseline_to_continuous
-from ..parameters import RESULTS_DIR, SUBJECTS, P
-from ..viz import to_html
-from ..viz.continuous import plot_continuous
+from .continuous import pipeline_continuous
+from ..parameters import SUBJECTS
+
 
 lg = getLogger(__name__)
 
 
-def pipeline_continuous(subject, run, event_type=&#39;cues&#39;, baseline=False):
-    &#34;&#34;&#34;Run pipeline to compute power spectrum on one participant, one run
+def pipeline_fima(pipeline=None, subject_only=None, parallel=False, kwargs=None):
+    &#34;&#34;&#34;Run pipeline to compute power spectrum on all the participants
 
     Parameters
     ----------
-    subject : str
-        subject code
-    run : str
-        number of the run of interest
+    pipeline : str
+        one of the pipelines to run
     event_type : str
         event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
         &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
+    subject_only : str
+        compute pipeline only for this participant
     &#34;&#34;&#34;
-    lg.debug(f&#39;Loading data for {subject} / {run} (events: {event_type})&#39;)
-    data, events, onsets = load(&#39;continuous&#39;, subject, run, event_type=event_type)
+    for subject, runs in SUBJECTS.items():
+        if subject_only is not None and subject != subject_only:
+            continue
+        for run in runs:
+            lg.info(f&#39;{subject} / {run}&#39;)
+            try:
+                sub_pipeline(pipeline, subject, run)
+            except Exception as err:
+                print(err)
 
-    lg.debug(&#39;Computing timefreq (baseline=False, mean=False)&#39;)
-    tf = compute_timefreq(data, artifacts=SUBJECTS[subject][run], baseline=False, mean=False)
 
-    lg.debug(&#39;Selecting frequency&#39;)
-    tf_cht = get_chantime(tf)
+def sub_pipeline(subject, run, pipeline, kwargs):
 
-    if baseline:
-        lg.debug(&#39;Applying baseline to continuous&#39;)
-        tf_cht = apply_baseline_to_continuous(tf_cht, onsets)
-        baseline_name = &#39;_&#39; + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]
-    else:
-        baseline_name = &#39;&#39;
+    if pipeline == &#39;continuous&#39;:
+        pipeline_continuous(
+            baseline=kwargs[&#39;baseline&#39;],
+            )
 
-    lg.debug(&#39;Plotting continuous&#39;)
-    divs = plot_continuous(tf_cht, onsets, events)
+    elif pipeline == &#39;spectrum&#39;:
+        pipeline_spectrum_all(
+            subject_only=args.subject)
 
-    html_file = RESULTS_DIR / &#39;continuous&#39; / event_type / f&#39;{subject}_run-{run}_{event_type}{baseline_name}.html&#39;
-    to_html(divs, html_file)</code></pre>
+    elif pipeline == &#39;flex_ext&#39;:
+        pipeline_flexext_all(
+            subject_only=args.subject)
+
+    elif pipeline == &#39;fingers&#39;:
+        pipeline_fingers_all(bars=args.bars, corr=args.corr, each=args.each)
+
+    elif pipeline == &#39;fitting&#39;:
+        pipeline_fitting_all(
+            model_name=args.model,
+            response=args.response,
+            subject_only=args.subject)</code></pre>
 </details>
 </section>
 <section>
@@ -79,59 +89,81 @@ def pipeline_continuous(subject, run, event_type=&#39;cues&#39;, baseline=False)
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="fima.pipelines.continuous.pipeline_continuous"><code class="name flex">
-<span>def <span class="ident">pipeline_continuous</span></span>(<span>subject, run, event_type='cues', baseline=False)</span>
+<dt id="fima.pipelines.main.pipeline_fima"><code class="name flex">
+<span>def <span class="ident">pipeline_fima</span></span>(<span>pipeline=None, subject_only=None, parallel=False, kwargs=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Run pipeline to compute power spectrum on one participant, one run</p>
+<div class="desc"><p>Run pipeline to compute power spectrum on all the participants</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>subject</code></strong> :&ensp;<code>str</code></dt>
-<dd>subject code</dd>
-<dt><strong><code>run</code></strong> :&ensp;<code>str</code></dt>
-<dd>number of the run of interest</dd>
+<dt><strong><code>pipeline</code></strong> :&ensp;<code>str</code></dt>
+<dd>one of the pipelines to run</dd>
 <dt><strong><code>event_type</code></strong> :&ensp;<code>str</code></dt>
 <dd>event type used to identify the trials (one of 'cues', 'open', 'close',
 'movements', 'extension', 'flexion')</dd>
+<dt><strong><code>subject_only</code></strong> :&ensp;<code>str</code></dt>
+<dd>compute pipeline only for this participant</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def pipeline_continuous(subject, run, event_type=&#39;cues&#39;, baseline=False):
-    &#34;&#34;&#34;Run pipeline to compute power spectrum on one participant, one run
+<pre><code class="python">def pipeline_fima(pipeline=None, subject_only=None, parallel=False, kwargs=None):
+    &#34;&#34;&#34;Run pipeline to compute power spectrum on all the participants
 
     Parameters
     ----------
-    subject : str
-        subject code
-    run : str
-        number of the run of interest
+    pipeline : str
+        one of the pipelines to run
     event_type : str
         event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
         &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
+    subject_only : str
+        compute pipeline only for this participant
     &#34;&#34;&#34;
-    lg.debug(f&#39;Loading data for {subject} / {run} (events: {event_type})&#39;)
-    data, events, onsets = load(&#39;continuous&#39;, subject, run, event_type=event_type)
+    for subject, runs in SUBJECTS.items():
+        if subject_only is not None and subject != subject_only:
+            continue
+        for run in runs:
+            lg.info(f&#39;{subject} / {run}&#39;)
+            try:
+                sub_pipeline(pipeline, subject, run)
+            except Exception as err:
+                print(err)</code></pre>
+</details>
+</dd>
+<dt id="fima.pipelines.main.sub_pipeline"><code class="name flex">
+<span>def <span class="ident">sub_pipeline</span></span>(<span>subject, run, pipeline, kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sub_pipeline(subject, run, pipeline, kwargs):
 
-    lg.debug(&#39;Computing timefreq (baseline=False, mean=False)&#39;)
-    tf = compute_timefreq(data, artifacts=SUBJECTS[subject][run], baseline=False, mean=False)
+    if pipeline == &#39;continuous&#39;:
+        pipeline_continuous(
+            baseline=kwargs[&#39;baseline&#39;],
+            )
 
-    lg.debug(&#39;Selecting frequency&#39;)
-    tf_cht = get_chantime(tf)
+    elif pipeline == &#39;spectrum&#39;:
+        pipeline_spectrum_all(
+            subject_only=args.subject)
 
-    if baseline:
-        lg.debug(&#39;Applying baseline to continuous&#39;)
-        tf_cht = apply_baseline_to_continuous(tf_cht, onsets)
-        baseline_name = &#39;_&#39; + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]
-    else:
-        baseline_name = &#39;&#39;
+    elif pipeline == &#39;flex_ext&#39;:
+        pipeline_flexext_all(
+            subject_only=args.subject)
 
-    lg.debug(&#39;Plotting continuous&#39;)
-    divs = plot_continuous(tf_cht, onsets, events)
+    elif pipeline == &#39;fingers&#39;:
+        pipeline_fingers_all(bars=args.bars, corr=args.corr, each=args.each)
 
-    html_file = RESULTS_DIR / &#39;continuous&#39; / event_type / f&#39;{subject}_run-{run}_{event_type}{baseline_name}.html&#39;
-    to_html(divs, html_file)</code></pre>
+    elif pipeline == &#39;fitting&#39;:
+        pipeline_fitting_all(
+            model_name=args.model,
+            response=args.response,
+            subject_only=args.subject)</code></pre>
 </details>
 </dd>
 </dl>
@@ -152,7 +184,8 @@ def pipeline_continuous(subject, run, event_type=&#39;cues&#39;, baseline=False)
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="fima.pipelines.continuous.pipeline_continuous" href="#fima.pipelines.continuous.pipeline_continuous">pipeline_continuous</a></code></li>
+<li><code><a title="fima.pipelines.main.pipeline_fima" href="#fima.pipelines.main.pipeline_fima">pipeline_fima</a></code></li>
+<li><code><a title="fima.pipelines.main.sub_pipeline" href="#fima.pipelines.main.sub_pipeline">sub_pipeline</a></code></li>
 </ul>
 </li>
 </ul>

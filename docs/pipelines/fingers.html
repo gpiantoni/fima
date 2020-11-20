@@ -28,31 +28,12 @@
 from ..viz.finger_channels import plot_finger_chan
 from ..fingers.viz import plot_fingerbars
 from ..viz import to_div, to_html, plot_surf
-from ..parameters import FINGERS_DIR, SUBJECTS, FINGERBARS_DIR, FINGERCORR_DIR, FINGERCORREACH_DIR
 from ..fingers.correlation import plot_heatmap, plot_finger_chan_2
 from ..read import load
 
 from numpy import corrcoef, empty, save, NaN
 from scipy.stats import norm as normdist
 from wonambi import Data
-
-
-def pipeline_fingers_all(event_type=&#39;cues&#39;, bars=False, corr=False, each=False):
-
-    for subject, runs in SUBJECTS.items():
-        for run in runs:
-            print(f&#39;{subject} / {run}&#39;)
-            try:
-                if bars:
-                    pipeline_fingerbars(subject, run, event_type)
-                elif corr:
-                    pipeline_finger_correlations(subject, run, event_type)
-                elif each:
-                    pipeline_finger_correlations_each(subject, run, event_type)
-                else:
-                    pipeline_fingers(subject, run, event_type)
-            except Exception as err:
-                print(err)
 
 
 def pipeline_fingers(subject, run, event_type=&#39;cues&#39;):
@@ -238,33 +219,6 @@ def pipeline_finger_correlations_each(subject, run, event_type, pvalue=0.05):
     to_html(divs, html_file)</code></pre>
 </details>
 </dd>
-<dt id="fima.pipelines.fingers.pipeline_fingers_all"><code class="name flex">
-<span>def <span class="ident">pipeline_fingers_all</span></span>(<span>event_type='cues', bars=False, corr=False, each=False)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def pipeline_fingers_all(event_type=&#39;cues&#39;, bars=False, corr=False, each=False):
-
-    for subject, runs in SUBJECTS.items():
-        for run in runs:
-            print(f&#39;{subject} / {run}&#39;)
-            try:
-                if bars:
-                    pipeline_fingerbars(subject, run, event_type)
-                elif corr:
-                    pipeline_finger_correlations(subject, run, event_type)
-                elif each:
-                    pipeline_finger_correlations_each(subject, run, event_type)
-                else:
-                    pipeline_fingers(subject, run, event_type)
-            except Exception as err:
-                print(err)</code></pre>
-</details>
-</dd>
 </dl>
 </section>
 <section>
@@ -287,7 +241,6 @@ def pipeline_finger_correlations_each(subject, run, event_type, pvalue=0.05):
 <li><code><a title="fima.pipelines.fingers.pipeline_finger_correlations_each" href="#fima.pipelines.fingers.pipeline_finger_correlations_each">pipeline_finger_correlations_each</a></code></li>
 <li><code><a title="fima.pipelines.fingers.pipeline_fingerbars" href="#fima.pipelines.fingers.pipeline_fingerbars">pipeline_fingerbars</a></code></li>
 <li><code><a title="fima.pipelines.fingers.pipeline_fingers" href="#fima.pipelines.fingers.pipeline_fingers">pipeline_fingers</a></code></li>
-<li><code><a title="fima.pipelines.fingers.pipeline_fingers_all" href="#fima.pipelines.fingers.pipeline_fingers_all">pipeline_fingers_all</a></code></li>
 </ul>
 </li>
 </ul>

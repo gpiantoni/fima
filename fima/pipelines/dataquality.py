@@ -1,7 +1,6 @@
 from ..preproc.data_quality import plot_raw_overview
 from ..utils import make_name
 from ..viz import to_html
-from ..parameters import BIDS_DIR, OVERVIEW_DIR
 
 
 def pipeline_dataquality():
