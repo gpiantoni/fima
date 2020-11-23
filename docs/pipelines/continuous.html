@@ -49,27 +49,33 @@ def pipeline_continuous(subject, run, event_type=&#39;cues&#39;, baseline=False)
         event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
         &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
     &#34;&#34;&#34;
-    lg.debug(f&#39;Loading data for {subject} / {run} (events: {event_type})&#39;)
-    data, events, onsets = load(&#39;continuous&#39;, subject, run, event_type=event_type)
-
-    lg.debug(&#39;Computing timefreq (baseline=False, mean=False)&#39;)
-    tf = compute_timefreq(data, artifacts=SUBJECTS[subject][run], baseline=False, mean=False)
-
-    lg.debug(&#39;Selecting frequency&#39;)
-    tf_cht = get_chantime(tf)
+    tf_cht, events, onsets = get_continuous_cht(subject, run, event_type)
 
     if baseline:
-        lg.debug(&#39;Applying baseline to continuous&#39;)
+        lg.info(f&#39;{subject:&lt;10}/ {run} Applying baseline to continuous&#39;)
         tf_cht = apply_baseline_to_continuous(tf_cht, onsets)
         baseline_name = &#39;_&#39; + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]
     else:
         baseline_name = &#39;&#39;
-
-    lg.debug(&#39;Plotting continuous&#39;)
+    lg.info(f&#39;{subject:&lt;10}/ {run} Plotting continuous&#39;)
     divs = plot_continuous(tf_cht, onsets, events)
 
-    html_file = RESULTS_DIR / &#39;continuous&#39; / event_type / f&#39;{subject}_run-{run}_{event_type}{baseline_name}.html&#39;
-    to_html(divs, html_file)</code></pre>
+    html_file = RESULTS_DIR / &#39;dataglove&#39; / event_type / f&#39;{subject}_run-{run}_{event_type}{baseline_name}.html&#39;
+    to_html(divs, html_file)
+
+
+def get_continuous_cht(subject, run, event_type):
+
+    lg.info(f&#39;{subject:&lt;10}/ {run} Loading data for events: {event_type}&#39;)
+    data, events, onsets = load(&#39;continuous&#39;, subject, run, event_type=event_type)
+
+    lg.info(f&#39;{subject:&lt;10}/ {run} Computing timefreq (baseline=False, mean=False)&#39;)
+    tf = compute_timefreq(data, artifacts=SUBJECTS[subject][run], baseline=False, mean=False)
+
+    lg.info(f&#39;{subject:&lt;10}/ {run} Selecting frequency&#39;)
+    tf_cht = get_chantime(tf)
+
+    return tf_cht, events, onsets</code></pre>
 </details>
 </section>
 <section>
@@ -79,6 +85,29 @@ def pipeline_continuous(subject, run, event_type=&#39;cues&#39;, baseline=False)
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="fima.pipelines.continuous.get_continuous_cht"><code class="name flex">
+<span>def <span class="ident">get_continuous_cht</span></span>(<span>subject, run, event_type)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_continuous_cht(subject, run, event_type):
+
+    lg.info(f&#39;{subject:&lt;10}/ {run} Loading data for events: {event_type}&#39;)
+    data, events, onsets = load(&#39;continuous&#39;, subject, run, event_type=event_type)
+
+    lg.info(f&#39;{subject:&lt;10}/ {run} Computing timefreq (baseline=False, mean=False)&#39;)
+    tf = compute_timefreq(data, artifacts=SUBJECTS[subject][run], baseline=False, mean=False)
+
+    lg.info(f&#39;{subject:&lt;10}/ {run} Selecting frequency&#39;)
+    tf_cht = get_chantime(tf)
+
+    return tf_cht, events, onsets</code></pre>
+</details>
+</dd>
 <dt id="fima.pipelines.continuous.pipeline_continuous"><code class="name flex">
 <span>def <span class="ident">pipeline_continuous</span></span>(<span>subject, run, event_type='cues', baseline=False)</span>
 </code></dt>
@@ -111,26 +140,18 @@ def pipeline_continuous(subject, run, event_type=&#39;cues&#39;, baseline=False)
         event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
         &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
     &#34;&#34;&#34;
-    lg.debug(f&#39;Loading data for {subject} / {run} (events: {event_type})&#39;)
-    data, events, onsets = load(&#39;continuous&#39;, subject, run, event_type=event_type)
-
-    lg.debug(&#39;Computing timefreq (baseline=False, mean=False)&#39;)
-    tf = compute_timefreq(data, artifacts=SUBJECTS[subject][run], baseline=False, mean=False)
-
-    lg.debug(&#39;Selecting frequency&#39;)
-    tf_cht = get_chantime(tf)
+    tf_cht, events, onsets = get_continuous_cht(subject, run, event_type)
 
     if baseline:
-        lg.debug(&#39;Applying baseline to continuous&#39;)
+        lg.info(f&#39;{subject:&lt;10}/ {run} Applying baseline to continuous&#39;)
         tf_cht = apply_baseline_to_continuous(tf_cht, onsets)
         baseline_name = &#39;_&#39; + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]
     else:
         baseline_name = &#39;&#39;
-
-    lg.debug(&#39;Plotting continuous&#39;)
+    lg.info(f&#39;{subject:&lt;10}/ {run} Plotting continuous&#39;)
     divs = plot_continuous(tf_cht, onsets, events)
 
-    html_file = RESULTS_DIR / &#39;continuous&#39; / event_type / f&#39;{subject}_run-{run}_{event_type}{baseline_name}.html&#39;
+    html_file = RESULTS_DIR / &#39;dataglove&#39; / event_type / f&#39;{subject}_run-{run}_{event_type}{baseline_name}.html&#39;
     to_html(divs, html_file)</code></pre>
 </details>
 </dd>
@@ -152,6 +173,7 @@ def pipeline_continuous(subject, run, event_type=&#39;cues&#39;, baseline=False)
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="fima.pipelines.continuous.get_continuous_cht" href="#fima.pipelines.continuous.get_continuous_cht">get_continuous_cht</a></code></li>
 <li><code><a title="fima.pipelines.continuous.pipeline_continuous" href="#fima.pipelines.continuous.pipeline_continuous">pipeline_continuous</a></code></li>
 </ul>
 </li>

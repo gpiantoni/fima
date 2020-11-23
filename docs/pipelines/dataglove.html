@@ -24,22 +24,39 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from ..viz.dataglove import plot_dataglove
+<pre><code class="python">from logging import getLogger
+
+from ..viz.dataglove import plot_dataglove
 from ..read import load
 from ..viz import to_div, to_html
+from ..parameters import RESULTS_DIR
+
+lg = getLogger(__name__)
 
 
 def pipeline_dataglove(subject, run):
-    events = load(&#39;events&#39;, subject, run)
+    try:
+        events = load(&#39;events&#39;, subject, run)
+    except FileNotFoundError:
+        lg.warning(f&#39;{subject:&lt;10}/ {run} No events&#39;)
+        return
+
     try:
         tsv = load(&#39;dataglove&#39;, subject, run)
     except FileNotFoundError:
+        lg.warning(f&#39;{subject:&lt;10}/ {run} No dataglove file&#39;)
         return
-    mov = load(&#39;movements&#39;, subject, run)
 
+    try:
+        mov = load(&#39;movements&#39;, subject, run)
+    except FileNotFoundError:
+        mov = None
+        lg.warning(f&#39;{subject:&lt;10}/ {run} You need to mark the movements&#39;)
+
+    lg.info(f&#39;{subject:&lt;10}/ {run} Plotting dataglove data&#39;)
     fig = plot_dataglove(tsv, events, mov)
-    fig_name = f&#39;{subject}_run-{run}_dataglove.html&#39;
-    to_html([to_div(fig), ], DATAGLOVE_DIR / fig_name)</code></pre>
+    html_file = RESULTS_DIR / &#39;dataglove&#39; / f&#39;{subject}_run-{run}_dataglove.html&#39;
+    to_html([to_div(fig), ], html_file)</code></pre>
 </details>
 </section>
 <section>
@@ -59,16 +76,28 @@ def pipeline_dataglove(subject, run):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def pipeline_dataglove(subject, run):
-    events = load(&#39;events&#39;, subject, run)
+    try:
+        events = load(&#39;events&#39;, subject, run)
+    except FileNotFoundError:
+        lg.warning(f&#39;{subject:&lt;10}/ {run} No events&#39;)
+        return
+
     try:
         tsv = load(&#39;dataglove&#39;, subject, run)
     except FileNotFoundError:
+        lg.warning(f&#39;{subject:&lt;10}/ {run} No dataglove file&#39;)
         return
-    mov = load(&#39;movements&#39;, subject, run)
 
+    try:
+        mov = load(&#39;movements&#39;, subject, run)
+    except FileNotFoundError:
+        mov = None
+        lg.warning(f&#39;{subject:&lt;10}/ {run} You need to mark the movements&#39;)
+
+    lg.info(f&#39;{subject:&lt;10}/ {run} Plotting dataglove data&#39;)
     fig = plot_dataglove(tsv, events, mov)
-    fig_name = f&#39;{subject}_run-{run}_dataglove.html&#39;
-    to_html([to_div(fig), ], DATAGLOVE_DIR / fig_name)</code></pre>
+    html_file = RESULTS_DIR / &#39;dataglove&#39; / f&#39;{subject}_run-{run}_dataglove.html&#39;
+    to_html([to_div(fig), ], html_file)</code></pre>
 </details>
 </dd>
 </dl>

@@ -47,6 +47,12 @@ def main():
     action.set_defaults(function='dataglove')
 
     action = list_pipelines.add_parser(
+        'ols',
+        help='Fit Ordinary Least Squares on the continuous data',
+        )
+    action.set_defaults(function='ols')
+
+    action = list_pipelines.add_parser(
         'spectrum',
         help='Compute Time-Frequency Analysis',
         )

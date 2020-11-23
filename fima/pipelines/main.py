@@ -5,6 +5,7 @@ from os import nice
 
 from .continuous import pipeline_continuous
 from .dataglove import pipeline_dataglove
+from .ols import pipeline_ols
 from ..parameters import SUBJECTS
 
 
@@ -55,6 +56,12 @@ def sub_pipeline(subject, run, pipeline, kwargs):
             run,
             )
 
+    elif pipeline == 'ols':
+        pipeline_ols(
+            subject,
+            run,
+            )
+
     elif pipeline == 'spectrum':
         pipeline_spectrum_all(
             subject_only=args.subject)
@@ -84,4 +91,3 @@ def gen_subject_run():
 
 def be_nice():
     nice(10)
-

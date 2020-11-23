@@ -67,6 +67,18 @@ def main():
         help=&#39;Baseline correction with &#39; + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;])
 
     action = list_pipelines.add_parser(
+        &#39;dataglove&#39;,
+        help=&#39;Plot the time-course of the dataglove&#39;,
+        )
+    action.set_defaults(function=&#39;dataglove&#39;)
+
+    action = list_pipelines.add_parser(
+        &#39;ols&#39;,
+        help=&#39;Fit Ordinary Least Squares on the continuous data&#39;,
+        )
+    action.set_defaults(function=&#39;ols&#39;)
+
+    action = list_pipelines.add_parser(
         &#39;spectrum&#39;,
         help=&#39;Compute Time-Frequency Analysis&#39;,
         )
@@ -183,6 +195,18 @@ if __name__ == &#39;__main__&#39;:
     action.add_argument(
         &#39;--baseline&#39;, action=&#39;store_true&#39;,
         help=&#39;Baseline correction with &#39; + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;])
+
+    action = list_pipelines.add_parser(
+        &#39;dataglove&#39;,
+        help=&#39;Plot the time-course of the dataglove&#39;,
+        )
+    action.set_defaults(function=&#39;dataglove&#39;)
+
+    action = list_pipelines.add_parser(
+        &#39;ols&#39;,
+        help=&#39;Fit Ordinary Least Squares on the continuous data&#39;,
+        )
+    action.set_defaults(function=&#39;ols&#39;)
 
     action = list_pipelines.add_parser(
         &#39;spectrum&#39;,
