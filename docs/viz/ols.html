@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.pipelines.continuous API documentation</title>
+<title>fima.viz.ols API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,50 +17,102 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.pipelines.continuous</code></h1>
+<h1 class="title">Module <code>fima.viz.ols</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from logging import getLogger
+<pre><code class="python">from fima.parameters import FINGER_COLOR
+import plotly.graph_objects as go
 
-from ..spectrum.baseline import apply_baseline_to_continuous
-from ..parameters import RESULTS_DIR, P
-from ..viz import to_html
-from ..viz.continuous import plot_continuous
-from ..spectrum import get_continuous_cht
+# this should be in parameters
+COLS = [
+    &#39;const&#39;,
+    &#39;thumb extension&#39;,
+    &#39;index extension&#39;,
+    &#39;middle extension&#39;,
+    &#39;ring extension&#39;,
+    &#39;little extension&#39;,
+    &#39;thumb flexion&#39;,
+    &#39;index flexion&#39;,
+    &#39;middle flexion&#39;,
+    &#39;ring flexion&#39;,
+    &#39;little flexion&#39;,
+    ]
 
-lg = getLogger(__name__)
+
+def plot_sigma_delay_mat(MAT, SIGMAS, DELAYS):
+    fig = go.Figure(data=[
+        go.Heatmap(
+            x=DELAYS,
+            y=SIGMAS,
+            z=MAT,
+            zmin=0,
+            colorscale=&#39;Hot&#39;,
+            ),
+        ],
+        layout=go.Layout(
+            xaxis=dict(
+                title=&#39;Delay (ms, 0s == movement start)&#39;),
+            yaxis=dict(
+                title=&#39;Kernel size (ms)&#39;),
+            ))
+    return fig
 
 
-def pipeline_continuous(subject, run, event_type=&#39;cues&#39;, baseline=False):
-    &#34;&#34;&#34;Run pipeline to compute power spectrum on one participant, one run
+def plot_data_prediction(t, results):
+    fig = go.Figure(data=[
+        go.Scatter(
+            x=t,
+            y=results.model.data.endog,
+            name=&#39;data&#39;,
+            line=dict(
+                color=&#39;blue&#39;,
+                width=1,
+            ),
+        ),
+        go.Scatter(
+            x=t,
+            y=results.fittedvalues,
+            name=&#39;prediction&#39;,
+            line=dict(
+                color=&#39;red&#39;,
+                width=1,
+            ),
+        ),
+    ])
+    return fig
 
-    Parameters
-    ----------
-    subject : str
-        subject code
-    run : str
-        number of the run of interest
-    event_type : str
-        event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
-        &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
-    &#34;&#34;&#34;
-    tf_cht, events, onsets = get_continuous_cht(subject, run, event_type)
 
-    if baseline:
-        lg.info(f&#39;{subject:&lt;10}/ {run} Applying baseline to continuous&#39;)
-        tf_cht = apply_baseline_to_continuous(tf_cht, onsets)
-        baseline_name = &#39;_&#39; + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]
-    else:
-        baseline_name = &#39;&#39;
-    lg.info(f&#39;{subject:&lt;10}/ {run} Plotting continuous&#39;)
-    divs = plot_continuous(tf_cht, onsets, events)
+def plot_coefficient(results):
 
-    html_file = RESULTS_DIR / &#39;dataglove&#39; / event_type / f&#39;{subject}_run-{run}_{event_type}{baseline_name}.html&#39;
-    to_html(divs, html_file)</code></pre>
+    COEF = results.params
+    LOW = results.conf_int()[0]
+    HIGH = results.conf_int()[1]
+
+    COLORS = [&#39;grey&#39;, ] + list(FINGER_COLOR.values()) + list(FINGER_COLOR.values())
+
+    fig = go.Figure(data=[
+        go.Bar(
+            x=COLS,
+            y=[COEF[col] for col in COLS],
+            marker=dict(
+                color=COLORS,
+            ),
+            error_y=dict(
+                type=&#39;data&#39;,
+                arrayminus=[COEF[col] - LOW[col] for col in COLS],
+                array=[HIGH[col] - COEF[col] for col in COLS],
+            ),
+        ), ],
+        layout=go.Layout(
+            yaxis=dict(
+                title=&#39;Coefficients&#39;)
+        ))
+
+    return fig</code></pre>
 </details>
 </section>
 <section>
@@ -70,51 +122,103 @@ def pipeline_continuous(subject, run, event_type=&#39;cues&#39;, baseline=False)
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="fima.pipelines.continuous.pipeline_continuous"><code class="name flex">
-<span>def <span class="ident">pipeline_continuous</span></span>(<span>subject, run, event_type='cues', baseline=False)</span>
+<dt id="fima.viz.ols.plot_coefficient"><code class="name flex">
+<span>def <span class="ident">plot_coefficient</span></span>(<span>results)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Run pipeline to compute power spectrum on one participant, one run</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>subject</code></strong> :&ensp;<code>str</code></dt>
-<dd>subject code</dd>
-<dt><strong><code>run</code></strong> :&ensp;<code>str</code></dt>
-<dd>number of the run of interest</dd>
-<dt><strong><code>event_type</code></strong> :&ensp;<code>str</code></dt>
-<dd>event type used to identify the trials (one of 'cues', 'open', 'close',
-'movements', 'extension', 'flexion')</dd>
-</dl></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def pipeline_continuous(subject, run, event_type=&#39;cues&#39;, baseline=False):
-    &#34;&#34;&#34;Run pipeline to compute power spectrum on one participant, one run
+<pre><code class="python">def plot_coefficient(results):
 
-    Parameters
-    ----------
-    subject : str
-        subject code
-    run : str
-        number of the run of interest
-    event_type : str
-        event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
-        &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
-    &#34;&#34;&#34;
-    tf_cht, events, onsets = get_continuous_cht(subject, run, event_type)
+    COEF = results.params
+    LOW = results.conf_int()[0]
+    HIGH = results.conf_int()[1]
 
-    if baseline:
-        lg.info(f&#39;{subject:&lt;10}/ {run} Applying baseline to continuous&#39;)
-        tf_cht = apply_baseline_to_continuous(tf_cht, onsets)
-        baseline_name = &#39;_&#39; + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]
-    else:
-        baseline_name = &#39;&#39;
-    lg.info(f&#39;{subject:&lt;10}/ {run} Plotting continuous&#39;)
-    divs = plot_continuous(tf_cht, onsets, events)
+    COLORS = [&#39;grey&#39;, ] + list(FINGER_COLOR.values()) + list(FINGER_COLOR.values())
 
-    html_file = RESULTS_DIR / &#39;dataglove&#39; / event_type / f&#39;{subject}_run-{run}_{event_type}{baseline_name}.html&#39;
-    to_html(divs, html_file)</code></pre>
+    fig = go.Figure(data=[
+        go.Bar(
+            x=COLS,
+            y=[COEF[col] for col in COLS],
+            marker=dict(
+                color=COLORS,
+            ),
+            error_y=dict(
+                type=&#39;data&#39;,
+                arrayminus=[COEF[col] - LOW[col] for col in COLS],
+                array=[HIGH[col] - COEF[col] for col in COLS],
+            ),
+        ), ],
+        layout=go.Layout(
+            yaxis=dict(
+                title=&#39;Coefficients&#39;)
+        ))
+
+    return fig</code></pre>
+</details>
+</dd>
+<dt id="fima.viz.ols.plot_data_prediction"><code class="name flex">
+<span>def <span class="ident">plot_data_prediction</span></span>(<span>t, results)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_data_prediction(t, results):
+    fig = go.Figure(data=[
+        go.Scatter(
+            x=t,
+            y=results.model.data.endog,
+            name=&#39;data&#39;,
+            line=dict(
+                color=&#39;blue&#39;,
+                width=1,
+            ),
+        ),
+        go.Scatter(
+            x=t,
+            y=results.fittedvalues,
+            name=&#39;prediction&#39;,
+            line=dict(
+                color=&#39;red&#39;,
+                width=1,
+            ),
+        ),
+    ])
+    return fig</code></pre>
+</details>
+</dd>
+<dt id="fima.viz.ols.plot_sigma_delay_mat"><code class="name flex">
+<span>def <span class="ident">plot_sigma_delay_mat</span></span>(<span>MAT, SIGMAS, DELAYS)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_sigma_delay_mat(MAT, SIGMAS, DELAYS):
+    fig = go.Figure(data=[
+        go.Heatmap(
+            x=DELAYS,
+            y=SIGMAS,
+            z=MAT,
+            zmin=0,
+            colorscale=&#39;Hot&#39;,
+            ),
+        ],
+        layout=go.Layout(
+            xaxis=dict(
+                title=&#39;Delay (ms, 0s == movement start)&#39;),
+            yaxis=dict(
+                title=&#39;Kernel size (ms)&#39;),
+            ))
+    return fig</code></pre>
 </details>
 </dd>
 </dl>
@@ -130,12 +234,14 @@ def pipeline_continuous(subject, run, event_type=&#39;cues&#39;, baseline=False)
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="fima.pipelines" href="index.html">fima.pipelines</a></code></li>
+<li><code><a title="fima.viz" href="index.html">fima.viz</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="fima.pipelines.continuous.pipeline_continuous" href="#fima.pipelines.continuous.pipeline_continuous">pipeline_continuous</a></code></li>
+<li><code><a title="fima.viz.ols.plot_coefficient" href="#fima.viz.ols.plot_coefficient">plot_coefficient</a></code></li>
+<li><code><a title="fima.viz.ols.plot_data_prediction" href="#fima.viz.ols.plot_data_prediction">plot_data_prediction</a></code></li>
+<li><code><a title="fima.viz.ols.plot_sigma_delay_mat" href="#fima.viz.ols.plot_sigma_delay_mat">plot_sigma_delay_mat</a></code></li>
 </ul>
 </li>
 </ul>

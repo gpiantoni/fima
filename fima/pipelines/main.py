@@ -1,12 +1,12 @@
 from logging import getLogger
 from functools import partial
 from multiprocessing import Pool
-from os import nice
 
 from .continuous import pipeline_continuous
 from .dataglove import pipeline_dataglove
 from .ols import pipeline_ols
 from ..parameters import SUBJECTS
+from ..utils import be_nice
 
 
 lg = getLogger(__name__)
@@ -87,7 +87,3 @@ def gen_subject_run():
             val.append((subj, run))
 
     return val
-
-
-def be_nice():
-    nice(10)

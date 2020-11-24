@@ -1,11 +1,10 @@
 from logging import getLogger
 
-from ..read import load
-from ..spectrum import compute_timefreq, get_chantime
 from ..spectrum.baseline import apply_baseline_to_continuous
-from ..parameters import RESULTS_DIR, SUBJECTS, P
+from ..parameters import RESULTS_DIR, P
 from ..viz import to_html
 from ..viz.continuous import plot_continuous
+from ..spectrum import get_continuous_cht
 
 lg = getLogger(__name__)
 
@@ -36,17 +35,3 @@ def pipeline_continuous(subject, run, event_type='cues', baseline=False):
 
     html_file = RESULTS_DIR / 'dataglove' / event_type / f'{subject}_run-{run}_{event_type}{baseline_name}.html'
     to_html(divs, html_file)
-
-
-def get_continuous_cht(subject, run, event_type):
-
-    lg.info(f'{subject:<10}/ {run} Loading data for events: {event_type}')
-    data, events, onsets = load('continuous', subject, run, event_type=event_type)
-
-    lg.info(f'{subject:<10}/ {run} Computing timefreq (baseline=False, mean=False)')
-    tf = compute_timefreq(data, artifacts=SUBJECTS[subject][run], baseline=False, mean=False)
-
-    lg.info(f'{subject:<10}/ {run} Selecting frequency')
-    tf_cht = get_chantime(tf)
-
-    return tf_cht, events, onsets

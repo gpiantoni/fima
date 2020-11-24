@@ -1,5 +1,16 @@
 from numpy import unique, where, abs, argmin
 from scipy.signal import unit_impulse, convolve
+from scipy.signal.windows import gaussian
+
+
+def make_regressors_from_indices(indices, shape, canonical_resp, delay=0):
+
+    regressors = {}
+    for k, v in indices.items():
+        r = unit_impulse(shape, [x + delay for x in v])
+        regressors[k] = convolve(r, canonical_resp, mode='same')
+
+    return regressors
 
 
 def find_movement_indices(mov, t):
@@ -17,11 +28,8 @@ def find_movement_indices(mov, t):
     return reg_idx
 
 
-def make_regressors_from_indices(indices, shape, canonical_resp, delay=0):
+def model_brain_response(shape='gaussian', coef=1):
+    N_POINTS = 102  # roughly one second
 
-    regressors = {}
-    for k, v in indices.items():
-        r = unit_impulse(shape, array(v) + delay)
-        regressors[k] = convolve(r, canonical_resp, mode='same')
-
-    return regressors
+    if shape == 'gaussian':
+        return gaussian(N_POINTS, coef)

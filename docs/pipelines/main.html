@@ -27,12 +27,12 @@
 <pre><code class="python">from logging import getLogger
 from functools import partial
 from multiprocessing import Pool
-from os import nice
 
 from .continuous import pipeline_continuous
 from .dataglove import pipeline_dataglove
 from .ols import pipeline_ols
 from ..parameters import SUBJECTS
+from ..utils import be_nice
 
 
 lg = getLogger(__name__)
@@ -112,11 +112,7 @@ def gen_subject_run():
         for run in runs:
             val.append((subj, run))
 
-    return val
-
-
-def be_nice():
-    nice(10)</code></pre>
+    return val</code></pre>
 </details>
 </section>
 <section>
@@ -126,19 +122,6 @@ def be_nice():
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="fima.pipelines.main.be_nice"><code class="name flex">
-<span>def <span class="ident">be_nice</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def be_nice():
-    nice(10)</code></pre>
-</details>
-</dd>
 <dt id="fima.pipelines.main.gen_subject_run"><code class="name flex">
 <span>def <span class="ident">gen_subject_run</span></span>(<span>)</span>
 </code></dt>
@@ -271,7 +254,6 @@ def be_nice():
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="fima.pipelines.main.be_nice" href="#fima.pipelines.main.be_nice">be_nice</a></code></li>
 <li><code><a title="fima.pipelines.main.gen_subject_run" href="#fima.pipelines.main.gen_subject_run">gen_subject_run</a></code></li>
 <li><code><a title="fima.pipelines.main.pipeline_fima" href="#fima.pipelines.main.pipeline_fima">pipeline_fima</a></code></li>
 <li><code><a title="fima.pipelines.main.sub_pipeline" href="#fima.pipelines.main.sub_pipeline">sub_pipeline</a></code></li>

@@ -26,6 +26,17 @@
 </summary>
 <pre><code class="python">from numpy import unique, where, abs, argmin
 from scipy.signal import unit_impulse, convolve
+from scipy.signal.windows import gaussian
+
+
+def make_regressors_from_indices(indices, shape, canonical_resp, delay=0):
+
+    regressors = {}
+    for k, v in indices.items():
+        r = unit_impulse(shape, [x + delay for x in v])
+        regressors[k] = convolve(r, canonical_resp, mode=&#39;same&#39;)
+
+    return regressors
 
 
 def find_movement_indices(mov, t):
@@ -43,14 +54,11 @@ def find_movement_indices(mov, t):
     return reg_idx
 
 
-def make_regressors_from_indices(indices, shape, canonical_resp, delay=0):
+def model_brain_response(shape=&#39;gaussian&#39;, coef=1):
+    N_POINTS = 102  # roughly one second
 
-    regressors = {}
-    for k, v in indices.items():
-        r = unit_impulse(shape, array(v) + delay)
-        regressors[k] = convolve(r, canonical_resp, mode=&#39;same&#39;)
-
-    return regressors</code></pre>
+    if shape == &#39;gaussian&#39;:
+        return gaussian(N_POINTS, coef)</code></pre>
 </details>
 </section>
 <section>
@@ -97,10 +105,26 @@ def make_regressors_from_indices(indices, shape, canonical_resp, delay=0):
 
     regressors = {}
     for k, v in indices.items():
-        r = unit_impulse(shape, array(v) + delay)
+        r = unit_impulse(shape, [x + delay for x in v])
         regressors[k] = convolve(r, canonical_resp, mode=&#39;same&#39;)
 
     return regressors</code></pre>
+</details>
+</dd>
+<dt id="fima.ols.regressors.model_brain_response"><code class="name flex">
+<span>def <span class="ident">model_brain_response</span></span>(<span>shape='gaussian', coef=1)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def model_brain_response(shape=&#39;gaussian&#39;, coef=1):
+    N_POINTS = 102  # roughly one second
+
+    if shape == &#39;gaussian&#39;:
+        return gaussian(N_POINTS, coef)</code></pre>
 </details>
 </dd>
 </dl>
@@ -123,6 +147,7 @@ def make_regressors_from_indices(indices, shape, canonical_resp, delay=0):
 <ul class="">
 <li><code><a title="fima.ols.regressors.find_movement_indices" href="#fima.ols.regressors.find_movement_indices">find_movement_indices</a></code></li>
 <li><code><a title="fima.ols.regressors.make_regressors_from_indices" href="#fima.ols.regressors.make_regressors_from_indices">make_regressors_from_indices</a></code></li>
+<li><code><a title="fima.ols.regressors.model_brain_response" href="#fima.ols.regressors.model_brain_response">model_brain_response</a></code></li>
 </ul>
 </li>
 </ul>

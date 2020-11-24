@@ -5,6 +5,7 @@ from ast import literal_eval
 from numpy import arange, array, clip, where
 from plotly.colors import sequential, cyclical, diverging
 from scipy.stats import ttest_1samp
+from os import nice
 
 
 def make_name(filename, event_type, ext='.html'):
@@ -160,3 +161,7 @@ def hide_artifacts(data, periods):
         data.data[0][:, i] = NaN
 
     return data
+
+
+def be_nice():
+    nice(10)

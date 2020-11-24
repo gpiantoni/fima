@@ -32,6 +32,7 @@ from ast import literal_eval
 from numpy import arange, array, clip, where
 from plotly.colors import sequential, cyclical, diverging
 from scipy.stats import ttest_1samp
+from os import nice
 
 
 def make_name(filename, event_type, ext=&#39;.html&#39;):
@@ -186,7 +187,11 @@ def hide_artifacts(data, periods):
         i = (p[0] &lt; data.time[0]) &amp; (data.time[0] &lt;= p[1])
         data.data[0][:, i] = NaN
 
-    return data</code></pre>
+    return data
+
+
+def be_nice():
+    nice(10)</code></pre>
 </details>
 </section>
 <section>
@@ -196,6 +201,19 @@ def hide_artifacts(data, periods):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="fima.utils.be_nice"><code class="name flex">
+<span>def <span class="ident">be_nice</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def be_nice():
+    nice(10)</code></pre>
+</details>
+</dd>
 <dt id="fima.utils.create_bool"><code class="name flex">
 <span>def <span class="ident">create_bool</span></span>(<span>events, to_select)</span>
 </code></dt>
@@ -479,6 +497,7 @@ point</p>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
+<li><code><a title="fima.utils.be_nice" href="#fima.utils.be_nice">be_nice</a></code></li>
 <li><code><a title="fima.utils.create_bool" href="#fima.utils.create_bool">create_bool</a></code></li>
 <li><code><a title="fima.utils.find_max_point" href="#fima.utils.find_max_point">find_max_point</a></code></li>
 <li><code><a title="fima.utils.get_color_for_val" href="#fima.utils.get_color_for_val">get_color_for_val</a></code></li>
