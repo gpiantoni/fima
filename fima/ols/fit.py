@@ -13,11 +13,8 @@ DELAYS = arange(-20, 50, 2)
 SIGMAS = arange(1, 50)
 
 
-def fit_one_channel(tf_cht, mov, chan):
+def fit_one_channel(x, indices):
 
-    indices = find_movement_indices(mov, tf_cht.time[0])
-
-    x = tf_cht(trial=0, chan=chan, trial_axis='trial000000')
     func = partial(get_rsquared, x=x, indices=indices)
 
     with Pool(initializer=be_nice) as p:
@@ -26,14 +23,19 @@ def fit_one_channel(tf_cht, mov, chan):
     return reshape(array(results), (SIGMAS.shape[0], DELAYS.shape[0]))
 
 
-def get_max(MAT, x):
+def get_max(MAT, x, indices):
     i_sigma, i_delay = unravel_index(argmax(MAT), MAT.shape)
 
     canonical_resp = model_brain_response(coef=SIGMAS[i_sigma])
     regressors = make_regressors_from_indices(indices, x.shape, canonical_resp, delay=DELAYS[i_delay])
     results = fit_ols(regressors, x)
 
-    return results
+    out = {
+        'sigma': SIGMAS[i_sigma],
+        'delay': DELAYS[i_delay],
+        'rsquared': results.rsquared,
+        }
+    return out, results
 
 
 def get_rsquared(sigma, delay, x, indices):

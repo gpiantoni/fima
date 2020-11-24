@@ -24,8 +24,55 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def pipeline_ols():
-    pass</code></pre>
+<pre><code class="python">from json import dump
+from logging import getLogger
+
+from ..read import load
+from ..spectrum import get_continuous_cht
+from ..ols.regressors import find_movement_indices
+from ..ols.fit import get_max, fit_one_channel, SIGMAS, DELAYS
+from ..viz import to_div, to_html
+from ..viz.ols import plot_sigma_delay_mat, plot_coefficient, plot_data_prediction
+from ..parameters import RESULTS_DIR
+
+lg = getLogger(__name__)
+
+
+def pipeline_ols(subject, run):
+
+    tf_cht, events, onsets = get_continuous_cht(subject, run, event_type=&#39;cues&#39;)
+    t = tf_cht.time[0]
+    t_diff = t[1] - t[0]
+
+    mov = load(&#39;movements&#39;, subject, run)
+    indices = find_movement_indices(mov, tf_cht.time[0])
+    for chan in tf_cht.chan[0]:
+        lg.info(f&#39;{subject:&lt;10}/ {run} Fitting OLS on {chan}&#39;)
+        x = tf_cht(trial=0, chan=chan, trial_axis=&#39;trial000000&#39;)
+
+        MAT = fit_one_channel(x, indices)
+        out, result = get_max(MAT, x, indices)
+        out[&#39;sigma&#39;] *= t_diff
+        out[&#39;delay&#39;] *= t_diff
+        out[&#39;chan&#39;] = chan
+
+        divs = []
+
+        fig = plot_sigma_delay_mat(MAT, SIGMAS * t_diff, DELAYS * t_diff)
+        divs.append(to_div(fig))
+
+        fig = plot_coefficient(result)
+        divs.append(to_div(fig))
+
+        fig = plot_data_prediction(tf_cht.time[0], result)
+        divs.append(to_div(fig))
+
+        html_file = RESULTS_DIR / &#39;ols&#39; / &#39;movement&#39; / f&#39;{subject}_run-{run}&#39; / f&#39;{subject}_run-{run}_{chan}.html&#39;
+        to_html(divs, html_file)
+
+        json_file = html_file.with_suffix(&#39;.json&#39;)
+        with json_file.open(&#39;w&#39;) as f:
+            dump(out, f, indent=2)</code></pre>
 </details>
 </section>
 <section>
@@ -36,7 +83,7 @@
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="fima.pipelines.ols.pipeline_ols"><code class="name flex">
-<span>def <span class="ident">pipeline_ols</span></span>(<span>)</span>
+<span>def <span class="ident">pipeline_ols</span></span>(<span>subject, run)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -44,8 +91,41 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def pipeline_ols():
-    pass</code></pre>
+<pre><code class="python">def pipeline_ols(subject, run):
+
+    tf_cht, events, onsets = get_continuous_cht(subject, run, event_type=&#39;cues&#39;)
+    t = tf_cht.time[0]
+    t_diff = t[1] - t[0]
+
+    mov = load(&#39;movements&#39;, subject, run)
+    indices = find_movement_indices(mov, tf_cht.time[0])
+    for chan in tf_cht.chan[0]:
+        lg.info(f&#39;{subject:&lt;10}/ {run} Fitting OLS on {chan}&#39;)
+        x = tf_cht(trial=0, chan=chan, trial_axis=&#39;trial000000&#39;)
+
+        MAT = fit_one_channel(x, indices)
+        out, result = get_max(MAT, x, indices)
+        out[&#39;sigma&#39;] *= t_diff
+        out[&#39;delay&#39;] *= t_diff
+        out[&#39;chan&#39;] = chan
+
+        divs = []
+
+        fig = plot_sigma_delay_mat(MAT, SIGMAS * t_diff, DELAYS * t_diff)
+        divs.append(to_div(fig))
+
+        fig = plot_coefficient(result)
+        divs.append(to_div(fig))
+
+        fig = plot_data_prediction(tf_cht.time[0], result)
+        divs.append(to_div(fig))
+
+        html_file = RESULTS_DIR / &#39;ols&#39; / &#39;movement&#39; / f&#39;{subject}_run-{run}&#39; / f&#39;{subject}_run-{run}_{chan}.html&#39;
+        to_html(divs, html_file)
+
+        json_file = html_file.with_suffix(&#39;.json&#39;)
+        with json_file.open(&#39;w&#39;) as f:
+            dump(out, f, indent=2)</code></pre>
 </details>
 </dd>
 </dl>

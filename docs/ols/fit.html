@@ -39,11 +39,8 @@ DELAYS = arange(-20, 50, 2)
 SIGMAS = arange(1, 50)
 
 
-def fit_one_channel(tf_cht, mov, chan):
+def fit_one_channel(x, indices):
 
-    indices = find_movement_indices(mov, tf_cht.time[0])
-
-    x = tf_cht(trial=0, chan=chan, trial_axis=&#39;trial000000&#39;)
     func = partial(get_rsquared, x=x, indices=indices)
 
     with Pool(initializer=be_nice) as p:
@@ -52,14 +49,19 @@ def fit_one_channel(tf_cht, mov, chan):
     return reshape(array(results), (SIGMAS.shape[0], DELAYS.shape[0]))
 
 
-def get_max(MAT, x):
+def get_max(MAT, x, indices):
     i_sigma, i_delay = unravel_index(argmax(MAT), MAT.shape)
 
     canonical_resp = model_brain_response(coef=SIGMAS[i_sigma])
     regressors = make_regressors_from_indices(indices, x.shape, canonical_resp, delay=DELAYS[i_delay])
     results = fit_ols(regressors, x)
 
-    return results
+    out = {
+        &#39;sigma&#39;: SIGMAS[i_sigma],
+        &#39;delay&#39;: DELAYS[i_delay],
+        &#39;rsquared&#39;: results.rsquared,
+        }
+    return out, results
 
 
 def get_rsquared(sigma, delay, x, indices):
@@ -104,7 +106,7 @@ def fit_ols(regressors, x):
 </details>
 </dd>
 <dt id="fima.ols.fit.fit_one_channel"><code class="name flex">
-<span>def <span class="ident">fit_one_channel</span></span>(<span>tf_cht, mov, chan)</span>
+<span>def <span class="ident">fit_one_channel</span></span>(<span>x, indices)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -112,11 +114,8 @@ def fit_ols(regressors, x):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def fit_one_channel(tf_cht, mov, chan):
+<pre><code class="python">def fit_one_channel(x, indices):
 
-    indices = find_movement_indices(mov, tf_cht.time[0])
-
-    x = tf_cht(trial=0, chan=chan, trial_axis=&#39;trial000000&#39;)
     func = partial(get_rsquared, x=x, indices=indices)
 
     with Pool(initializer=be_nice) as p:
@@ -126,7 +125,7 @@ def fit_ols(regressors, x):
 </details>
 </dd>
 <dt id="fima.ols.fit.get_max"><code class="name flex">
-<span>def <span class="ident">get_max</span></span>(<span>MAT, x)</span>
+<span>def <span class="ident">get_max</span></span>(<span>MAT, x, indices)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -134,14 +133,19 @@ def fit_ols(regressors, x):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_max(MAT, x):
+<pre><code class="python">def get_max(MAT, x, indices):
     i_sigma, i_delay = unravel_index(argmax(MAT), MAT.shape)
 
     canonical_resp = model_brain_response(coef=SIGMAS[i_sigma])
     regressors = make_regressors_from_indices(indices, x.shape, canonical_resp, delay=DELAYS[i_delay])
     results = fit_ols(regressors, x)
 
-    return results</code></pre>
+    out = {
+        &#39;sigma&#39;: SIGMAS[i_sigma],
+        &#39;delay&#39;: DELAYS[i_delay],
+        &#39;rsquared&#39;: results.rsquared,
+        }
+    return out, results</code></pre>
 </details>
 </dd>
 <dt id="fima.ols.fit.get_rsquared"><code class="name flex">
