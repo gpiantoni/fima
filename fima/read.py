@@ -88,7 +88,7 @@ def load(what, subject, run=None, acq=None, event_type=None):
         folder = BIDS_DIR
 
     elif what == 'electrodes':
-        pattern = f'sub-{subject}_*_acq-{acq}_run-{run}_electrodes.tsv'
+        pattern = f'sub-{subject}_*_acq-{acq}_electrodes.tsv'
         folder = BIDS_DIR
 
     elif what in ('surface', 'freesurfer'):

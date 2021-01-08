@@ -30,7 +30,7 @@ from ..spectrum.baseline import apply_baseline_to_continuous
 from ..parameters import RESULTS_DIR, P
 from ..viz import to_html
 from ..viz.continuous import plot_continuous
-from ..spectrum import get_continuous_cht
+from ..spectrum.continuous import get_continuous_cht
 
 lg = getLogger(__name__)
 
@@ -59,7 +59,7 @@ def pipeline_continuous(subject, run, event_type=&#39;cues&#39;, baseline=False)
     lg.info(f&#39;{subject:&lt;10}/ {run} Plotting continuous&#39;)
     divs = plot_continuous(tf_cht, onsets, events)
 
-    html_file = RESULTS_DIR / &#39;dataglove&#39; / event_type / f&#39;{subject}_run-{run}_{event_type}{baseline_name}.html&#39;
+    html_file = RESULTS_DIR / &#39;continuous&#39; / event_type / f&#39;{subject}_run-{run}_{event_type}{baseline_name}.html&#39;
     to_html(divs, html_file)</code></pre>
 </details>
 </section>
@@ -113,7 +113,7 @@ def pipeline_continuous(subject, run, event_type=&#39;cues&#39;, baseline=False)
     lg.info(f&#39;{subject:&lt;10}/ {run} Plotting continuous&#39;)
     divs = plot_continuous(tf_cht, onsets, events)
 
-    html_file = RESULTS_DIR / &#39;dataglove&#39; / event_type / f&#39;{subject}_run-{run}_{event_type}{baseline_name}.html&#39;
+    html_file = RESULTS_DIR / &#39;continuous&#39; / event_type / f&#39;{subject}_run-{run}_{event_type}{baseline_name}.html&#39;
     to_html(divs, html_file)</code></pre>
 </details>
 </dd>

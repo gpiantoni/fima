@@ -115,7 +115,7 @@ def load(what, subject, run=None, acq=None, event_type=None):
         folder = BIDS_DIR
 
     elif what == &#39;electrodes&#39;:
-        pattern = f&#39;sub-{subject}_*_acq-{acq}_run-{run}_electrodes.tsv&#39;
+        pattern = f&#39;sub-{subject}_*_acq-{acq}_electrodes.tsv&#39;
         folder = BIDS_DIR
 
     elif what in (&#39;surface&#39;, &#39;freesurfer&#39;):
@@ -311,7 +311,7 @@ def select_events(subject, run, t):
         folder = BIDS_DIR
 
     elif what == &#39;electrodes&#39;:
-        pattern = f&#39;sub-{subject}_*_acq-{acq}_run-{run}_electrodes.tsv&#39;
+        pattern = f&#39;sub-{subject}_*_acq-{acq}_electrodes.tsv&#39;
         folder = BIDS_DIR
 
     elif what in (&#39;surface&#39;, &#39;freesurfer&#39;):

@@ -40,10 +40,12 @@ AXIS = dict(
     )
 
 
-def plot_surf(data, elec, pial=None, info=&#39;activity&#39;):
-    colorscale = P[&#39;viz&#39;][&#39;colorscale&#39;]
+def plot_surf(data, elec, pial=None, info=&#39;activity&#39;, clim=None, colorscale=None):
+    if colorscale is None:
+        colorscale = P[&#39;viz&#39;][&#39;colorscale&#39;]
+
     if info == &#39;finger&#39;:
-        clim = (-1, 5)
+        colorlim = (-1, 5)
         colorbar = dict(
             title=&#34;Main Finger&#34;,
             titleside=&#34;top&#34;,
@@ -61,17 +63,20 @@ def plot_surf(data, elec, pial=None, info=&#39;activity&#39;):
             )
 
         if info == &#39;rsquared&#39;:
-            clim = (0, 0.30)
+            colorlim = (0, 0.70)
             colorscale = &#39;Hot&#39;
 
         elif info == &#39;open_v_close&#39;:
-            clim = (0, 1)
+            colorlim = (0, 1)
 
         elif info == &#39;tstat&#39;:
-            clim = (-10, 10)
+            colorlim = (-10, 10)
+
+        elif clim is not None:
+            colorlim = clim
 
         else:
-            clim = (
+            colorlim = (
                 P[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;] * -1,
                 P[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
                 )
@@ -108,6 +113,8 @@ def plot_surf(data, elec, pial=None, info=&#39;activity&#39;):
     values = []
     labels = []
     for label in elec[&#39;name&#39;]:
+        if label not in data.chan[0]:
+            continue
         v = data(trial=0, chan=label).tolist()
         labels.append(f&#39;{label} = {v:0.3f}&#39;)
         values.append(v)
@@ -125,8 +132,8 @@ def plot_surf(data, elec, pial=None, info=&#39;activity&#39;):
                 color=values,
                 colorscale=colorscale,
                 showscale=True,
-                cmin=clim[0],
-                cmax=clim[1],
+                cmin=colorlim[0],
+                cmax=colorlim[1],
                 colorbar=colorbar,
             ),
         )
@@ -164,7 +171,7 @@ def plot_surf(data, elec, pial=None, info=&#39;activity&#39;):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="fima.viz.surf.plot_surf"><code class="name flex">
-<span>def <span class="ident">plot_surf</span></span>(<span>data, elec, pial=None, info='activity')</span>
+<span>def <span class="ident">plot_surf</span></span>(<span>data, elec, pial=None, info='activity', clim=None, colorscale=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -172,10 +179,12 @@ def plot_surf(data, elec, pial=None, info=&#39;activity&#39;):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def plot_surf(data, elec, pial=None, info=&#39;activity&#39;):
-    colorscale = P[&#39;viz&#39;][&#39;colorscale&#39;]
+<pre><code class="python">def plot_surf(data, elec, pial=None, info=&#39;activity&#39;, clim=None, colorscale=None):
+    if colorscale is None:
+        colorscale = P[&#39;viz&#39;][&#39;colorscale&#39;]
+
     if info == &#39;finger&#39;:
-        clim = (-1, 5)
+        colorlim = (-1, 5)
         colorbar = dict(
             title=&#34;Main Finger&#34;,
             titleside=&#34;top&#34;,
@@ -193,17 +202,20 @@ def plot_surf(data, elec, pial=None, info=&#39;activity&#39;):
             )
 
         if info == &#39;rsquared&#39;:
-            clim = (0, 0.30)
+            colorlim = (0, 0.70)
             colorscale = &#39;Hot&#39;
 
         elif info == &#39;open_v_close&#39;:
-            clim = (0, 1)
+            colorlim = (0, 1)
 
         elif info == &#39;tstat&#39;:
-            clim = (-10, 10)
+            colorlim = (-10, 10)
+
+        elif clim is not None:
+            colorlim = clim
 
         else:
-            clim = (
+            colorlim = (
                 P[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;] * -1,
                 P[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
                 )
@@ -240,6 +252,8 @@ def plot_surf(data, elec, pial=None, info=&#39;activity&#39;):
     values = []
     labels = []
     for label in elec[&#39;name&#39;]:
+        if label not in data.chan[0]:
+            continue
         v = data(trial=0, chan=label).tolist()
         labels.append(f&#39;{label} = {v:0.3f}&#39;)
         values.append(v)
@@ -257,8 +271,8 @@ def plot_surf(data, elec, pial=None, info=&#39;activity&#39;):
                 color=values,
                 colorscale=colorscale,
                 showscale=True,
-                cmin=clim[0],
-                cmax=clim[1],
+                cmin=colorlim[0],
+                cmax=colorlim[1],
                 colorbar=colorbar,
             ),
         )

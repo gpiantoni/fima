@@ -2,7 +2,7 @@ from json import dump
 from logging import getLogger
 
 from ..read import load
-from ..spectrum import get_continuous_cht
+from ..spectrum.continuous import get_continuous_cht
 from ..ols.regressors import find_movement_indices
 from ..ols.fit import get_max, fit_one_channel, SIGMAS, DELAYS
 from ..viz import to_div, to_html
