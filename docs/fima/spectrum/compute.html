@@ -25,7 +25,7 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from numpy import arange, zeros
-from wonambi.trans import apply_baseline, timefrequency, concatenate, math, select
+from wonambi.trans import apply_baseline, timefrequency, concatenate, math, select, filter_
 
 from ..parameters import P
 from .baseline import apply_common_baseline
@@ -42,7 +42,8 @@ def compute_timefreq(data, artifacts=None, baseline=True, mean=True):
             step=0.01,
             taper=&#39;dpss&#39;,
             halfbandwidth=5)
-    else:
+
+    elif P[&#39;spectrum&#39;][&#39;method&#39;] == &#39;wavelet&#39;:
         tf = timefrequency(
             data,
             &#39;morlet&#39;,
@@ -55,6 +56,11 @@ def compute_timefreq(data, artifacts=None, baseline=True, mean=True):
         t_step = t_bool.shape[0] // 100
         t_bool[20:-20:t_step] = True
         tf = select(tf, time=t_bool)
+
+    elif P[&#39;spectrum&#39;][&#39;method&#39;] == &#39;hilbert&#39;:
+        f = filter_(data, low_cut=60, high_cut=200)
+        tf = math(f, operator_name=&#39;hilbert&#39;, axis=&#39;time&#39;)
+        tf = math(tf, operator_name=&#39;abs&#39;)
 
     tf = concatenate(
         tf,
@@ -148,7 +154,8 @@ def get_chan(tf, freq=None, baseline=False, time=None, operator_name=&#39;mean&#
             step=0.01,
             taper=&#39;dpss&#39;,
             halfbandwidth=5)
-    else:
+
+    elif P[&#39;spectrum&#39;][&#39;method&#39;] == &#39;wavelet&#39;:
         tf = timefrequency(
             data,
             &#39;morlet&#39;,
@@ -161,6 +168,11 @@ def get_chan(tf, freq=None, baseline=False, time=None, operator_name=&#39;mean&#
         t_step = t_bool.shape[0] // 100
         t_bool[20:-20:t_step] = True
         tf = select(tf, time=t_bool)
+
+    elif P[&#39;spectrum&#39;][&#39;method&#39;] == &#39;hilbert&#39;:
+        f = filter_(data, low_cut=60, high_cut=200)
+        tf = math(f, operator_name=&#39;hilbert&#39;, axis=&#39;time&#39;)
+        tf = math(tf, operator_name=&#39;abs&#39;)
 
     tf = concatenate(
         tf,

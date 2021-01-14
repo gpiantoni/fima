@@ -13,7 +13,7 @@ else:
     PROJ_DIR = Path('/Fridge/users/giovanni/projects/finger_mapping')
 
 SCRIPTS_DIR = PROJ_DIR / 'scripts'
-BIDS_DIR = PROJ_DIR / 'subjects2'
+BIDS_DIR = PROJ_DIR / 'subjects'
 FREESURFER_DIR = PROJ_DIR / 'freesurfer/'
 
 RESULTS_DIR = PROJ_DIR / 'results'
@@ -48,15 +48,16 @@ P = dict(
             ),
         ),
     spectrum=dict(
-        method='spectrogram',  # spectrogram or morlet
+        method='spectrogram',  # spectrogram or wavelet or hilbert
         window_size=0.3,
+        taper='dpss',  # dpss or hanning (only for spectrogram)
         baseline=dict(
             time=(-1, -0.5),
             common=True,  # use the same, common baseline for all the trials
             type='zscore',  # dB or zscore or percent or relchange
             ),
         select=dict(
-            freq=(100, 140),  # (60, 200)
+            freq=(60, 200),  # (60, 200)
             timeinterval=0.3,  # fima/utils.py
             ),
         ),

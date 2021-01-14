@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.parameters API documentation</title>
-<meta name="description" content="General parameters useful for all the functions" />
+<title>fima.spectrum.continuous API documentation</title>
+<meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -17,181 +17,35 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.parameters</code></h1>
+<h1 class="title">Module <code>fima.spectrum.continuous</code></h1>
 </header>
 <section id="section-intro">
-<p>General parameters useful for all the functions</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;General parameters useful for all the functions&#34;&#34;&#34;
+<pre><code class="python">from logging import getLogger
 
-from pathlib import Path
-from platform import node
-from .utils import get_color_for_val
+from .compute import compute_timefreq, get_chantime
+from ..read import load
+from ..parameters import SUBJECTS, P
 
-
-NYU_DIR = Path(&#39;/Fridge/R01_BAIR/data/nyu/scitran/bair/nyu&#39;)
-
-if node() == &#39;archxps&#39;:
-    PROJ_DIR = Path(&#39;/home/gio/projects/finger_mapping&#39;)
-else:
-    PROJ_DIR = Path(&#39;/Fridge/users/giovanni/projects/finger_mapping&#39;)
-
-SCRIPTS_DIR = PROJ_DIR / &#39;scripts&#39;
-BIDS_DIR = PROJ_DIR / &#39;subjects2&#39;
-FREESURFER_DIR = PROJ_DIR / &#39;freesurfer/&#39;
-
-RESULTS_DIR = PROJ_DIR / &#39;results&#39;
-
-P = dict(
-    read=dict(
-        pre=2,
-        post=2,
-        ),
-    data_quality=dict(
-        histogram=dict(
-            contamination=0.04,
-            ),
-        spectrum=dict(
-            n_neighbors=20,
-            ),
-        ),
-    align=dict(
-        time=(-1, 1.5),
-        threshold=dict(
-            low=0.5,
-            high=3,
-            ),
-        ),
-    viz=dict(
-        colorscale=&#39;Jet&#39;,
-        tfr=dict(
-            max=10,
-            ),
-        tfr_mean=dict(
-            max=5,
-            ),
-        ),
-    spectrum=dict(
-        method=&#39;spectrogram&#39;,  # spectrogram or morlet
-        window_size=0.3,
-        baseline=dict(
-            time=(-1, -0.5),
-            common=True,  # use the same, common baseline for all the trials
-            type=&#39;zscore&#39;,  # dB or zscore or percent or relchange
-            ),
-        select=dict(
-            freq=(100, 140),  # (60, 200)
-            timeinterval=0.3,  # fima/utils.py
-            ),
-        ),
-    )
+lg = getLogger(__name__)
 
 
-SUBJECTS = {
-    &#39;drouwen&#39;: {
-        &#39;1&#39;: [],
-        },
-    &#39;duiven&#39;: {
-        &#39;1&#39;: [
-            (225, 243),
-            ],
-        &#39;2&#39;: [],
-        },
-    &#39;franeker&#39;: {
-        &#39;1&#39;: [],
-        &#39;2&#39;: [],
-        },
-    &#39;heek&#39;: {
-        &#39;1&#39;: [
-            (190, 194),
-            ],
-        &#39;2&#39;: [
-            (21, 28),
-            ],
-        },
-    &#39;intraop008&#39;: {
-        &#39;1&#39;: [
-            (85, 86),
-            (112.5, 113),
-            (345, 346),
-            ],
-        },
-    &#39;intraop013&#39;: {
-        &#39;1&#39;: [
-            (36, 37),
-            (63.5, 64.5),
-            ],
-        &#39;2&#39;: [
-            (27.5, 29.5),
-            (33.5, 40),
-            (247.5, 249),
-            (257, 261),
-            ],
-        },
-    &#39;intraop016&#39;: {
-        &#39;1&#39;: [],
-        },
-    &#39;itens&#39;: {
-        &#39;1&#39;: [
-            (215, 216),
-            ],
-        &#39;2&#39;: [],
-        &#39;3&#39;: [],
-        },
-    &#39;lemmer&#39;: {
-        &#39;1&#39;: [],
-        &#39;2&#39;: [],
-        },
-    &#39;ommen&#39;: {
-        &#39;1&#39;: [],
-        &#39;2&#39;: [],
-        },
-    &#39;veere&#39;: {
-        &#39;1&#39;: [],
-        },
-    &#39;vledder&#39;: {
-        &#39;2&#39;: [],
-        &#39;3&#39;: [],
-        },
-    &#39;warmond&#39;: {
-        &#39;1&#39;: [],
-        &#39;2&#39;: [],
-        },
-    }
+def get_continuous_cht(subject, run, event_type=&#39;cues&#39;):
 
-MOVEMENT_SYMBOL_DATA = {
-    &#39;open&#39;: &#39;circle-open&#39;,
-    &#39;close&#39;: &#39;circle&#39;,
-    }
+    lg.info(f&#39;{subject:&lt;10}/ {run} Loading data for events: {event_type}&#39;)
+    data, events, onsets = load(&#39;continuous&#39;, subject, run, event_type=event_type)
 
-MOVEMENT_SYMBOL_MODEL = {
-    &#39;open&#39;: &#39;diamond-open&#39;,
-    &#39;close&#39;: &#39;diamond&#39;,
-    }
+    lg.info(f&#39;{subject:&lt;10}/ {run} Computing timefreq (baseline=False, mean=False)&#39;)
+    tf = compute_timefreq(data, artifacts=SUBJECTS[subject][run], baseline=False, mean=False)
 
-MOVEMENT_LINE = {
-    &#39;open&#39;: &#39;dot&#39;,
-    &#39;close&#39;: &#39;solid&#39;,
-    }
+    if P[&#39;spectrum&#39;][&#39;method&#39;] != &#39;hilbert&#39;:
+        lg.info(f&#39;{subject:&lt;10}/ {run} Selecting frequency&#39;)
+        tf = get_chantime(tf)
 
-FINGER_COLOR = {
-    &#39;thumb&#39;: get_color_for_val(4, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;index&#39;: get_color_for_val(3, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;middle&#39;: get_color_for_val(2, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;ring&#39;: get_color_for_val(1, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;little&#39;: get_color_for_val(0, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-}
-
-FINGERS = list(FINGER_COLOR)
-
-
-EVENTS = []
-for action in MOVEMENT_LINE:
-    for f in FINGERS:
-        EVENTS.append(f&#39;{f} {action}&#39;)</code></pre>
+    return tf, events, onsets</code></pre>
 </details>
 </section>
 <section>
@@ -199,6 +53,33 @@ for action in MOVEMENT_LINE:
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="fima.spectrum.continuous.get_continuous_cht"><code class="name flex">
+<span>def <span class="ident">get_continuous_cht</span></span>(<span>subject, run, event_type='cues')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_continuous_cht(subject, run, event_type=&#39;cues&#39;):
+
+    lg.info(f&#39;{subject:&lt;10}/ {run} Loading data for events: {event_type}&#39;)
+    data, events, onsets = load(&#39;continuous&#39;, subject, run, event_type=event_type)
+
+    lg.info(f&#39;{subject:&lt;10}/ {run} Computing timefreq (baseline=False, mean=False)&#39;)
+    tf = compute_timefreq(data, artifacts=SUBJECTS[subject][run], baseline=False, mean=False)
+
+    if P[&#39;spectrum&#39;][&#39;method&#39;] != &#39;hilbert&#39;:
+        lg.info(f&#39;{subject:&lt;10}/ {run} Selecting frequency&#39;)
+        tf = get_chantime(tf)
+
+    return tf, events, onsets</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -211,7 +92,12 @@ for action in MOVEMENT_LINE:
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="fima" href="index.html">fima</a></code></li>
+<li><code><a title="fima.spectrum" href="index.html">fima.spectrum</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="fima.spectrum.continuous.get_continuous_cht" href="#fima.spectrum.continuous.get_continuous_cht">get_continuous_cht</a></code></li>
 </ul>
 </li>
 </ul>

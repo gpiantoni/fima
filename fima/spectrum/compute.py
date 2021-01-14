@@ -1,5 +1,5 @@
 from numpy import arange, zeros
-from wonambi.trans import apply_baseline, timefrequency, concatenate, math, select
+from wonambi.trans import apply_baseline, timefrequency, concatenate, math, select, filter_
 
 from ..parameters import P
 from .baseline import apply_common_baseline
@@ -14,9 +14,10 @@ def compute_timefreq(data, artifacts=None, baseline=True, mean=True):
             'spectrogram',
             duration=P['spectrum']['window_size'],
             step=0.01,
-            taper='dpss',
+            taper=P['spectrum']['taper'],
             halfbandwidth=5)
-    else:
+
+    elif P['spectrum']['method'] == 'wavelet':
         tf = timefrequency(
             data,
             'morlet',
@@ -29,6 +30,11 @@ def compute_timefreq(data, artifacts=None, baseline=True, mean=True):
         t_step = t_bool.shape[0] // 100
         t_bool[20:-20:t_step] = True
         tf = select(tf, time=t_bool)
+
+    elif P['spectrum']['method'] == 'hilbert':
+        f = filter_(data, low_cut=60, high_cut=200)
+        tf = math(f, operator_name='hilbert', axis='time')
+        tf = math(tf, operator_name='abs')
 
     tf = concatenate(
         tf,

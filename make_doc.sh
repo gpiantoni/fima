@@ -1,6 +1,3 @@
-rm docs -fr
-pdoc3 fima -o doc --html
-mv doc/fima docs
-rmdir doc
+rm docs/fima -fr
+pdoc3 fima -o docs --html
 git add docs
-
