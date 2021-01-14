@@ -40,6 +40,12 @@ P = dict(
         ),
     ols=dict(
         threshold=0.05,  # fima/pipelines/ols.py
+        window=dict(
+            method='gamma',  # gaussian or gamma (for gamma, use a as well)
+            scale=[.1, .5, .2],  # [0.1, 2, .1],
+            loc=[-.5, .5, .4],  # [-1, +1],
+            a=[1.2, 4, 1],
+            ),
         ),
     viz=dict(
         colorscale='Jet',

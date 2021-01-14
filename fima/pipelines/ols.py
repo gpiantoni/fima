@@ -8,7 +8,7 @@ from numpy import nanmin, nanmax, array
 from ..read import load
 from ..spectrum.continuous import get_continuous_cht
 from ..ols.regressors import find_movement_indices
-from ..ols.fit import get_max, fit_one_channel, SIGMAS, DELAYS
+from ..ols.fit import get_max, fit_one_channel
 from ..viz import to_div, to_html
 from ..viz.surf import plot_surf
 from ..viz.ols import plot_sigma_delay_mat, plot_coefficient, plot_data_prediction
@@ -45,7 +45,7 @@ def pipeline_ols_allchan(subject, run):
         lg.info(f'{subject:<10}/ {run} Fitting OLS on {chan}')
         x = tf_cht(trial=0, chan=chan, trial_axis='trial000000')
 
-        MAT = fit_one_channel(x, indices)
+        MAT = fit_one_channel(t, x, indices)
         out, result = get_max(MAT, x, indices)
         out['sigma'] *= t_diff
         out['delay'] *= t_diff
@@ -72,11 +72,17 @@ def pipeline_ols_allchan(subject, run):
 
 def pipeline_ols_summary(subject, run):
     df = import_ols(subject, run)
+    if df is None:
+        return
 
     SUMMARY_DIR.mkdir(parents=True, exist_ok=True)
     df.to_csv(
         SUMMARY_DIR / f'ols_movement_{subject}_run-{run}_summary.tsv',
         sep='\t', index=False)
+
+    dat = Data(array(df['rsquared']), chan=array(df['chan']))
+    fig = plot_surf(dat, elec, pial=pial, clim=(0, nanmax(df['rsquared'])), colorscale='Hot')
+    to_html([to_div(fig), ], SUMMARY_DIR / f'ols_movement_{subject}_run-{run}_rsquared.html')
 
     df = df[df['rsquared'] >= P['ols']['threshold']]
     if len(df) == 0:
@@ -88,10 +94,6 @@ def pipeline_ols_summary(subject, run):
         pial = load('surface', subject, run)
     except FileNotFoundError:
         pial = None
-
-    dat = Data(array(df['rsquared']), chan=array(df['chan']))
-    fig = plot_surf(dat, elec, pial=pial, clim=(0, nanmax(df['rsquared'])), colorscale='Hot')
-    to_html([to_div(fig), ], SUMMARY_DIR / f'ols_movement_{subject}_run-{run}_rsquared.html')
 
     for param in ('sigma', ):
         dat = Data(array(df[param]), chan=array(df['chan']))
@@ -107,5 +109,8 @@ def import_ols(subject, run):
     for json_file in out_dir.glob('*.json'):
         with json_file.open() as f:
             df.append(json_load(f))
+
+    if len(df) == 0:
+        return
 
     return DataFrame(df).sort_values('rsquared', ascending=False)

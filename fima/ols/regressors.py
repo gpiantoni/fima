@@ -1,16 +1,9 @@
-from numpy import unique, where, abs, argmin
+from numpy import unique, where, abs, argmin, arange
 from scipy.signal import unit_impulse, convolve
-from scipy.signal.windows import gaussian
+from scipy.stats import norm as normal
+from scipy.stats import gamma
 
-
-def make_regressors_from_indices(indices, shape, canonical_resp, delay=0):
-
-    regressors = {}
-    for k, v in indices.items():
-        r = unit_impulse(shape, [x + delay for x in v])
-        regressors[k] = convolve(r, canonical_resp, mode='same')
-
-    return regressors
+from ..parameters import P
 
 
 def find_movement_indices(mov, t):
@@ -28,8 +21,17 @@ def find_movement_indices(mov, t):
     return reg_idx
 
 
-def model_brain_response(shape='gaussian', coef=1):
-    N_POINTS = 102 * 3  # roughly one second
+def make_regressors_from_indices(indices, t, params):
+    t_diff = t[1] - t[0]
+    t_window = arange(-3, 3, t_diff)
+    if P['ols']['window']['method'] == 'gaussian':
+        canonical_resp = normal.pdf(t_window, loc=params[0], scale=params[1])
+    else:
+        canonical_resp = gamma.pdf(t_window, a=params[2], loc=params[0], scale=params[1])
 
-    if shape == 'gaussian':
-        return gaussian(N_POINTS, coef)
+    regressors = {}
+    for k, v in indices.items():
+        r = unit_impulse(t.shape, v)
+        regressors[k] = convolve(r, canonical_resp, mode='same')
+
+    return regressors
