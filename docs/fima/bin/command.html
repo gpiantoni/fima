@@ -77,6 +77,9 @@ def main():
         help=&#39;Fit Ordinary Least Squares on the continuous data&#39;,
         )
     action.set_defaults(function=&#39;ols&#39;)
+    action.add_argument(
+        &#39;--summary&#39;, action=&#39;store_true&#39;,
+        help=&#39;Skip OLS and jump to the summary directly&#39;)
 
     action = list_pipelines.add_parser(
         &#39;spectrum&#39;,
@@ -138,6 +141,8 @@ def main():
     kwargs = {}
     if args.function == &#39;continuous&#39;:
         kwargs[&#39;baseline&#39;] = args.baseline
+    if args.function == &#39;ols&#39;:
+        kwargs[&#39;summary&#39;] = args.summary
 
     pipeline_fima(
         args.function,
@@ -207,6 +212,9 @@ if __name__ == &#39;__main__&#39;:
         help=&#39;Fit Ordinary Least Squares on the continuous data&#39;,
         )
     action.set_defaults(function=&#39;ols&#39;)
+    action.add_argument(
+        &#39;--summary&#39;, action=&#39;store_true&#39;,
+        help=&#39;Skip OLS and jump to the summary directly&#39;)
 
     action = list_pipelines.add_parser(
         &#39;spectrum&#39;,
@@ -268,6 +276,8 @@ if __name__ == &#39;__main__&#39;:
     kwargs = {}
     if args.function == &#39;continuous&#39;:
         kwargs[&#39;baseline&#39;] = args.baseline
+    if args.function == &#39;ols&#39;:
+        kwargs[&#39;summary&#39;] = args.summary
 
     pipeline_fima(
         args.function,

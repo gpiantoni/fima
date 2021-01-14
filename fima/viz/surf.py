@@ -1,5 +1,5 @@
 import plotly.graph_objects as go
-from numpy import sign
+from numpy import sign, NaN
 
 from ..parameters import P
 
@@ -87,9 +87,10 @@ def plot_surf(data, elec, pial=None, info='activity', clim=None, colorscale=None
     values = []
     labels = []
     for label in elec['name']:
-        if label not in data.chan[0]:
-            continue
-        v = data(trial=0, chan=label).tolist()
+        if label in data.chan[0]:
+            v = data(trial=0, chan=label).tolist()
+        else:
+            v = NaN
         labels.append(f'{label} = {v:0.3f}')
         values.append(v)
 

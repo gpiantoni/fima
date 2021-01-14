@@ -40,7 +40,7 @@ else:
     PROJ_DIR = Path(&#39;/Fridge/users/giovanni/projects/finger_mapping&#39;)
 
 SCRIPTS_DIR = PROJ_DIR / &#39;scripts&#39;
-BIDS_DIR = PROJ_DIR / &#39;subjects2&#39;
+BIDS_DIR = PROJ_DIR / &#39;subjects&#39;
 FREESURFER_DIR = PROJ_DIR / &#39;freesurfer/&#39;
 
 RESULTS_DIR = PROJ_DIR / &#39;results&#39;
@@ -65,6 +65,9 @@ P = dict(
             high=3,
             ),
         ),
+    ols=dict(
+        threshold=0.05,  # fima/pipelines/ols.py
+        ),
     viz=dict(
         colorscale=&#39;Jet&#39;,
         tfr=dict(
@@ -75,15 +78,16 @@ P = dict(
             ),
         ),
     spectrum=dict(
-        method=&#39;hilbert&#39;,  # spectrogram or wavelet or hilbert
+        method=&#39;spectrogram&#39;,  # spectrogram or wavelet or hilbert
         window_size=0.3,
+        taper=&#39;dpss&#39;,  # dpss or hanning (only for spectrogram)
         baseline=dict(
             time=(-1, -0.5),
             common=True,  # use the same, common baseline for all the trials
             type=&#39;zscore&#39;,  # dB or zscore or percent or relchange
             ),
         select=dict(
-            freq=(100, 140),  # (60, 200)
+            freq=(60, 200),  # (60, 200)
             timeinterval=0.3,  # fima/utils.py
             ),
         ),

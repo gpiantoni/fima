@@ -1,18 +1,39 @@
 from json import dump
+from json import load as json_load
 from logging import getLogger
+from wonambi import Data
+from pandas import DataFrame
+from numpy import nanmin, nanmax, array
 
 from ..read import load
 from ..spectrum.continuous import get_continuous_cht
 from ..ols.regressors import find_movement_indices
 from ..ols.fit import get_max, fit_one_channel, SIGMAS, DELAYS
 from ..viz import to_div, to_html
+from ..viz.surf import plot_surf
 from ..viz.ols import plot_sigma_delay_mat, plot_coefficient, plot_data_prediction
-from ..parameters import RESULTS_DIR
+from ..parameters import RESULTS_DIR, P
 
 lg = getLogger(__name__)
 
+OLS_DIR = RESULTS_DIR / 'ols' / 'movement'
+SUMMARY_DIR = RESULTS_DIR / 'ols' / 'summary'
 
-def pipeline_ols(subject, run):
+
+def pipeline_ols(subject, run, summary):
+    """
+    Parameters
+    ----------
+    summary : bool
+        if True, skip time-consuming computation of OLS for each channel
+    """
+    if not summary:
+        pipeline_ols_allchan(subject, run)
+
+    pipeline_ols_summary(subject, run)
+
+
+def pipeline_ols_allchan(subject, run):
 
     tf_cht, events, onsets = get_continuous_cht(subject, run, event_type='cues')
     t = tf_cht.time[0]
@@ -41,9 +62,50 @@ def pipeline_ols(subject, run):
         fig = plot_data_prediction(tf_cht.time[0], result)
         divs.append(to_div(fig))
 
-        html_file = RESULTS_DIR / 'ols' / 'movement' / f'{subject}_run-{run}' / f'{subject}_run-{run}_{chan}.html'
+        html_file = OLS_DIR / f'{subject}_run-{run}' / f'{subject}_run-{run}_{chan}.html'
         to_html(divs, html_file)
 
         json_file = html_file.with_suffix('.json')
         with json_file.open('w') as f:
             dump(out, f, indent=2)
+
+
+def pipeline_ols_summary(subject, run):
+    df = import_ols(subject, run)
+
+    SUMMARY_DIR.mkdir(parents=True, exist_ok=True)
+    df.to_csv(
+        SUMMARY_DIR / f'ols_movement_{subject}_run-{run}_summary.tsv',
+        sep='\t', index=False)
+
+    df = df[df['rsquared'] >= P['ols']['threshold']]
+    if len(df) == 0:
+        lg.warning(f'No channels had a fit better than threshold {P["ols"]["threshold"]}')
+        return
+
+    elec = load('electrodes', subject, run)
+    try:
+        pial = load('surface', subject, run)
+    except FileNotFoundError:
+        pial = None
+
+    dat = Data(array(df['rsquared']), chan=array(df['chan']))
+    fig = plot_surf(dat, elec, pial=pial, clim=(0, nanmax(df['rsquared'])), colorscale='Hot')
+    to_html([to_div(fig), ], SUMMARY_DIR / f'ols_movement_{subject}_run-{run}_rsquared.html')
+
+    for param in ('sigma', ):
+        dat = Data(array(df[param]), chan=array(df['chan']))
+        fig = plot_surf(dat, elec, pial=pial, clim=(nanmin(df[param]) - 0.1, nanmax(df[param]) + 0.1), colorscale='Hot')
+        to_html([to_div(fig), ], SUMMARY_DIR / f'ols_movement_{subject}_run-{run}_{param}.html')
+
+
+def import_ols(subject, run):
+
+    out_dir = OLS_DIR / f'{subject}_run-{run}'
+
+    df = []
+    for json_file in out_dir.glob('*.json'):
+        with json_file.open() as f:
+            df.append(json_load(f))
+
+    return DataFrame(df).sort_values('rsquared', ascending=False)

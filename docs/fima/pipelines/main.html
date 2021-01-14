@@ -86,6 +86,7 @@ def sub_pipeline(subject, run, pipeline, kwargs):
         pipeline_ols(
             subject,
             run,
+            summary=kwargs[&#39;summary&#39;],
             )
 
     elif pipeline == &#39;spectrum&#39;:
@@ -216,6 +217,7 @@ def gen_subject_run():
         pipeline_ols(
             subject,
             run,
+            summary=kwargs[&#39;summary&#39;],
             )
 
     elif pipeline == &#39;spectrum&#39;:

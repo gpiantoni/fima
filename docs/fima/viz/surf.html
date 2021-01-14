@@ -25,7 +25,7 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">import plotly.graph_objects as go
-from numpy import sign
+from numpy import sign, NaN
 
 from ..parameters import P
 
@@ -113,9 +113,10 @@ def plot_surf(data, elec, pial=None, info=&#39;activity&#39;, clim=None, colorsc
     values = []
     labels = []
     for label in elec[&#39;name&#39;]:
-        if label not in data.chan[0]:
-            continue
-        v = data(trial=0, chan=label).tolist()
+        if label in data.chan[0]:
+            v = data(trial=0, chan=label).tolist()
+        else:
+            v = NaN
         labels.append(f&#39;{label} = {v:0.3f}&#39;)
         values.append(v)
 
@@ -252,9 +253,10 @@ def plot_surf(data, elec, pial=None, info=&#39;activity&#39;, clim=None, colorsc
     values = []
     labels = []
     for label in elec[&#39;name&#39;]:
-        if label not in data.chan[0]:
-            continue
-        v = data(trial=0, chan=label).tolist()
+        if label in data.chan[0]:
+            v = data(trial=0, chan=label).tolist()
+        else:
+            v = NaN
         labels.append(f&#39;{label} = {v:0.3f}&#39;)
         values.append(v)
 

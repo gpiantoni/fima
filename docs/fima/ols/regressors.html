@@ -55,7 +55,7 @@ def find_movement_indices(mov, t):
 
 
 def model_brain_response(shape=&#39;gaussian&#39;, coef=1):
-    N_POINTS = 102  # roughly one second
+    N_POINTS = 102 * 3  # roughly one second
 
     if shape == &#39;gaussian&#39;:
         return gaussian(N_POINTS, coef)</code></pre>
@@ -121,7 +121,7 @@ def model_brain_response(shape=&#39;gaussian&#39;, coef=1):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def model_brain_response(shape=&#39;gaussian&#39;, coef=1):
-    N_POINTS = 102  # roughly one second
+    N_POINTS = 102 * 3  # roughly one second
 
     if shape == &#39;gaussian&#39;:
         return gaussian(N_POINTS, coef)</code></pre>

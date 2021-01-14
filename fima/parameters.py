@@ -38,6 +38,9 @@ P = dict(
             high=3,
             ),
         ),
+    ols=dict(
+        threshold=0.05,  # fima/pipelines/ols.py
+        ),
     viz=dict(
         colorscale='Jet',
         tfr=dict(

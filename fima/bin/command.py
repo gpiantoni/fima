@@ -51,6 +51,9 @@ def main():
         help='Fit Ordinary Least Squares on the continuous data',
         )
     action.set_defaults(function='ols')
+    action.add_argument(
+        '--summary', action='store_true',
+        help='Skip OLS and jump to the summary directly')
 
     action = list_pipelines.add_parser(
         'spectrum',
@@ -112,6 +115,8 @@ def main():
     kwargs = {}
     if args.function == 'continuous':
         kwargs['baseline'] = args.baseline
+    if args.function == 'ols':
+        kwargs['summary'] = args.summary
 
     pipeline_fima(
         args.function,

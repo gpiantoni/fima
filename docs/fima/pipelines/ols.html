@@ -25,20 +25,41 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from json import dump
+from json import load as json_load
 from logging import getLogger
+from wonambi import Data
+from pandas import DataFrame
+from numpy import nanmin, nanmax, array
 
 from ..read import load
 from ..spectrum.continuous import get_continuous_cht
 from ..ols.regressors import find_movement_indices
 from ..ols.fit import get_max, fit_one_channel, SIGMAS, DELAYS
 from ..viz import to_div, to_html
+from ..viz.surf import plot_surf
 from ..viz.ols import plot_sigma_delay_mat, plot_coefficient, plot_data_prediction
-from ..parameters import RESULTS_DIR
+from ..parameters import RESULTS_DIR, P
 
 lg = getLogger(__name__)
 
+OLS_DIR = RESULTS_DIR / &#39;ols&#39; / &#39;movement&#39;
+SUMMARY_DIR = RESULTS_DIR / &#39;ols&#39; / &#39;summary&#39;
 
-def pipeline_ols(subject, run):
+
+def pipeline_ols(subject, run, summary):
+    &#34;&#34;&#34;
+    Parameters
+    ----------
+    summary : bool
+        if True, skip time-consuming computation of OLS for each channel
+    &#34;&#34;&#34;
+    if not summary:
+        pipeline_ols_allchan(subject, run)
+
+    pipeline_ols_summary(subject, run)
+
+
+def pipeline_ols_allchan(subject, run):
 
     tf_cht, events, onsets = get_continuous_cht(subject, run, event_type=&#39;cues&#39;)
     t = tf_cht.time[0]
@@ -67,12 +88,53 @@ def pipeline_ols(subject, run):
         fig = plot_data_prediction(tf_cht.time[0], result)
         divs.append(to_div(fig))
 
-        html_file = RESULTS_DIR / &#39;ols&#39; / &#39;movement&#39; / f&#39;{subject}_run-{run}&#39; / f&#39;{subject}_run-{run}_{chan}.html&#39;
+        html_file = OLS_DIR / f&#39;{subject}_run-{run}&#39; / f&#39;{subject}_run-{run}_{chan}.html&#39;
         to_html(divs, html_file)
 
         json_file = html_file.with_suffix(&#39;.json&#39;)
         with json_file.open(&#39;w&#39;) as f:
-            dump(out, f, indent=2)</code></pre>
+            dump(out, f, indent=2)
+
+
+def pipeline_ols_summary(subject, run):
+    df = import_ols(subject, run)
+
+    SUMMARY_DIR.mkdir(parents=True, exist_ok=True)
+    df.to_csv(
+        SUMMARY_DIR / f&#39;ols_movement_{subject}_run-{run}_summary.tsv&#39;,
+        sep=&#39;\t&#39;, index=False)
+
+    df = df[df[&#39;rsquared&#39;] &gt;= P[&#39;ols&#39;][&#39;threshold&#39;]]
+    if len(df) == 0:
+        lg.warning(f&#39;No channels had a fit better than threshold {P[&#34;ols&#34;][&#34;threshold&#34;]}&#39;)
+        return
+
+    elec = load(&#39;electrodes&#39;, subject, run)
+    try:
+        pial = load(&#39;surface&#39;, subject, run)
+    except FileNotFoundError:
+        pial = None
+
+    dat = Data(array(df[&#39;rsquared&#39;]), chan=array(df[&#39;chan&#39;]))
+    fig = plot_surf(dat, elec, pial=pial, clim=(0, nanmax(df[&#39;rsquared&#39;])), colorscale=&#39;Hot&#39;)
+    to_html([to_div(fig), ], SUMMARY_DIR / f&#39;ols_movement_{subject}_run-{run}_rsquared.html&#39;)
+
+    for param in (&#39;sigma&#39;, ):
+        dat = Data(array(df[param]), chan=array(df[&#39;chan&#39;]))
+        fig = plot_surf(dat, elec, pial=pial, clim=(nanmin(df[param]) - 0.1, nanmax(df[param]) + 0.1), colorscale=&#39;Hot&#39;)
+        to_html([to_div(fig), ], SUMMARY_DIR / f&#39;ols_movement_{subject}_run-{run}_{param}.html&#39;)
+
+
+def import_ols(subject, run):
+
+    out_dir = OLS_DIR / f&#39;{subject}_run-{run}&#39;
+
+    df = []
+    for json_file in out_dir.glob(&#39;*.json&#39;):
+        with json_file.open() as f:
+            df.append(json_load(f))
+
+    return DataFrame(df).sort_values(&#39;rsquared&#39;, ascending=False)</code></pre>
 </details>
 </section>
 <section>
@@ -82,8 +144,8 @@ def pipeline_ols(subject, run):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="fima.pipelines.ols.pipeline_ols"><code class="name flex">
-<span>def <span class="ident">pipeline_ols</span></span>(<span>subject, run)</span>
+<dt id="fima.pipelines.ols.import_ols"><code class="name flex">
+<span>def <span class="ident">import_ols</span></span>(<span>subject, run)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -91,7 +153,54 @@ def pipeline_ols(subject, run):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def pipeline_ols(subject, run):
+<pre><code class="python">def import_ols(subject, run):
+
+    out_dir = OLS_DIR / f&#39;{subject}_run-{run}&#39;
+
+    df = []
+    for json_file in out_dir.glob(&#39;*.json&#39;):
+        with json_file.open() as f:
+            df.append(json_load(f))
+
+    return DataFrame(df).sort_values(&#39;rsquared&#39;, ascending=False)</code></pre>
+</details>
+</dd>
+<dt id="fima.pipelines.ols.pipeline_ols"><code class="name flex">
+<span>def <span class="ident">pipeline_ols</span></span>(<span>subject, run, summary)</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>summary</code></strong> :&ensp;<code>bool</code></dt>
+<dd>if True, skip time-consuming computation of OLS for each channel</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pipeline_ols(subject, run, summary):
+    &#34;&#34;&#34;
+    Parameters
+    ----------
+    summary : bool
+        if True, skip time-consuming computation of OLS for each channel
+    &#34;&#34;&#34;
+    if not summary:
+        pipeline_ols_allchan(subject, run)
+
+    pipeline_ols_summary(subject, run)</code></pre>
+</details>
+</dd>
+<dt id="fima.pipelines.ols.pipeline_ols_allchan"><code class="name flex">
+<span>def <span class="ident">pipeline_ols_allchan</span></span>(<span>subject, run)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pipeline_ols_allchan(subject, run):
 
     tf_cht, events, onsets = get_continuous_cht(subject, run, event_type=&#39;cues&#39;)
     t = tf_cht.time[0]
@@ -120,12 +229,50 @@ def pipeline_ols(subject, run):
         fig = plot_data_prediction(tf_cht.time[0], result)
         divs.append(to_div(fig))
 
-        html_file = RESULTS_DIR / &#39;ols&#39; / &#39;movement&#39; / f&#39;{subject}_run-{run}&#39; / f&#39;{subject}_run-{run}_{chan}.html&#39;
+        html_file = OLS_DIR / f&#39;{subject}_run-{run}&#39; / f&#39;{subject}_run-{run}_{chan}.html&#39;
         to_html(divs, html_file)
 
         json_file = html_file.with_suffix(&#39;.json&#39;)
         with json_file.open(&#39;w&#39;) as f:
             dump(out, f, indent=2)</code></pre>
+</details>
+</dd>
+<dt id="fima.pipelines.ols.pipeline_ols_summary"><code class="name flex">
+<span>def <span class="ident">pipeline_ols_summary</span></span>(<span>subject, run)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pipeline_ols_summary(subject, run):
+    df = import_ols(subject, run)
+
+    SUMMARY_DIR.mkdir(parents=True, exist_ok=True)
+    df.to_csv(
+        SUMMARY_DIR / f&#39;ols_movement_{subject}_run-{run}_summary.tsv&#39;,
+        sep=&#39;\t&#39;, index=False)
+
+    df = df[df[&#39;rsquared&#39;] &gt;= P[&#39;ols&#39;][&#39;threshold&#39;]]
+    if len(df) == 0:
+        lg.warning(f&#39;No channels had a fit better than threshold {P[&#34;ols&#34;][&#34;threshold&#34;]}&#39;)
+        return
+
+    elec = load(&#39;electrodes&#39;, subject, run)
+    try:
+        pial = load(&#39;surface&#39;, subject, run)
+    except FileNotFoundError:
+        pial = None
+
+    dat = Data(array(df[&#39;rsquared&#39;]), chan=array(df[&#39;chan&#39;]))
+    fig = plot_surf(dat, elec, pial=pial, clim=(0, nanmax(df[&#39;rsquared&#39;])), colorscale=&#39;Hot&#39;)
+    to_html([to_div(fig), ], SUMMARY_DIR / f&#39;ols_movement_{subject}_run-{run}_rsquared.html&#39;)
+
+    for param in (&#39;sigma&#39;, ):
+        dat = Data(array(df[param]), chan=array(df[&#39;chan&#39;]))
+        fig = plot_surf(dat, elec, pial=pial, clim=(nanmin(df[param]) - 0.1, nanmax(df[param]) + 0.1), colorscale=&#39;Hot&#39;)
+        to_html([to_div(fig), ], SUMMARY_DIR / f&#39;ols_movement_{subject}_run-{run}_{param}.html&#39;)</code></pre>
 </details>
 </dd>
 </dl>
@@ -146,7 +293,10 @@ def pipeline_ols(subject, run):
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="fima.pipelines.ols.import_ols" href="#fima.pipelines.ols.import_ols">import_ols</a></code></li>
 <li><code><a title="fima.pipelines.ols.pipeline_ols" href="#fima.pipelines.ols.pipeline_ols">pipeline_ols</a></code></li>
+<li><code><a title="fima.pipelines.ols.pipeline_ols_allchan" href="#fima.pipelines.ols.pipeline_ols_allchan">pipeline_ols_allchan</a></code></li>
+<li><code><a title="fima.pipelines.ols.pipeline_ols_summary" href="#fima.pipelines.ols.pipeline_ols_summary">pipeline_ols_summary</a></code></li>
 </ul>
 </li>
 </ul>

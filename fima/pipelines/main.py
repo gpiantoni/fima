@@ -60,6 +60,7 @@ def sub_pipeline(subject, run, pipeline, kwargs):
         pipeline_ols(
             subject,
             run,
+            summary=kwargs['summary'],
             )
 
     elif pipeline == 'spectrum':
