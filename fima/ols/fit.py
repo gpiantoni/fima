@@ -36,6 +36,7 @@ def get_max(t, x, indices, MAT):
         'scale': max_values[1],
         'rsquared': results.rsquared,
         }
+    out.update(dict(results.params))
     if P['ols']['window']['method'] == 'gamma':
         out['a'] = max_values[2]
 

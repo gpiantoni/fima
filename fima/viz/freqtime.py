@@ -11,6 +11,8 @@ from ..parameters import P
 
 
 def _compute_regions(fs, elec):
+    """do not use this anymore, use brainregions"""
+    raise NotImplementedError
     chans = Channels(elec['name'], c_[elec['x'], elec['y'], elec['z']])
     regions = assign_region_to_channels(chans, fs, parc_type='aparc.a2009s', exclude_regions=('White', 'WM', 'Unknown'))
     return regions

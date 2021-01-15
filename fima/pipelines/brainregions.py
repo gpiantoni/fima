@@ -31,13 +31,13 @@ def pipeline_brainregions(subject, run):
 def find_brainregions(fs, elec, tsv_file, template):
 
     with tsv_file.open('w') as f:
-        f.write('name\tx\ty\tz\tregion\tapprox\n')
+        f.write('chan\tx\ty\tz\tregion\tapprox\n')
 
         for el in elec:
             pos = r_[el['x'], el['y'], el['z']]
 
             region, approx = fs.find_brain_region(
-                pos, template, max_approx=4,
+                pos, template, max_approx=10,
                 exclude_regions=['Unknown', 'Right-Cerebral-White-Matter', 'Left-Cerebral-White-Matter'])
 
             if template == 'aparc.DKTatlas':
