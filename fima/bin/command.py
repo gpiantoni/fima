@@ -32,6 +32,18 @@ def main():
     list_pipelines = parser.add_subparsers(title='Pipelines', help='')
 
     action = list_pipelines.add_parser(
+        'brainregions',
+        help='Get brain regions for all the electrodes',
+        )
+    action.set_defaults(function='brainregions')
+
+    action = list_pipelines.add_parser(
+        'dataglove',
+        help='Plot the time-course of the dataglove',
+        )
+    action.set_defaults(function='dataglove')
+
+    action = list_pipelines.add_parser(
         'continuous',
         help='Plot the time-course continuously in the high-frequency range',
         )
@@ -39,12 +51,6 @@ def main():
     action.add_argument(
         '--baseline', action='store_true',
         help='Baseline correction with ' + P['spectrum']['baseline']['type'])
-
-    action = list_pipelines.add_parser(
-        'dataglove',
-        help='Plot the time-course of the dataglove',
-        )
-    action.set_defaults(function='dataglove')
 
     action = list_pipelines.add_parser(
         'ols',

@@ -5,6 +5,7 @@ from multiprocessing import Pool
 from .continuous import pipeline_continuous
 from .dataglove import pipeline_dataglove
 from .ols import pipeline_ols
+from .brainregions import pipeline_brainregions
 from ..parameters import SUBJECTS
 from ..utils import be_nice
 
@@ -52,6 +53,12 @@ def sub_pipeline(subject, run, pipeline, kwargs):
 
     elif pipeline == 'dataglove':
         pipeline_dataglove(
+            subject,
+            run,
+            )
+
+    elif pipeline == 'brainregions':
+        pipeline_brainregions(
             subject,
             run,
             )

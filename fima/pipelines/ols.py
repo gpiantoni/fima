@@ -92,7 +92,8 @@ def pipeline_ols_summary(subject, run):
         lg.warning(f'No channels had a fit better than threshold {P["ols"]["threshold"]}')
         return
 
-    for param in ('sigma', ):
+    params = set(df) - {'rsquared', 'chan'}
+    for param in params:
         dat = Data(array(df[param]), chan=array(df['chan']))
         fig = plot_surf(dat, elec, pial=pial, clim=(nanmin(df[param]) - 0.1, nanmax(df[param]) + 0.1), colorscale='Hot')
         to_html([to_div(fig), ], SUMMARY_DIR / f'ols_movement_{subject}_run-{run}_{param}.html')
