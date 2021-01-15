@@ -18,6 +18,7 @@ lg = getLogger(__name__)
 
 OLS_DIR = RESULTS_DIR / 'ols' / 'movement'
 SUMMARY_DIR = RESULTS_DIR / 'ols' / 'summary'
+PLOTS_DIR = RESULTS_DIR / 'ols' / 'plots'
 
 
 def pipeline_ols(subject, run, summary):
@@ -85,7 +86,7 @@ def pipeline_ols_summary(subject, run):
 
     dat = Data(array(df['rsquared']), chan=array(df['chan']))
     fig = plot_surf(dat, elec, pial=pial, clim=(0, nanmax(df['rsquared'])), colorscale='Hot')
-    to_html([to_div(fig), ], SUMMARY_DIR / f'ols_movement_{subject}_run-{run}_rsquared.html')
+    to_html([to_div(fig), ], PLOTS_DIR / f'ols_movement_{subject}_run-{run}_rsquared.html')
 
     df = df[df['rsquared'] >= P['ols']['threshold']]
     if len(df) == 0:
@@ -95,8 +96,8 @@ def pipeline_ols_summary(subject, run):
     params = set(df) - {'rsquared', 'chan'}
     for param in params:
         dat = Data(array(df[param]), chan=array(df['chan']))
-        fig = plot_surf(dat, elec, pial=pial, clim=(nanmin(df[param]) - 0.1, nanmax(df[param]) + 0.1), colorscale='Hot')
-        to_html([to_div(fig), ], SUMMARY_DIR / f'ols_movement_{subject}_run-{run}_{param}.html')
+        fig = plot_surf(dat, elec, pial=pial, clim=(nanmin(df[param]), nanmax(df[param])), colorscale='Hot')
+        to_html([to_div(fig), ], PLOTS_DIR / f'ols_movement_{subject}_run-{run}_{param}.html')
 
 
 def import_ols(subject, run):

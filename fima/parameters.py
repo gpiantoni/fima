@@ -42,9 +42,9 @@ P = dict(
         threshold=0.05,  # fima/pipelines/ols.py
         window=dict(
             method='gamma',  # gaussian or gamma (for gamma, use a as well)
-            loc=[-.3, .3, .1],  # [-1, +1],
-            scale=[.1, 2, .1],  # [0.1, 2, .1],
-            a=[1.2, 4, 0.2],
+            loc=[-.8, .3, 0.05],  # [-1, +1],
+            scale=[0.03, 0.5, .03],  # [0.1, 2, .1],
+            a=[1.5, 8.1, 0.5],
             ),
         ),
     viz=dict(
