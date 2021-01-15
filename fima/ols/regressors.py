@@ -22,6 +22,18 @@ def find_movement_indices(mov, t):
 
 
 def make_regressors_from_indices(indices, t, params):
+
+    canonical_resp = compute_canonical(t, params)[1]
+    regressors = {}
+    for k, v in indices.items():
+        r = unit_impulse(t.shape, v)
+        regressors[k] = convolve(r, canonical_resp, mode='same')
+
+    return regressors
+
+
+def compute_canonical(t, params):
+
     t_diff = t[1] - t[0]
     t_window = arange(-3, 3, t_diff)
     if P['ols']['window']['method'] == 'gaussian':
@@ -29,9 +41,4 @@ def make_regressors_from_indices(indices, t, params):
     else:
         canonical_resp = gamma.pdf(t_window, a=params[2], loc=params[0], scale=params[1])
 
-    regressors = {}
-    for k, v in indices.items():
-        r = unit_impulse(t.shape, v)
-        regressors[k] = convolve(r, canonical_resp, mode='same')
-
-    return regressors
+    return t_window, canonical_resp

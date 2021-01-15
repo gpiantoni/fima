@@ -11,7 +11,7 @@ from ..ols.regressors import find_movement_indices
 from ..ols.fit import get_max, fit_one_channel
 from ..viz import to_div, to_html
 from ..viz.surf import plot_surf
-from ..viz.ols import plot_sigma_delay_mat, plot_coefficient, plot_data_prediction
+from ..viz.ols import plot_coefficient, plot_data_prediction
 from ..parameters import RESULTS_DIR, P
 
 lg = getLogger(__name__)
@@ -37,7 +37,6 @@ def pipeline_ols_allchan(subject, run):
 
     tf_cht, events, onsets = get_continuous_cht(subject, run, event_type='cues')
     t = tf_cht.time[0]
-    t_diff = t[1] - t[0]
 
     mov = load('movements', subject, run)
     indices = find_movement_indices(mov, tf_cht.time[0])
@@ -46,15 +45,13 @@ def pipeline_ols_allchan(subject, run):
         x = tf_cht(trial=0, chan=chan, trial_axis='trial000000')
 
         MAT = fit_one_channel(t, x, indices)
-        out, result = get_max(MAT, x, indices)
-        out['sigma'] *= t_diff
-        out['delay'] *= t_diff
+        out, result = get_max(t, x, indices, MAT)
         out['chan'] = chan
 
         divs = []
 
-        fig = plot_sigma_delay_mat(MAT, SIGMAS * t_diff, DELAYS * t_diff)
-        divs.append(to_div(fig))
+        # fig = plot_sigma_delay_mat(MAT, SIGMAS * t_diff, DELAYS * t_diff)
+        # divs.append(to_div(fig))
 
         fig = plot_coefficient(result)
         divs.append(to_div(fig))
@@ -80,6 +77,12 @@ def pipeline_ols_summary(subject, run):
         SUMMARY_DIR / f'ols_movement_{subject}_run-{run}_summary.tsv',
         sep='\t', index=False)
 
+    elec = load('electrodes', subject, run)
+    try:
+        pial = load('surface', subject, run)
+    except FileNotFoundError:
+        pial = None
+
     dat = Data(array(df['rsquared']), chan=array(df['chan']))
     fig = plot_surf(dat, elec, pial=pial, clim=(0, nanmax(df['rsquared'])), colorscale='Hot')
     to_html([to_div(fig), ], SUMMARY_DIR / f'ols_movement_{subject}_run-{run}_rsquared.html')
@@ -88,12 +91,6 @@ def pipeline_ols_summary(subject, run):
     if len(df) == 0:
         lg.warning(f'No channels had a fit better than threshold {P["ols"]["threshold"]}')
         return
-
-    elec = load('electrodes', subject, run)
-    try:
-        pial = load('surface', subject, run)
-    except FileNotFoundError:
-        pial = None
 
     for param in ('sigma', ):
         dat = Data(array(df[param]), chan=array(df['chan']))

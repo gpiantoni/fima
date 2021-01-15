@@ -18,6 +18,10 @@ COLS = [
 
 
 def plot_sigma_delay_mat(MAT, SIGMAS, DELAYS):
+    """Not being used at this point, because gamma is 3D so I don't know how to
+    plot it"""
+    raise NotImplementedError
+
     fig = go.Figure(data=[
         go.Heatmap(
             x=DELAYS,
