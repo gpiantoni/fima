@@ -60,7 +60,6 @@ def sub_pipeline(subject, run, pipeline, kwargs):
     elif pipeline == 'brainregions':
         pipeline_brainregions(
             subject,
-            run,
             )
 
     elif pipeline == 'ols':

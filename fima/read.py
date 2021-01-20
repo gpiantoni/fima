@@ -2,6 +2,7 @@
 from numpy import genfromtxt, isin, isnan, empty, NaN
 from numpy.lib.recfunctions import append_fields
 from bidso.objects import Electrodes
+from nibabel.freesurfer.io import read_annot
 from wonambi.attr import Freesurfer
 
 from .preproc import read_data
@@ -56,9 +57,13 @@ def load(what, subject, run=None, acq=None, event_type=None):
       - 'events' returns: ndarray
       - 'dataglove' returns: ndarray
       - 'movements' returns: ndarray
+      (run is not necessary)
       - 'electrodes'
-      - 'surface'
       - 'freesurfer'
+      - 'surface'
+      - 'aparc'
+      - 'aparc.a2009s'
+      - 'aparc.DKTatlas'
 
     EVENT_TYPE:
       - cues : all cues (to open and close)
@@ -91,7 +96,7 @@ def load(what, subject, run=None, acq=None, event_type=None):
         pattern = f'sub-{subject}_*_acq-{acq}_electrodes.tsv'
         folder = BIDS_DIR
 
-    elif what in ('surface', 'freesurfer'):
+    elif what in ('surface', 'freesurfer', 'aparc', 'aparc.a2009s', 'aparc.DKTatlas'):
         pattern = subject
         folder = FREESURFER_DIR
 
@@ -140,6 +145,26 @@ def load(what, subject, run=None, acq=None, event_type=None):
         elec = load('electrodes', subject, run, acq)
         right_or_left = (elec['x'] > 0).sum() / elec.shape[0]
         return read_surf(filename, right_or_left)
+
+    elif what in ('aparc', 'aparc.a2009s', 'aparc.DKTatlas'):
+        fs = load('freesurfer', subject)
+        pial = load('surface', subject)
+        hemi = pial.surf_file.stem
+
+        aparc_file = fs.dir / 'label' / f'{hemi}.{what}.annot'
+        region_values, _, region_names = read_annot(aparc_file)
+
+        out = {
+            'aparc': what,
+            'ras_shift': fs.surface_ras_shift,
+            'vert': pial.vert,
+            'regions': {
+                'values': region_values,
+                'names': [x.decode() for x in region_names],
+                }
+            }
+
+        return out
 
     elif what == 'freesurfer':
         return Freesurfer(filename)

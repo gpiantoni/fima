@@ -39,7 +39,11 @@ def pipeline_ols_allchan(subject, run):
     tf_cht, events, onsets = get_continuous_cht(subject, run, event_type='cues')
     t = tf_cht.time[0]
 
-    mov = load('movements', subject, run)
+    try:
+        mov = load('movements', subject, run)
+    except FileNotFoundError:
+        return
+
     indices = find_movement_indices(mov, tf_cht.time[0])
     for chan in tf_cht.chan[0]:
         lg.info(f'{subject:<10}/ {run} Fitting OLS on {chan}')
@@ -97,7 +101,7 @@ def pipeline_ols_summary(subject, run):
     for param in params:
         dat = Data(array(df[param]), chan=array(df['chan']))
         fig = plot_surf(dat, elec, pial=pial, clim=(nanmin(df[param]), nanmax(df[param])), colorscale='Hot')
-        to_html([to_div(fig), ], PLOTS_DIR / f'ols_movement_{subject}_run-{run}_{param}.html')
+        to_html([to_div(fig), ], PLOTS_DIR / f'ols_movement_{subject}_run-{run}_{param.replace(" ", "")}.html')
 
 
 def import_ols(subject, run):
