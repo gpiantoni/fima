@@ -3,7 +3,7 @@ from json import load as json_load
 from logging import getLogger
 from wonambi import Data
 from pandas import DataFrame
-from numpy import nanmin, nanmax, array, corrcoef
+from numpy import nanmin, nanmax, array
 
 from ..read import load
 from ..spectrum.continuous import get_continuous_cht
@@ -13,7 +13,7 @@ from ..ols.prf import add_prf_estimates
 from ..viz import to_div, to_html
 from ..viz.surf import plot_surf
 from ..viz.ols import plot_coefficient, plot_data_prediction
-from ..parameters import RESULTS_DIR, P, FINGERS_FLEXION, FINGERS_EXTENSION
+from ..parameters import RESULTS_DIR, P
 
 lg = getLogger(__name__)
 

@@ -29,7 +29,7 @@ def compute_prf_from_parameters(j, finger_group):
     movement_type = finger_group[0].split()[1]
     data = [j[k] for k in finger_group]
 
-    j[movement_type + ' mode'] = argmax(data)
+    j[movement_type + ' mode'] = int(argmax(data))
 
     result = least_squares(
         gaussian,

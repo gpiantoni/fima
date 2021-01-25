@@ -41,4 +41,6 @@ def compute_canonical(t, params):
     else:
         canonical_resp = gamma.pdf(t_window, a=params[2], loc=params[0], scale=params[1])
 
+    # TODO add this line: canonical_resp /= canonical_resp.max()
+
     return t_window, canonical_resp

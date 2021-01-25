@@ -32,6 +32,7 @@ def get_max(t, x, indices, MAT):
     results = fit_ols(regressors, x)
 
     out = {
+        'tdiff': t[1] - t[0],
         'loc': max_values[0],
         'scale': max_values[1],
         'rsquared': results.rsquared,
