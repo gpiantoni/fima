@@ -66,7 +66,8 @@ def sub_pipeline(subject, run, pipeline, kwargs):
         pipeline_ols(
             subject,
             run,
-            summary=kwargs['summary'],
+            skip_ols=kwargs['skip_ols'],
+            skip_prf=kwargs['skip_prf'],
             )
 
     elif pipeline == 'spectrum':

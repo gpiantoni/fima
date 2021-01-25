@@ -9,6 +9,7 @@ from ..read import load
 from ..spectrum.continuous import get_continuous_cht
 from ..ols.regressors import find_movement_indices
 from ..ols.fit import get_max, fit_one_channel
+from ..ols.prf import add_prf_estimates
 from ..viz import to_div, to_html
 from ..viz.surf import plot_surf
 from ..viz.ols import plot_coefficient, plot_data_prediction
@@ -21,15 +22,19 @@ SUMMARY_DIR = RESULTS_DIR / 'ols' / 'summary'
 PLOTS_DIR = RESULTS_DIR / 'ols' / 'plots'
 
 
-def pipeline_ols(subject, run, summary):
+def pipeline_ols(subject, run, skip_ols=False, skip_prf=False):
     """
     Parameters
     ----------
-    summary : bool
+    skip_ols : bool
         if True, skip time-consuming computation of OLS for each channel
+    skip_prf : bool
+        if True, skip time-consuming computation of PRF on the parameters
     """
-    if not summary:
+    if not skip_ols:
         pipeline_ols_allchan(subject, run)
+    if not skip_prf:
+        pipeline_ols_prf(subject, run)
 
     pipeline_ols_summary(subject, run)
 
@@ -118,14 +123,12 @@ def import_ols(subject, run):
 
     df = DataFrame(df).sort_values('rsquared', ascending=False).reset_index(drop=True)
 
-    i_corr = []
-    for i, row in df.iterrows():
-        i_corr.append(
-            corrcoef(
-                row[FINGERS_FLEXION].astype(float),
-                row[FINGERS_EXTENSION].astype(float))[0, 1])
-    df['corrparams'] = i_corr
-
     return df
 
 
+def pipeline_ols_prf(subject, run):
+
+    out_dir = OLS_DIR / f'{subject}_run-{run}'
+
+    for json_file in out_dir.glob('*.json'):
+        add_prf_estimates(json_file)

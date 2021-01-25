@@ -58,8 +58,11 @@ def main():
         )
     action.set_defaults(function='ols')
     action.add_argument(
-        '--summary', action='store_true',
-        help='Skip OLS and jump to the summary directly')
+        '--skip_ols', action='store_true',
+        help='Skip OLS on the data (very time consuming)')
+    action.add_argument(
+        '--skip_prf', action='store_true',
+        help='Skip PRF on parameters (time consuming). Use both options to jump to summary directly')
 
     action = list_pipelines.add_parser(
         'spectrum',
@@ -122,7 +125,8 @@ def main():
     if args.function == 'continuous':
         kwargs['baseline'] = args.baseline
     if args.function == 'ols':
-        kwargs['summary'] = args.summary
+        kwargs['skip_ols'] = args.skip_ols
+        kwargs['skip_prf'] = args.skip_prf
 
     pipeline_fima(
         args.function,
