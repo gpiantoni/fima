@@ -3,7 +3,7 @@ from json import load as json_load
 from logging import getLogger
 from wonambi import Data
 from pandas import DataFrame
-from numpy import nanmin, nanmax, array
+from numpy import nanmin, nanmax, array, corrcoef
 
 from ..read import load
 from ..spectrum.continuous import get_continuous_cht
@@ -12,7 +12,7 @@ from ..ols.fit import get_max, fit_one_channel
 from ..viz import to_div, to_html
 from ..viz.surf import plot_surf
 from ..viz.ols import plot_coefficient, plot_data_prediction
-from ..parameters import RESULTS_DIR, P
+from ..parameters import RESULTS_DIR, P, FINGERS_FLEXION, FINGERS_EXTENSION
 
 lg = getLogger(__name__)
 
@@ -116,4 +116,16 @@ def import_ols(subject, run):
     if len(df) == 0:
         return
 
-    return DataFrame(df).sort_values('rsquared', ascending=False)
+    df = DataFrame(df).sort_values('rsquared', ascending=False).reset_index(drop=True)
+
+    i_corr = []
+    for i, row in df.iterrows():
+        i_corr.append(
+            corrcoef(
+                row[FINGERS_FLEXION].astype(float),
+                row[FINGERS_EXTENSION].astype(float))[0, 1])
+    df['corrparams'] = i_corr
+
+    return df
+
+

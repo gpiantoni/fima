@@ -9,41 +9,16 @@ from .preproc import read_data
 from .dataglove.read_dataglove import read_physio
 from .preproc.elec import read_surf
 from .align.maxmin import main_func, CRITICAL_TIMEPOINTS
-from .parameters import BIDS_DIR, SCRIPTS_DIR, FREESURFER_DIR
+from .parameters import (
+    BIDS_DIR,
+    SCRIPTS_DIR,
+    FREESURFER_DIR,
+    FINGERS_OPEN,
+    FINGERS_CLOSED,
+    FINGERS_FLEXION,
+    FINGERS_EXTENSION,
+    )
 
-
-FINGERS_OPEN = [
-    'thumb open',
-    'index open',
-    'middle open',
-    'ring open',
-    'little open',
-    ]
-
-FINGERS_CLOSED = [
-    'thumb close',
-    'index close',
-    'middle close',
-    'ring close',
-    'little close',
-    ]
-
-
-FINGERS_FLEXION = [
-    'thumb flexion',
-    'index flexion',
-    'middle flexion',
-    'ring flexion',
-    'little flexion',
-    ]
-
-FINGERS_EXTENSION = [
-    'thumb extension',
-    'index extension',
-    'middle extension',
-    'ring extension',
-    'little extension',
-    ]
 
 timepoints = ', '.join(f"'{x}'" for x in CRITICAL_TIMEPOINTS)
 

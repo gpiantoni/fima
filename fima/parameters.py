@@ -171,7 +171,14 @@ FINGER_COLOR = {
 FINGERS = list(FINGER_COLOR)
 
 
-EVENTS = []
-for action in MOVEMENT_LINE:
-    for f in FINGERS:
-        EVENTS.append(f'{f} {action}')
+FINGERS_OPEN = []
+FINGERS_CLOSED = []
+FINGERS_FLEXION = []
+FINGERS_EXTENSION = []
+for f in FINGERS:
+    FINGERS_OPEN.append(f + ' open')
+    FINGERS_CLOSED.append(f + ' close')
+    FINGERS_FLEXION.append(f + ' flexion')
+    FINGERS_EXTENSION.append(f + ' extension')
+
+EVENTS = FINGERS_OPEN + FINGERS_CLOSED
