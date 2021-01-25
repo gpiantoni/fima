@@ -2,7 +2,7 @@
 """
 from scipy.stats import norm
 from scipy.optimize import least_squares
-from numpy import sqrt, Inf, arange, array, corrcoef
+from numpy import sqrt, Inf, arange, array, corrcoef, argmax
 from json import load as json_load
 from json import dump
 
@@ -28,6 +28,8 @@ def add_prf_estimates(json_file):
 def compute_prf_from_parameters(j, finger_group):
     movement_type = finger_group[0].split()[1]
     data = [j[k] for k in finger_group]
+
+    j[movement_type + ' mode'] = argmax(data)
 
     result = least_squares(
         gaussian,
