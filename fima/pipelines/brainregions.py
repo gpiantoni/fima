@@ -19,7 +19,7 @@ def pipeline_brainregions(subject):
     elec = load('electrodes', subject)
 
     aparc = {}
-    for template in ('aparc.a2009s', 'aparc.DKTatlas'):
+    for template in ('aparc.a2009s', 'aparc.DKTatlas', 'BA_exvivo'):
         aparc[template] = load(template, subject)
 
     out_dir = RESULTS_DIR / 'brainregions'
@@ -27,7 +27,7 @@ def pipeline_brainregions(subject):
 
     tsv_file = out_dir / f'{subject}_regions.tsv'
     with tsv_file.open('w') as f:
-        f.write('chan\tx\ty\tz\ta2009s\tDKTatlas')
+        f.write('chan\tx\ty\tz\ta2009s\tDKTatlas\tBA')
 
         for el in elec:
             pos = r_[el['x'], el['y'], el['z']]
@@ -35,6 +35,8 @@ def pipeline_brainregions(subject):
             i_vert = argmin(norm(aparc['aparc.a2009s']['vert'] - pos_surf, axis=1))
 
             f.write(f"\n{el['name']}\t{el['x']}\t{el['y']}\t{el['z']}")
-            for i_aparc in aparc.values():
+            for name, i_aparc in aparc.items():
                 region = i_aparc['regions']['names'][i_aparc['regions']['values'][i_vert]]
+                if name == 'BA_exvivo':
+                    region = region.split('_')[0]
                 f.write(f"\t{region}")

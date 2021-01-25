@@ -19,6 +19,12 @@ from .parameters import (
     FINGERS_EXTENSION,
     )
 
+FS_LABELS = [
+    'aparc',
+    'aparc.a2009s',
+    'aparc.DKTatlas',
+    'BA_exvivo',
+    ]
 
 timepoints = ', '.join(f"'{x}'" for x in CRITICAL_TIMEPOINTS)
 
@@ -39,6 +45,7 @@ def load(what, subject, run=None, acq=None, event_type=None):
       - 'aparc'
       - 'aparc.a2009s'
       - 'aparc.DKTatlas'
+      - 'BA_exvivo'
 
     EVENT_TYPE:
       - cues : all cues (to open and close)
@@ -71,7 +78,7 @@ def load(what, subject, run=None, acq=None, event_type=None):
         pattern = f'sub-{subject}_*_acq-{acq}_electrodes.tsv'
         folder = BIDS_DIR
 
-    elif what in ('surface', 'freesurfer', 'aparc', 'aparc.a2009s', 'aparc.DKTatlas'):
+    elif what in ['surface', 'freesurfer'] + FS_LABELS:
         pattern = subject
         folder = FREESURFER_DIR
 
@@ -121,7 +128,7 @@ def load(what, subject, run=None, acq=None, event_type=None):
         right_or_left = (elec['x'] > 0).sum() / elec.shape[0]
         return read_surf(filename, right_or_left)
 
-    elif what in ('aparc', 'aparc.a2009s', 'aparc.DKTatlas'):
+    elif what in FS_LABELS:
         fs = load('freesurfer', subject)
         pial = load('surface', subject)
         hemi = pial.surf_file.stem
