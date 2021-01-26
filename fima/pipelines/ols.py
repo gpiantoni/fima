@@ -10,15 +10,18 @@ from ..spectrum.continuous import get_continuous_cht
 from ..ols.regressors import find_movement_indices
 from ..ols.fit import get_max, fit_one_channel
 from ..ols.prf import add_prf_estimates
+from ..ols.summary import import_all_ols
 from ..viz import to_div, to_html
 from ..viz.surf import plot_surf
 from ..viz.ols import plot_coefficient, plot_data_prediction
+from ..viz.ols_summary import plot_ols_rsquared
 from ..parameters import RESULTS_DIR, P
 
 lg = getLogger(__name__)
 
 OLS_DIR = RESULTS_DIR / 'ols' / 'movement'
 SUMMARY_DIR = RESULTS_DIR / 'ols' / 'summary'
+ALL_DIR = RESULTS_DIR / 'ols' / 'alltogether'
 PLOTS_DIR = RESULTS_DIR / 'ols' / 'plots'
 
 
@@ -37,6 +40,19 @@ def pipeline_ols(subject, run, skip_ols=False, skip_prf=False):
         pipeline_ols_prf(subject, run)
 
     pipeline_ols_summary(subject, run)
+    pipeline_ols_all_summary()
+
+
+def pipeline_ols_all_summary():
+
+    df = import_all_ols()
+
+    divs = []
+    fig = plot_ols_rsquared(df, 'BA')
+    divs.append(to_div(fig))
+    fig = plot_ols_rsquared(df, 'brainregion')
+    divs.append(to_div(fig))
+    to_html(divs, ALL_DIR / 'ols_movement_all_rsquared_bars.html')
 
 
 def pipeline_ols_allchan(subject, run):
