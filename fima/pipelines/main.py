@@ -4,7 +4,7 @@ from multiprocessing import Pool
 
 from .continuous import pipeline_continuous
 from .dataglove import pipeline_dataglove
-from .ols import pipeline_ols
+from .ols import pipeline_ols, pipeline_ols_all
 from .brainregions import pipeline_brainregions
 from ..parameters import SUBJECTS
 from ..utils import be_nice
@@ -25,7 +25,6 @@ def pipeline_fima(pipeline=None, subject_only=None, parallel=False, kwargs=None)
         'movements', 'extension', 'flexion')
     subject_only : str
         compute pipeline only for this participant
-    """
     func = partial(sub_pipeline, pipeline=pipeline, kwargs=kwargs)
     if parallel:
         args = gen_subject_run()
@@ -40,6 +39,10 @@ def pipeline_fima(pipeline=None, subject_only=None, parallel=False, kwargs=None)
             for run in runs:
                 lg.info(f'{subject:<10}/ {run}')
                 func(subject, run)
+    """
+
+    if pipeline == 'ols':
+        pipeline_ols_all()
 
 
 def sub_pipeline(subject, run, pipeline, kwargs):

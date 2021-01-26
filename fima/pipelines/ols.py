@@ -14,7 +14,7 @@ from ..ols.summary import import_all_ols
 from ..viz import to_div, to_html
 from ..viz.surf import plot_surf
 from ..viz.ols import plot_coefficient, plot_data_prediction
-from ..viz.ols_summary import plot_ols_rsquared
+from ..viz.ols_summary import plot_ols_rsquared, plot_ols_params
 from ..parameters import RESULTS_DIR, P
 
 lg = getLogger(__name__)
@@ -40,19 +40,38 @@ def pipeline_ols(subject, run, skip_ols=False, skip_prf=False):
         pipeline_ols_prf(subject, run)
 
     pipeline_ols_summary(subject, run)
-    pipeline_ols_all_summary()
 
 
-def pipeline_ols_all_summary():
+def pipeline_ols_all():
 
     df = import_all_ols()
 
+    REGIONS = ['BA', 'brainregion']
     divs = []
-    fig = plot_ols_rsquared(df, 'BA')
-    divs.append(to_div(fig))
-    fig = plot_ols_rsquared(df, 'brainregion')
-    divs.append(to_div(fig))
+    for region in REGIONS:
+        fig = plot_ols_rsquared(df, region)
+        divs.append(to_div(fig))
     to_html(divs, ALL_DIR / 'ols_movement_all_rsquared_bars.html')
+
+    PARAMS = (
+        ('estimate', 'onset', 'Onset time (ms, movement onset = 0)'),
+        ('estimate', 'spread', 'Temporal Spread (ms, wider -> more spread over time)'),
+        ('flexext', 'corr', 'Correlation between extension and flexion estimates'),
+        ('flexext', 'diff', 'Extension estimates - flexion estimates'),
+        ('flexext', 'diff', 'Extension estimates - flexion estimates'),
+        )
+
+    divs = []
+    for param in PARAMS:
+        for region in REGIONS:
+            fig = plot_ols_params(
+                df[df['estimate']['rsquared'] > 0.1],
+                param[:2],
+                region,
+                param[2],
+                )
+            divs.append(to_div(fig))
+    to_html(divs, ALL_DIR / 'ols_movement_all_summary.html')
 
 
 def pipeline_ols_allchan(subject, run):

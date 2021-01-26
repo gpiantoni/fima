@@ -1,8 +1,51 @@
 import plotly.graph_objects as go
+
+from numpy import arange, sqrt
+
+
 from ..utils import get_color_for_val
 
-from numpy import arange
 
+def plot_ols_params(df, param, region_type, yaxis_name=''):
+
+    SUMMARY = {}
+    for region in sorted(df['channel'][region_type].unique()):
+        if region == 'unknown':
+            continue
+        x = df[param[0]][param[1]][df['channel'][region_type] == region]
+        SUMMARY[region] = [x.mean(), x.std() / sqrt(len(x))]
+
+    fig = go.Figure([
+        go.Scatter(
+            mode='markers',
+            y=[x[0] for x in SUMMARY.values()],
+            marker=dict(
+                color='black'),
+            error_y=dict(
+                type='data',
+                array=[x[1] for x in SUMMARY.values()],
+            )
+        )],
+        layout=go.Layout(
+            title=dict(
+                text=' / '.join(param),
+                ),
+            xaxis=dict(
+                title=dict(
+                    text='brain region',
+                    ),
+                tickmode='array',
+                tickvals=arange(len(SUMMARY)),
+                ticktext=list(SUMMARY.keys()),
+                ),
+            yaxis=dict(
+                title=dict(
+                    text=yaxis_name)
+                ),
+            )
+        )
+
+    return fig
 
 def plot_ols_rsquared(df, region_type):
 
