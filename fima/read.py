@@ -79,7 +79,7 @@ def load(what, subject, run=None, acq=None, event_type=None):
         folder = BIDS_DIR
 
     elif what in ['surface', 'freesurfer'] + FS_LABELS:
-        pattern = subject
+        pattern = 'sub-' + subject
         folder = FREESURFER_DIR
 
     elif what == 'dataglove':

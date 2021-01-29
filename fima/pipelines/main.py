@@ -25,6 +25,7 @@ def pipeline_fima(pipeline=None, subject_only=None, parallel=False, kwargs=None)
         'movements', 'extension', 'flexion')
     subject_only : str
         compute pipeline only for this participant
+    """
     func = partial(sub_pipeline, pipeline=pipeline, kwargs=kwargs)
     if parallel:
         args = gen_subject_run()
@@ -39,7 +40,6 @@ def pipeline_fima(pipeline=None, subject_only=None, parallel=False, kwargs=None)
             for run in runs:
                 lg.info(f'{subject:<10}/ {run}')
                 func(subject, run)
-    """
 
     if pipeline == 'ols':
         pipeline_ols_all()

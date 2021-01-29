@@ -46,7 +46,7 @@ def pipeline_ols_all():
 
     df = import_all_ols()
 
-    REGIONS = ['BA', 'brainregion']
+    REGIONS = ['brainregion', 'BA']
     divs = []
     for region in REGIONS:
         fig = plot_ols_rsquared(df, region)
@@ -58,7 +58,8 @@ def pipeline_ols_all():
         ('estimate', 'spread', 'Temporal Spread (ms, wider -> more spread over time)'),
         ('flexext', 'corr', 'Correlation between extension and flexion estimates'),
         ('flexext', 'diff', 'Extension estimates - flexion estimates'),
-        ('flexext', 'diff', 'Extension estimates - flexion estimates'),
+        ('extension', 'spread', 'PRF spatial spread (extension)'),
+        ('flexion', 'spread', 'PRF spatial spread (flexion)'),
         )
 
     divs = []

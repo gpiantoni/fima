@@ -33,22 +33,20 @@ def compute_prf_from_parameters(j, finger_group):
 
     result = least_squares(
         gaussian,
-        x0=[1, 2, 0.5],
+        x0=[2, 0.5],
         bounds=(
-            [-Inf, -1, 0.01],
-            [Inf, 5, 10]),
+            [-1, 0.01],
+            [5, 10]),
         args=[data, ],
         max_nfev=1e4,
-        x_scale=[10, 1, 1],
         )
 
-    j[movement_type + ' A'] = result.x[0]
-    j[movement_type + ' loc'] = result.x[1]
-    j[movement_type + ' scale'] = result.x[2]
-    j[movement_type + ' rms'] = result.fun[0]
+    j[movement_type + ' loc'] = result.x[0]
+    j[movement_type + ' scale'] = result.x[1]
+    j[movement_type + ' corr'] = 1 - result.fun[0]
 
 
 def gaussian(x0, y):
-    A, loc, scale = x0
-    y1 = A * norm.pdf(arange(5), loc=loc, scale=scale)
-    return sqrt(((y - y1) ** 2).mean())
+    loc, scale = x0
+    y1 = norm.pdf(arange(5), loc=loc, scale=scale)
+    return 1 - corrcoef(y, y1)[0, 1]

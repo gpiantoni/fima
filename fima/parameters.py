@@ -3,6 +3,7 @@
 from pathlib import Path
 from platform import node
 from pandas import DataFrame
+from os import environ
 from .utils import get_color_for_val
 
 
@@ -15,7 +16,7 @@ else:
 
 SCRIPTS_DIR = PROJ_DIR / 'scripts'
 BIDS_DIR = PROJ_DIR / 'subjects'
-FREESURFER_DIR = PROJ_DIR / 'freesurfer/'
+FREESURFER_DIR = Path(environ['SUBJECTS_DIR'])
 
 RESULTS_DIR = PROJ_DIR / 'results'
 
