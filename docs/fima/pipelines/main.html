@@ -30,7 +30,8 @@ from multiprocessing import Pool
 
 from .continuous import pipeline_continuous
 from .dataglove import pipeline_dataglove
-from .ols import pipeline_ols
+from .ols import pipeline_ols, pipeline_ols_all
+from .brainregions import pipeline_brainregions
 from ..parameters import SUBJECTS
 from ..utils import be_nice
 
@@ -66,6 +67,9 @@ def pipeline_fima(pipeline=None, subject_only=None, parallel=False, kwargs=None)
                 lg.info(f&#39;{subject:&lt;10}/ {run}&#39;)
                 func(subject, run)
 
+    if pipeline == &#39;ols&#39;:
+        pipeline_ols_all()
+
 
 def sub_pipeline(subject, run, pipeline, kwargs):
 
@@ -82,11 +86,17 @@ def sub_pipeline(subject, run, pipeline, kwargs):
             run,
             )
 
+    elif pipeline == &#39;brainregions&#39;:
+        pipeline_brainregions(
+            subject,
+            )
+
     elif pipeline == &#39;ols&#39;:
         pipeline_ols(
             subject,
             run,
-            summary=kwargs[&#39;summary&#39;],
+            skip_ols=kwargs[&#39;skip_ols&#39;],
+            skip_prf=kwargs[&#39;skip_prf&#39;],
             )
 
     elif pipeline == &#39;spectrum&#39;:
@@ -186,7 +196,10 @@ def gen_subject_run():
 
             for run in runs:
                 lg.info(f&#39;{subject:&lt;10}/ {run}&#39;)
-                func(subject, run)</code></pre>
+                func(subject, run)
+
+    if pipeline == &#39;ols&#39;:
+        pipeline_ols_all()</code></pre>
 </details>
 </dd>
 <dt id="fima.pipelines.main.sub_pipeline"><code class="name flex">
@@ -213,11 +226,17 @@ def gen_subject_run():
             run,
             )
 
+    elif pipeline == &#39;brainregions&#39;:
+        pipeline_brainregions(
+            subject,
+            )
+
     elif pipeline == &#39;ols&#39;:
         pipeline_ols(
             subject,
             run,
-            summary=kwargs[&#39;summary&#39;],
+            skip_ols=kwargs[&#39;skip_ols&#39;],
+            skip_prf=kwargs[&#39;skip_prf&#39;],
             )
 
     elif pipeline == &#39;spectrum&#39;:

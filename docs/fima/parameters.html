@@ -29,6 +29,8 @@
 
 from pathlib import Path
 from platform import node
+from pandas import DataFrame
+from os import environ
 from .utils import get_color_for_val
 
 
@@ -41,7 +43,7 @@ else:
 
 SCRIPTS_DIR = PROJ_DIR / &#39;scripts&#39;
 BIDS_DIR = PROJ_DIR / &#39;subjects&#39;
-FREESURFER_DIR = PROJ_DIR / &#39;freesurfer/&#39;
+FREESURFER_DIR = Path(environ[&#39;SUBJECTS_DIR&#39;])
 
 RESULTS_DIR = PROJ_DIR / &#39;results&#39;
 
@@ -67,6 +69,12 @@ P = dict(
         ),
     ols=dict(
         threshold=0.05,  # fima/pipelines/ols.py
+        window=dict(
+            method=&#39;gamma&#39;,  # gaussian or gamma (for gamma, use a as well)
+            loc=[-.8, .3, 0.05],  # [-1, +1],
+            scale=[0.03, 0.5, .03],  # [0.1, 2, .1],
+            a=[1.5, 8.1, 0.5],
+            ),
         ),
     viz=dict(
         colorscale=&#39;Jet&#39;,
@@ -92,6 +100,12 @@ P = dict(
             ),
         ),
     )
+
+
+GRID_TYPES = DataFrame({
+    &#39;subject&#39;: [&#39;drouwen&#39;, &#39;duiven&#39;, &#39;franeker&#39;, &#39;heek&#39;, &#39;intraop008&#39;, &#39;intraop013&#39;, &#39;intraop016&#39;, &#39;itens&#39;, &#39;lemmer&#39;, &#39;ommen&#39;, &#39;vledder&#39;, &#39;warmond&#39;, &#39;veere&#39;],
+    &#39;grid_type&#39;: [&#39;clinical&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;clinical&#39;, &#39;clinical&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;]
+    })
 
 
 SUBJECTS = {
@@ -192,10 +206,17 @@ FINGER_COLOR = {
 FINGERS = list(FINGER_COLOR)
 
 
-EVENTS = []
-for action in MOVEMENT_LINE:
-    for f in FINGERS:
-        EVENTS.append(f&#39;{f} {action}&#39;)</code></pre>
+FINGERS_OPEN = []
+FINGERS_CLOSED = []
+FINGERS_FLEXION = []
+FINGERS_EXTENSION = []
+for f in FINGERS:
+    FINGERS_OPEN.append(f + &#39; open&#39;)
+    FINGERS_CLOSED.append(f + &#39; close&#39;)
+    FINGERS_FLEXION.append(f + &#39; flexion&#39;)
+    FINGERS_EXTENSION.append(f + &#39; extension&#39;)
+
+EVENTS = FINGERS_OPEN + FINGERS_CLOSED</code></pre>
 </details>
 </section>
 <section>

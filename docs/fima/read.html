@@ -29,46 +29,28 @@
 from numpy import genfromtxt, isin, isnan, empty, NaN
 from numpy.lib.recfunctions import append_fields
 from bidso.objects import Electrodes
+from nibabel.freesurfer.io import read_annot
 from wonambi.attr import Freesurfer
 
 from .preproc import read_data
 from .dataglove.read_dataglove import read_physio
 from .preproc.elec import read_surf
 from .align.maxmin import main_func, CRITICAL_TIMEPOINTS
-from .parameters import BIDS_DIR, SCRIPTS_DIR, FREESURFER_DIR
+from .parameters import (
+    BIDS_DIR,
+    SCRIPTS_DIR,
+    FREESURFER_DIR,
+    FINGERS_OPEN,
+    FINGERS_CLOSED,
+    FINGERS_FLEXION,
+    FINGERS_EXTENSION,
+    )
 
-
-FINGERS_OPEN = [
-    &#39;thumb open&#39;,
-    &#39;index open&#39;,
-    &#39;middle open&#39;,
-    &#39;ring open&#39;,
-    &#39;little open&#39;,
-    ]
-
-FINGERS_CLOSED = [
-    &#39;thumb close&#39;,
-    &#39;index close&#39;,
-    &#39;middle close&#39;,
-    &#39;ring close&#39;,
-    &#39;little close&#39;,
-    ]
-
-
-FINGERS_FLEXION = [
-    &#39;thumb flexion&#39;,
-    &#39;index flexion&#39;,
-    &#39;middle flexion&#39;,
-    &#39;ring flexion&#39;,
-    &#39;little flexion&#39;,
-    ]
-
-FINGERS_EXTENSION = [
-    &#39;thumb extension&#39;,
-    &#39;index extension&#39;,
-    &#39;middle extension&#39;,
-    &#39;ring extension&#39;,
-    &#39;little extension&#39;,
+FS_LABELS = [
+    &#39;aparc&#39;,
+    &#39;aparc.a2009s&#39;,
+    &#39;aparc.DKTatlas&#39;,
+    &#39;BA_exvivo&#39;,
     ]
 
 timepoints = &#39;, &#39;.join(f&#34;&#39;{x}&#39;&#34; for x in CRITICAL_TIMEPOINTS)
@@ -83,9 +65,14 @@ def load(what, subject, run=None, acq=None, event_type=None):
       - &#39;events&#39; returns: ndarray
       - &#39;dataglove&#39; returns: ndarray
       - &#39;movements&#39; returns: ndarray
+      (run is not necessary)
       - &#39;electrodes&#39;
-      - &#39;surface&#39;
       - &#39;freesurfer&#39;
+      - &#39;surface&#39;
+      - &#39;aparc&#39;
+      - &#39;aparc.a2009s&#39;
+      - &#39;aparc.DKTatlas&#39;
+      - &#39;BA_exvivo&#39;
 
     EVENT_TYPE:
       - cues : all cues (to open and close)
@@ -118,8 +105,8 @@ def load(what, subject, run=None, acq=None, event_type=None):
         pattern = f&#39;sub-{subject}_*_acq-{acq}_electrodes.tsv&#39;
         folder = BIDS_DIR
 
-    elif what in (&#39;surface&#39;, &#39;freesurfer&#39;):
-        pattern = subject
+    elif what in [&#39;surface&#39;, &#39;freesurfer&#39;] + FS_LABELS:
+        pattern = &#39;sub-&#39; + subject
         folder = FREESURFER_DIR
 
     elif what == &#39;dataglove&#39;:
@@ -167,6 +154,26 @@ def load(what, subject, run=None, acq=None, event_type=None):
         elec = load(&#39;electrodes&#39;, subject, run, acq)
         right_or_left = (elec[&#39;x&#39;] &gt; 0).sum() / elec.shape[0]
         return read_surf(filename, right_or_left)
+
+    elif what in FS_LABELS:
+        fs = load(&#39;freesurfer&#39;, subject)
+        pial = load(&#39;surface&#39;, subject)
+        hemi = pial.surf_file.stem
+
+        aparc_file = fs.dir / &#39;label&#39; / f&#39;{hemi}.{what}.annot&#39;
+        region_values, _, region_names = read_annot(aparc_file)
+
+        out = {
+            &#39;aparc&#39;: what,
+            &#39;ras_shift&#39;: fs.surface_ras_shift,
+            &#39;vert&#39;: pial.vert,
+            &#39;regions&#39;: {
+                &#39;values&#39;: region_values,
+                &#39;names&#39;: [x.decode() for x in region_names],
+                }
+            }
+
+        return out
 
     elif what == &#39;freesurfer&#39;:
         return Freesurfer(filename)
@@ -279,9 +286,14 @@ def select_events(subject, run, t):
       - &#39;events&#39; returns: ndarray
       - &#39;dataglove&#39; returns: ndarray
       - &#39;movements&#39; returns: ndarray
+      (run is not necessary)
       - &#39;electrodes&#39;
-      - &#39;surface&#39;
       - &#39;freesurfer&#39;
+      - &#39;surface&#39;
+      - &#39;aparc&#39;
+      - &#39;aparc.a2009s&#39;
+      - &#39;aparc.DKTatlas&#39;
+      - &#39;BA_exvivo&#39;
 
     EVENT_TYPE:
       - cues : all cues (to open and close)
@@ -314,8 +326,8 @@ def select_events(subject, run, t):
         pattern = f&#39;sub-{subject}_*_acq-{acq}_electrodes.tsv&#39;
         folder = BIDS_DIR
 
-    elif what in (&#39;surface&#39;, &#39;freesurfer&#39;):
-        pattern = subject
+    elif what in [&#39;surface&#39;, &#39;freesurfer&#39;] + FS_LABELS:
+        pattern = &#39;sub-&#39; + subject
         folder = FREESURFER_DIR
 
     elif what == &#39;dataglove&#39;:
@@ -363,6 +375,26 @@ def select_events(subject, run, t):
         elec = load(&#39;electrodes&#39;, subject, run, acq)
         right_or_left = (elec[&#39;x&#39;] &gt; 0).sum() / elec.shape[0]
         return read_surf(filename, right_or_left)
+
+    elif what in FS_LABELS:
+        fs = load(&#39;freesurfer&#39;, subject)
+        pial = load(&#39;surface&#39;, subject)
+        hemi = pial.surf_file.stem
+
+        aparc_file = fs.dir / &#39;label&#39; / f&#39;{hemi}.{what}.annot&#39;
+        region_values, _, region_names = read_annot(aparc_file)
+
+        out = {
+            &#39;aparc&#39;: what,
+            &#39;ras_shift&#39;: fs.surface_ras_shift,
+            &#39;vert&#39;: pial.vert,
+            &#39;regions&#39;: {
+                &#39;values&#39;: region_values,
+                &#39;names&#39;: [x.decode() for x in region_names],
+                }
+            }
+
+        return out
 
     elif what == &#39;freesurfer&#39;:
         return Freesurfer(filename)

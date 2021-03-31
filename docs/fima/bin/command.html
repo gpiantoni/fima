@@ -58,6 +58,18 @@ def main():
     list_pipelines = parser.add_subparsers(title=&#39;Pipelines&#39;, help=&#39;&#39;)
 
     action = list_pipelines.add_parser(
+        &#39;brainregions&#39;,
+        help=&#39;Get brain regions for all the electrodes&#39;,
+        )
+    action.set_defaults(function=&#39;brainregions&#39;)
+
+    action = list_pipelines.add_parser(
+        &#39;dataglove&#39;,
+        help=&#39;Plot the time-course of the dataglove&#39;,
+        )
+    action.set_defaults(function=&#39;dataglove&#39;)
+
+    action = list_pipelines.add_parser(
         &#39;continuous&#39;,
         help=&#39;Plot the time-course continuously in the high-frequency range&#39;,
         )
@@ -67,19 +79,16 @@ def main():
         help=&#39;Baseline correction with &#39; + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;])
 
     action = list_pipelines.add_parser(
-        &#39;dataglove&#39;,
-        help=&#39;Plot the time-course of the dataglove&#39;,
-        )
-    action.set_defaults(function=&#39;dataglove&#39;)
-
-    action = list_pipelines.add_parser(
         &#39;ols&#39;,
         help=&#39;Fit Ordinary Least Squares on the continuous data&#39;,
         )
     action.set_defaults(function=&#39;ols&#39;)
     action.add_argument(
-        &#39;--summary&#39;, action=&#39;store_true&#39;,
-        help=&#39;Skip OLS and jump to the summary directly&#39;)
+        &#39;--skip_ols&#39;, action=&#39;store_true&#39;,
+        help=&#39;Skip OLS on the data (very time consuming)&#39;)
+    action.add_argument(
+        &#39;--skip_prf&#39;, action=&#39;store_true&#39;,
+        help=&#39;Skip PRF on parameters (time consuming). Use both options to jump to summary directly&#39;)
 
     action = list_pipelines.add_parser(
         &#39;spectrum&#39;,
@@ -142,7 +151,8 @@ def main():
     if args.function == &#39;continuous&#39;:
         kwargs[&#39;baseline&#39;] = args.baseline
     if args.function == &#39;ols&#39;:
-        kwargs[&#39;summary&#39;] = args.summary
+        kwargs[&#39;skip_ols&#39;] = args.skip_ols
+        kwargs[&#39;skip_prf&#39;] = args.skip_prf
 
     pipeline_fima(
         args.function,
@@ -193,6 +203,18 @@ if __name__ == &#39;__main__&#39;:
     list_pipelines = parser.add_subparsers(title=&#39;Pipelines&#39;, help=&#39;&#39;)
 
     action = list_pipelines.add_parser(
+        &#39;brainregions&#39;,
+        help=&#39;Get brain regions for all the electrodes&#39;,
+        )
+    action.set_defaults(function=&#39;brainregions&#39;)
+
+    action = list_pipelines.add_parser(
+        &#39;dataglove&#39;,
+        help=&#39;Plot the time-course of the dataglove&#39;,
+        )
+    action.set_defaults(function=&#39;dataglove&#39;)
+
+    action = list_pipelines.add_parser(
         &#39;continuous&#39;,
         help=&#39;Plot the time-course continuously in the high-frequency range&#39;,
         )
@@ -202,19 +224,16 @@ if __name__ == &#39;__main__&#39;:
         help=&#39;Baseline correction with &#39; + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;])
 
     action = list_pipelines.add_parser(
-        &#39;dataglove&#39;,
-        help=&#39;Plot the time-course of the dataglove&#39;,
-        )
-    action.set_defaults(function=&#39;dataglove&#39;)
-
-    action = list_pipelines.add_parser(
         &#39;ols&#39;,
         help=&#39;Fit Ordinary Least Squares on the continuous data&#39;,
         )
     action.set_defaults(function=&#39;ols&#39;)
     action.add_argument(
-        &#39;--summary&#39;, action=&#39;store_true&#39;,
-        help=&#39;Skip OLS and jump to the summary directly&#39;)
+        &#39;--skip_ols&#39;, action=&#39;store_true&#39;,
+        help=&#39;Skip OLS on the data (very time consuming)&#39;)
+    action.add_argument(
+        &#39;--skip_prf&#39;, action=&#39;store_true&#39;,
+        help=&#39;Skip PRF on parameters (time consuming). Use both options to jump to summary directly&#39;)
 
     action = list_pipelines.add_parser(
         &#39;spectrum&#39;,
@@ -277,7 +296,8 @@ if __name__ == &#39;__main__&#39;:
     if args.function == &#39;continuous&#39;:
         kwargs[&#39;baseline&#39;] = args.baseline
     if args.function == &#39;ols&#39;:
-        kwargs[&#39;summary&#39;] = args.summary
+        kwargs[&#39;skip_ols&#39;] = args.skip_ols
+        kwargs[&#39;skip_prf&#39;] = args.skip_prf
 
     pipeline_fima(
         args.function,

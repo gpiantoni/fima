@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.pipelines API documentation</title>
+<title>fima.pipelines.brainregions API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,64 +17,113 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.pipelines</code></h1>
+<h1 class="title">Module <code>fima.pipelines.brainregions</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from .main import pipeline_fima</code></pre>
+<pre><code class="python">from logging import getLogger
+from numpy import r_, argmin
+from numpy.linalg import norm
+
+from ..read import load
+from ..parameters import RESULTS_DIR
+
+lg = getLogger(__name__)
+
+
+def pipeline_brainregions(subject):
+    &#34;&#34;&#34;Run pipeline to compute power spectrum on one participant, one run
+
+    Parameters
+    ----------
+    subject : str
+        subject code
+    &#34;&#34;&#34;
+    elec = load(&#39;electrodes&#39;, subject)
+
+    aparc = {}
+    for template in (&#39;aparc.a2009s&#39;, &#39;aparc.DKTatlas&#39;, &#39;BA_exvivo&#39;):
+        aparc[template] = load(template, subject)
+
+    out_dir = RESULTS_DIR / &#39;brainregions&#39;
+    out_dir.mkdir(exist_ok=True, parents=True)
+
+    tsv_file = out_dir / f&#39;{subject}_regions.tsv&#39;
+    with tsv_file.open(&#39;w&#39;) as f:
+        f.write(&#39;chan\tx\ty\tz\ta2009s\tDKTatlas\tBA&#39;)
+
+        for el in elec:
+            pos = r_[el[&#39;x&#39;], el[&#39;y&#39;], el[&#39;z&#39;]]
+            pos_surf = pos - aparc[&#39;aparc.a2009s&#39;][&#39;ras_shift&#39;]  # ras_shift depends on T1.mgz not on aparc
+            i_vert = argmin(norm(aparc[&#39;aparc.a2009s&#39;][&#39;vert&#39;] - pos_surf, axis=1))
+
+            f.write(f&#34;\n{el[&#39;name&#39;]}\t{el[&#39;x&#39;]}\t{el[&#39;y&#39;]}\t{el[&#39;z&#39;]}&#34;)
+            for name, i_aparc in aparc.items():
+                region = i_aparc[&#39;regions&#39;][&#39;names&#39;][i_aparc[&#39;regions&#39;][&#39;values&#39;][i_vert]]
+                if name == &#39;BA_exvivo&#39;:
+                    region = region.split(&#39;_&#39;)[0]
+                f.write(f&#34;\t{region}&#34;)</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="fima.pipelines.brainregions" href="brainregions.html">fima.pipelines.brainregions</a></code></dt>
+<dt id="fima.pipelines.brainregions.pipeline_brainregions"><code class="name flex">
+<span>def <span class="ident">pipeline_brainregions</span></span>(<span>subject)</span>
+</code></dt>
 <dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.pipelines.continuous" href="continuous.html">fima.pipelines.continuous</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.pipelines.dataglove" href="dataglove.html">fima.pipelines.dataglove</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.pipelines.dataquality" href="dataquality.html">fima.pipelines.dataquality</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.pipelines.fingers" href="fingers.html">fima.pipelines.fingers</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.pipelines.fitting" href="fitting.html">fima.pipelines.fitting</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.pipelines.flex_ext" href="flex_ext.html">fima.pipelines.flex_ext</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.pipelines.main" href="main.html">fima.pipelines.main</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.pipelines.ols" href="ols.html">fima.pipelines.ols</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.pipelines.spectrum" href="spectrum.html">fima.pipelines.spectrum</a></code></dt>
-<dd>
-<div class="desc"><p>Compute the power spectrum</p></div>
+<div class="desc"><p>Run pipeline to compute power spectrum on one participant, one run</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>subject</code></strong> :&ensp;<code>str</code></dt>
+<dd>subject code</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pipeline_brainregions(subject):
+    &#34;&#34;&#34;Run pipeline to compute power spectrum on one participant, one run
+
+    Parameters
+    ----------
+    subject : str
+        subject code
+    &#34;&#34;&#34;
+    elec = load(&#39;electrodes&#39;, subject)
+
+    aparc = {}
+    for template in (&#39;aparc.a2009s&#39;, &#39;aparc.DKTatlas&#39;, &#39;BA_exvivo&#39;):
+        aparc[template] = load(template, subject)
+
+    out_dir = RESULTS_DIR / &#39;brainregions&#39;
+    out_dir.mkdir(exist_ok=True, parents=True)
+
+    tsv_file = out_dir / f&#39;{subject}_regions.tsv&#39;
+    with tsv_file.open(&#39;w&#39;) as f:
+        f.write(&#39;chan\tx\ty\tz\ta2009s\tDKTatlas\tBA&#39;)
+
+        for el in elec:
+            pos = r_[el[&#39;x&#39;], el[&#39;y&#39;], el[&#39;z&#39;]]
+            pos_surf = pos - aparc[&#39;aparc.a2009s&#39;][&#39;ras_shift&#39;]  # ras_shift depends on T1.mgz not on aparc
+            i_vert = argmin(norm(aparc[&#39;aparc.a2009s&#39;][&#39;vert&#39;] - pos_surf, axis=1))
+
+            f.write(f&#34;\n{el[&#39;name&#39;]}\t{el[&#39;x&#39;]}\t{el[&#39;y&#39;]}\t{el[&#39;z&#39;]}&#34;)
+            for name, i_aparc in aparc.items():
+                region = i_aparc[&#39;regions&#39;][&#39;names&#39;][i_aparc[&#39;regions&#39;][&#39;values&#39;][i_vert]]
+                if name == &#39;BA_exvivo&#39;:
+                    region = region.split(&#39;_&#39;)[0]
+                f.write(f&#34;\t{region}&#34;)</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -87,21 +136,12 @@
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="fima" href="../index.html">fima</a></code></li>
+<li><code><a title="fima.pipelines" href="index.html">fima.pipelines</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="fima.pipelines.brainregions" href="brainregions.html">fima.pipelines.brainregions</a></code></li>
-<li><code><a title="fima.pipelines.continuous" href="continuous.html">fima.pipelines.continuous</a></code></li>
-<li><code><a title="fima.pipelines.dataglove" href="dataglove.html">fima.pipelines.dataglove</a></code></li>
-<li><code><a title="fima.pipelines.dataquality" href="dataquality.html">fima.pipelines.dataquality</a></code></li>
-<li><code><a title="fima.pipelines.fingers" href="fingers.html">fima.pipelines.fingers</a></code></li>
-<li><code><a title="fima.pipelines.fitting" href="fitting.html">fima.pipelines.fitting</a></code></li>
-<li><code><a title="fima.pipelines.flex_ext" href="flex_ext.html">fima.pipelines.flex_ext</a></code></li>
-<li><code><a title="fima.pipelines.main" href="main.html">fima.pipelines.main</a></code></li>
-<li><code><a title="fima.pipelines.ols" href="ols.html">fima.pipelines.ols</a></code></li>
-<li><code><a title="fima.pipelines.spectrum" href="spectrum.html">fima.pipelines.spectrum</a></code></li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="fima.pipelines.brainregions.pipeline_brainregions" href="#fima.pipelines.brainregions.pipeline_brainregions">pipeline_brainregions</a></code></li>
 </ul>
 </li>
 </ul>

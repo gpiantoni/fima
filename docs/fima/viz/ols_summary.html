@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.viz.ols API documentation</title>
+<title>fima.viz.ols_summary API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,103 +17,105 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.viz.ols</code></h1>
+<h1 class="title">Module <code>fima.viz.ols_summary</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from fima.parameters import FINGER_COLOR
-import plotly.graph_objects as go
+<pre><code class="python">import plotly.graph_objects as go
 
-# this should be in parameters
-COLS = [
-    &#39;const&#39;,
-    &#39;thumb extension&#39;,
-    &#39;index extension&#39;,
-    &#39;middle extension&#39;,
-    &#39;ring extension&#39;,
-    &#39;little extension&#39;,
-    &#39;thumb flexion&#39;,
-    &#39;index flexion&#39;,
-    &#39;middle flexion&#39;,
-    &#39;ring flexion&#39;,
-    &#39;little flexion&#39;,
-    ]
+from numpy import arange, sqrt
 
 
-def plot_sigma_delay_mat(MAT, SIGMAS, DELAYS):
-    &#34;&#34;&#34;Not being used at this point, because gamma is 3D so I don&#39;t know how to
-    plot it&#34;&#34;&#34;
-    raise NotImplementedError
-
-    fig = go.Figure(data=[
-        go.Heatmap(
-            x=DELAYS,
-            y=SIGMAS,
-            z=MAT,
-            zmin=0,
-            colorscale=&#39;Hot&#39;,
-            ),
-        ],
-        layout=go.Layout(
-            xaxis=dict(
-                title=&#39;Delay (ms, 0s == movement start)&#39;),
-            yaxis=dict(
-                title=&#39;Kernel size (ms)&#39;),
-            ))
-    return fig
+from ..utils import get_color_for_val
 
 
-def plot_data_prediction(t, results):
-    fig = go.Figure(data=[
+def plot_ols_params(df, param, region_type, yaxis_name=&#39;&#39;):
+
+    SUMMARY = {}
+    for region in sorted(df[&#39;channel&#39;][region_type].unique()):
+        if region == &#39;unknown&#39;:
+            continue
+        x = df[param[0]][param[1]][df[&#39;channel&#39;][region_type] == region]
+        SUMMARY[region] = [x.mean(), x.std() / sqrt(len(x))]
+
+    fig = go.Figure([
         go.Scatter(
-            x=t,
-            y=results.model.data.endog,
-            name=&#39;data&#39;,
-            line=dict(
-                color=&#39;blue&#39;,
-                width=1,
-            ),
-        ),
-        go.Scatter(
-            x=t,
-            y=results.fittedvalues,
-            name=&#39;prediction&#39;,
-            line=dict(
-                color=&#39;red&#39;,
-                width=1,
-            ),
-        ),
-    ])
-    return fig
-
-
-def plot_coefficient(results):
-
-    COEF = results.params
-    LOW = results.conf_int()[0]
-    HIGH = results.conf_int()[1]
-
-    COLORS = [&#39;grey&#39;, ] + list(FINGER_COLOR.values()) + list(FINGER_COLOR.values())
-
-    fig = go.Figure(data=[
-        go.Bar(
-            x=COLS,
-            y=[COEF[col] for col in COLS],
+            mode=&#39;markers&#39;,
+            y=[x[0] for x in SUMMARY.values()],
             marker=dict(
-                color=COLORS,
-            ),
+                color=&#39;black&#39;),
             error_y=dict(
                 type=&#39;data&#39;,
-                arrayminus=[COEF[col] - LOW[col] for col in COLS],
-                array=[HIGH[col] - COEF[col] for col in COLS],
-            ),
-        ), ],
+                array=[x[1] for x in SUMMARY.values()],
+            )
+        )],
         layout=go.Layout(
+            title=dict(
+                text=&#39; / &#39;.join(param),
+                ),
+            xaxis=dict(
+                title=dict(
+                    text=&#39;brain region&#39;,
+                    ),
+                tickmode=&#39;array&#39;,
+                tickvals=arange(len(SUMMARY)),
+                ticktext=list(SUMMARY.keys()),
+                ),
             yaxis=dict(
-                title=&#39;Coefficients&#39;)
+                title=dict(
+                    text=yaxis_name)
+                ),
+            )
+        )
+
+    return fig
+
+def plot_ols_rsquared(df, region_type):
+
+    rsquared_levels = arange(0, 1, .1)
+    BARS = {}
+    for region in sorted(df[&#39;channel&#39;][region_type].unique()):
+        if region == &#39;unknown&#39;:
+            continue
+
+        vals = []
+        for i in rsquared_levels:
+            vals.append(
+                len(df[(df[&#39;channel&#39;][region_type] == region) &amp; (i &lt;= df[&#39;estimate&#39;][&#39;rsquared&#39;]) &amp; (df[&#39;estimate&#39;][&#39;rsquared&#39;] &lt;= (i + 0.1))]))
+        BARS[region] = vals
+
+    n_levels = len(BARS[df[&#39;channel&#39;][region_type][0]])
+    bar_plots = []
+    for i in range(n_levels):
+        bar_plots.append(
+            go.Bar(
+                x=list(BARS.keys()),
+                y=[x[i] for x in BARS.values()],
+                name=f&#39;{rsquared_levels[i]:0.1f} - {rsquared_levels[i]+0.1:0.1f}&#39;,
+                marker=dict(
+                    color=get_color_for_val(i, &#39;Hot&#39;, 0, n_levels - 3),
+                ),
+            ),
+        )
+
+    fig = go.Figure(
+        bar_plots,
+        layout=go.Layout(
+            barmode=&#39;stack&#39;,
+            title=dict(
+                text=&#39;R-Squares&#39;
+                ),
+            xaxis=dict(
+                title=dict(
+                    text=&#39;brain region&#39;,)
+                ),
+            yaxis=dict(
+                title=dict(
+                    text=&#39;# channels&#39;,)
+                ),
         ))
 
     return fig</code></pre>
@@ -126,8 +128,8 @@ def plot_coefficient(results):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="fima.viz.ols.plot_coefficient"><code class="name flex">
-<span>def <span class="ident">plot_coefficient</span></span>(<span>results)</span>
+<dt id="fima.viz.ols_summary.plot_ols_params"><code class="name flex">
+<span>def <span class="ident">plot_ols_params</span></span>(<span>df, param, region_type, yaxis_name='')</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -135,37 +137,50 @@ def plot_coefficient(results):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def plot_coefficient(results):
+<pre><code class="python">def plot_ols_params(df, param, region_type, yaxis_name=&#39;&#39;):
 
-    COEF = results.params
-    LOW = results.conf_int()[0]
-    HIGH = results.conf_int()[1]
+    SUMMARY = {}
+    for region in sorted(df[&#39;channel&#39;][region_type].unique()):
+        if region == &#39;unknown&#39;:
+            continue
+        x = df[param[0]][param[1]][df[&#39;channel&#39;][region_type] == region]
+        SUMMARY[region] = [x.mean(), x.std() / sqrt(len(x))]
 
-    COLORS = [&#39;grey&#39;, ] + list(FINGER_COLOR.values()) + list(FINGER_COLOR.values())
-
-    fig = go.Figure(data=[
-        go.Bar(
-            x=COLS,
-            y=[COEF[col] for col in COLS],
+    fig = go.Figure([
+        go.Scatter(
+            mode=&#39;markers&#39;,
+            y=[x[0] for x in SUMMARY.values()],
             marker=dict(
-                color=COLORS,
-            ),
+                color=&#39;black&#39;),
             error_y=dict(
                 type=&#39;data&#39;,
-                arrayminus=[COEF[col] - LOW[col] for col in COLS],
-                array=[HIGH[col] - COEF[col] for col in COLS],
-            ),
-        ), ],
+                array=[x[1] for x in SUMMARY.values()],
+            )
+        )],
         layout=go.Layout(
+            title=dict(
+                text=&#39; / &#39;.join(param),
+                ),
+            xaxis=dict(
+                title=dict(
+                    text=&#39;brain region&#39;,
+                    ),
+                tickmode=&#39;array&#39;,
+                tickvals=arange(len(SUMMARY)),
+                ticktext=list(SUMMARY.keys()),
+                ),
             yaxis=dict(
-                title=&#39;Coefficients&#39;)
-        ))
+                title=dict(
+                    text=yaxis_name)
+                ),
+            )
+        )
 
     return fig</code></pre>
 </details>
 </dd>
-<dt id="fima.viz.ols.plot_data_prediction"><code class="name flex">
-<span>def <span class="ident">plot_data_prediction</span></span>(<span>t, results)</span>
+<dt id="fima.viz.ols_summary.plot_ols_rsquared"><code class="name flex">
+<span>def <span class="ident">plot_ols_rsquared</span></span>(<span>df, region_type)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -173,60 +188,51 @@ def plot_coefficient(results):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def plot_data_prediction(t, results):
-    fig = go.Figure(data=[
-        go.Scatter(
-            x=t,
-            y=results.model.data.endog,
-            name=&#39;data&#39;,
-            line=dict(
-                color=&#39;blue&#39;,
-                width=1,
-            ),
-        ),
-        go.Scatter(
-            x=t,
-            y=results.fittedvalues,
-            name=&#39;prediction&#39;,
-            line=dict(
-                color=&#39;red&#39;,
-                width=1,
-            ),
-        ),
-    ])
-    return fig</code></pre>
-</details>
-</dd>
-<dt id="fima.viz.ols.plot_sigma_delay_mat"><code class="name flex">
-<span>def <span class="ident">plot_sigma_delay_mat</span></span>(<span>MAT, SIGMAS, DELAYS)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Not being used at this point, because gamma is 3D so I don't know how to
-plot it</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def plot_sigma_delay_mat(MAT, SIGMAS, DELAYS):
-    &#34;&#34;&#34;Not being used at this point, because gamma is 3D so I don&#39;t know how to
-    plot it&#34;&#34;&#34;
-    raise NotImplementedError
+<pre><code class="python">def plot_ols_rsquared(df, region_type):
 
-    fig = go.Figure(data=[
-        go.Heatmap(
-            x=DELAYS,
-            y=SIGMAS,
-            z=MAT,
-            zmin=0,
-            colorscale=&#39;Hot&#39;,
+    rsquared_levels = arange(0, 1, .1)
+    BARS = {}
+    for region in sorted(df[&#39;channel&#39;][region_type].unique()):
+        if region == &#39;unknown&#39;:
+            continue
+
+        vals = []
+        for i in rsquared_levels:
+            vals.append(
+                len(df[(df[&#39;channel&#39;][region_type] == region) &amp; (i &lt;= df[&#39;estimate&#39;][&#39;rsquared&#39;]) &amp; (df[&#39;estimate&#39;][&#39;rsquared&#39;] &lt;= (i + 0.1))]))
+        BARS[region] = vals
+
+    n_levels = len(BARS[df[&#39;channel&#39;][region_type][0]])
+    bar_plots = []
+    for i in range(n_levels):
+        bar_plots.append(
+            go.Bar(
+                x=list(BARS.keys()),
+                y=[x[i] for x in BARS.values()],
+                name=f&#39;{rsquared_levels[i]:0.1f} - {rsquared_levels[i]+0.1:0.1f}&#39;,
+                marker=dict(
+                    color=get_color_for_val(i, &#39;Hot&#39;, 0, n_levels - 3),
+                ),
             ),
-        ],
+        )
+
+    fig = go.Figure(
+        bar_plots,
         layout=go.Layout(
+            barmode=&#39;stack&#39;,
+            title=dict(
+                text=&#39;R-Squares&#39;
+                ),
             xaxis=dict(
-                title=&#39;Delay (ms, 0s == movement start)&#39;),
+                title=dict(
+                    text=&#39;brain region&#39;,)
+                ),
             yaxis=dict(
-                title=&#39;Kernel size (ms)&#39;),
-            ))
+                title=dict(
+                    text=&#39;# channels&#39;,)
+                ),
+        ))
+
     return fig</code></pre>
 </details>
 </dd>
@@ -248,9 +254,8 @@ plot it</p></div>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="fima.viz.ols.plot_coefficient" href="#fima.viz.ols.plot_coefficient">plot_coefficient</a></code></li>
-<li><code><a title="fima.viz.ols.plot_data_prediction" href="#fima.viz.ols.plot_data_prediction">plot_data_prediction</a></code></li>
-<li><code><a title="fima.viz.ols.plot_sigma_delay_mat" href="#fima.viz.ols.plot_sigma_delay_mat">plot_sigma_delay_mat</a></code></li>
+<li><code><a title="fima.viz.ols_summary.plot_ols_params" href="#fima.viz.ols_summary.plot_ols_params">plot_ols_params</a></code></li>
+<li><code><a title="fima.viz.ols_summary.plot_ols_rsquared" href="#fima.viz.ols_summary.plot_ols_rsquared">plot_ols_rsquared</a></code></li>
 </ul>
 </li>
 </ul>

@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.pipelines API documentation</title>
-<meta name="description" content="" />
+<title>fima.ols.prf API documentation</title>
+<meta name="description" content="Compute PRF on the parameter estimate, not the raw data" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -17,64 +17,146 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.pipelines</code></h1>
+<h1 class="title">Module <code>fima.ols.prf</code></h1>
 </header>
 <section id="section-intro">
+<p>Compute PRF on the parameter estimate, not the raw data</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from .main import pipeline_fima</code></pre>
+<pre><code class="python">&#34;&#34;&#34;Compute PRF on the parameter estimate, not the raw data
+&#34;&#34;&#34;
+from scipy.stats import norm
+from scipy.optimize import least_squares
+from numpy import sqrt, Inf, arange, array, corrcoef, argmax
+from json import load as json_load
+from json import dump
+
+from ..parameters import FINGERS_EXTENSION, FINGERS_FLEXION
+
+
+def add_prf_estimates(json_file):
+    with json_file.open() as f:
+        j = json_load(f)
+
+    compute_prf_from_parameters(j, FINGERS_EXTENSION)
+    compute_prf_from_parameters(j, FINGERS_FLEXION)
+
+    y_ext = [j[k] for k in FINGERS_EXTENSION]
+    y_flex = [j[k] for k in FINGERS_FLEXION]
+    j[&#39;params corr&#39;] = corrcoef(y_ext, y_flex)[0, 1]
+    j[&#39;params diff&#39;] = (array(y_ext) - array(y_flex)).mean()
+
+    with json_file.open(&#39;w&#39;) as f:
+        dump(j, f, indent=2)
+
+
+def compute_prf_from_parameters(j, finger_group):
+    movement_type = finger_group[0].split()[1]
+    data = [j[k] for k in finger_group]
+
+    j[movement_type + &#39; mode&#39;] = int(argmax(data))
+
+    result = least_squares(
+        gaussian,
+        x0=[2, 0.5],
+        bounds=(
+            [-1, 0.01],
+            [5, 10]),
+        args=[data, ],
+        max_nfev=1e4,
+        )
+
+    j[movement_type + &#39; loc&#39;] = result.x[0]
+    j[movement_type + &#39; scale&#39;] = result.x[1]
+    j[movement_type + &#39; corr&#39;] = 1 - result.fun[0]
+
+
+def gaussian(x0, y):
+    loc, scale = x0
+    y1 = norm.pdf(arange(5), loc=loc, scale=scale)
+    return 1 - corrcoef(y, y1)[0, 1]</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="fima.pipelines.brainregions" href="brainregions.html">fima.pipelines.brainregions</a></code></dt>
+<dt id="fima.ols.prf.add_prf_estimates"><code class="name flex">
+<span>def <span class="ident">add_prf_estimates</span></span>(<span>json_file)</span>
+</code></dt>
 <dd>
 <div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_prf_estimates(json_file):
+    with json_file.open() as f:
+        j = json_load(f)
+
+    compute_prf_from_parameters(j, FINGERS_EXTENSION)
+    compute_prf_from_parameters(j, FINGERS_FLEXION)
+
+    y_ext = [j[k] for k in FINGERS_EXTENSION]
+    y_flex = [j[k] for k in FINGERS_FLEXION]
+    j[&#39;params corr&#39;] = corrcoef(y_ext, y_flex)[0, 1]
+    j[&#39;params diff&#39;] = (array(y_ext) - array(y_flex)).mean()
+
+    with json_file.open(&#39;w&#39;) as f:
+        dump(j, f, indent=2)</code></pre>
+</details>
 </dd>
-<dt><code class="name"><a title="fima.pipelines.continuous" href="continuous.html">fima.pipelines.continuous</a></code></dt>
+<dt id="fima.ols.prf.compute_prf_from_parameters"><code class="name flex">
+<span>def <span class="ident">compute_prf_from_parameters</span></span>(<span>j, finger_group)</span>
+</code></dt>
 <dd>
 <div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def compute_prf_from_parameters(j, finger_group):
+    movement_type = finger_group[0].split()[1]
+    data = [j[k] for k in finger_group]
+
+    j[movement_type + &#39; mode&#39;] = int(argmax(data))
+
+    result = least_squares(
+        gaussian,
+        x0=[2, 0.5],
+        bounds=(
+            [-1, 0.01],
+            [5, 10]),
+        args=[data, ],
+        max_nfev=1e4,
+        )
+
+    j[movement_type + &#39; loc&#39;] = result.x[0]
+    j[movement_type + &#39; scale&#39;] = result.x[1]
+    j[movement_type + &#39; corr&#39;] = 1 - result.fun[0]</code></pre>
+</details>
 </dd>
-<dt><code class="name"><a title="fima.pipelines.dataglove" href="dataglove.html">fima.pipelines.dataglove</a></code></dt>
+<dt id="fima.ols.prf.gaussian"><code class="name flex">
+<span>def <span class="ident">gaussian</span></span>(<span>x0, y)</span>
+</code></dt>
 <dd>
 <div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.pipelines.dataquality" href="dataquality.html">fima.pipelines.dataquality</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.pipelines.fingers" href="fingers.html">fima.pipelines.fingers</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.pipelines.fitting" href="fitting.html">fima.pipelines.fitting</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.pipelines.flex_ext" href="flex_ext.html">fima.pipelines.flex_ext</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.pipelines.main" href="main.html">fima.pipelines.main</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.pipelines.ols" href="ols.html">fima.pipelines.ols</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.pipelines.spectrum" href="spectrum.html">fima.pipelines.spectrum</a></code></dt>
-<dd>
-<div class="desc"><p>Compute the power spectrum</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def gaussian(x0, y):
+    loc, scale = x0
+    y1 = norm.pdf(arange(5), loc=loc, scale=scale)
+    return 1 - corrcoef(y, y1)[0, 1]</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -87,21 +169,14 @@
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="fima" href="../index.html">fima</a></code></li>
+<li><code><a title="fima.ols" href="index.html">fima.ols</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="fima.pipelines.brainregions" href="brainregions.html">fima.pipelines.brainregions</a></code></li>
-<li><code><a title="fima.pipelines.continuous" href="continuous.html">fima.pipelines.continuous</a></code></li>
-<li><code><a title="fima.pipelines.dataglove" href="dataglove.html">fima.pipelines.dataglove</a></code></li>
-<li><code><a title="fima.pipelines.dataquality" href="dataquality.html">fima.pipelines.dataquality</a></code></li>
-<li><code><a title="fima.pipelines.fingers" href="fingers.html">fima.pipelines.fingers</a></code></li>
-<li><code><a title="fima.pipelines.fitting" href="fitting.html">fima.pipelines.fitting</a></code></li>
-<li><code><a title="fima.pipelines.flex_ext" href="flex_ext.html">fima.pipelines.flex_ext</a></code></li>
-<li><code><a title="fima.pipelines.main" href="main.html">fima.pipelines.main</a></code></li>
-<li><code><a title="fima.pipelines.ols" href="ols.html">fima.pipelines.ols</a></code></li>
-<li><code><a title="fima.pipelines.spectrum" href="spectrum.html">fima.pipelines.spectrum</a></code></li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="fima.ols.prf.add_prf_estimates" href="#fima.ols.prf.add_prf_estimates">add_prf_estimates</a></code></li>
+<li><code><a title="fima.ols.prf.compute_prf_from_parameters" href="#fima.ols.prf.compute_prf_from_parameters">compute_prf_from_parameters</a></code></li>
+<li><code><a title="fima.ols.prf.gaussian" href="#fima.ols.prf.gaussian">gaussian</a></code></li>
 </ul>
 </li>
 </ul>
