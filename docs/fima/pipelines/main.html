@@ -32,6 +32,7 @@ from .continuous import pipeline_continuous
 from .dataglove import pipeline_dataglove
 from .ols import pipeline_ols, pipeline_ols_all
 from .brainregions import pipeline_brainregions
+from .spectrum import pipeline_spectrum
 from ..parameters import SUBJECTS
 from ..utils import be_nice
 
@@ -100,8 +101,11 @@ def sub_pipeline(subject, run, pipeline, kwargs):
             )
 
     elif pipeline == &#39;spectrum&#39;:
-        pipeline_spectrum_all(
-            subject_only=args.subject)
+        pipeline_spectrum(
+            subject,
+            run,
+            event_type=&#39;cues&#39;,
+            )
 
     elif pipeline == &#39;flex_ext&#39;:
         pipeline_flexext_all(
@@ -240,8 +244,11 @@ def gen_subject_run():
             )
 
     elif pipeline == &#39;spectrum&#39;:
-        pipeline_spectrum_all(
-            subject_only=args.subject)
+        pipeline_spectrum(
+            subject,
+            run,
+            event_type=&#39;cues&#39;,
+            )
 
     elif pipeline == &#39;flex_ext&#39;:
         pipeline_flexext_all(

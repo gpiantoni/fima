@@ -7,8 +7,6 @@ from os import environ
 from .utils import get_color_for_val
 
 
-NYU_DIR = Path('/Fridge/R01_BAIR/data/nyu/scitran/bair/nyu')
-
 if node() == 'archxps':
     PROJ_DIR = Path('/home/gio/projects/finger_mapping')
 else:
@@ -43,7 +41,7 @@ P = dict(
     ols=dict(
         threshold=0.05,  # fima/pipelines/ols.py
         window=dict(
-            method='gamma',  # gaussian or gamma (for gamma, use a as well)
+            method='gaussian',  # gaussian or gamma (for gamma, use a as well)
             loc=[-.8, .3, 0.05],  # [-1, +1],
             scale=[0.03, 0.5, .03],  # [0.1, 2, .1],
             a=[1.5, 8.1, 0.5],

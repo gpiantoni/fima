@@ -35,7 +35,7 @@ def read_data(filename, event_onsets, continuous=False):
     d = BIDSEEG(filename)
     chans = d.channels[
         (d.channels[&#39;status&#39;] == &#39;good&#39;)
-        &amp; ((d.channels[&#39;type&#39;] == &#39;ECOG&#39;) | (d.channels[&#39;type&#39;] == &#39;SEEG&#39;))
+        &amp; (d.channels[&#39;type&#39;] == &#39;ECOG&#39;)
         ]
 
     if continuous:
@@ -72,7 +72,7 @@ def read_data(filename, event_onsets, continuous=False):
     d = BIDSEEG(filename)
     chans = d.channels[
         (d.channels[&#39;status&#39;] == &#39;good&#39;)
-        &amp; ((d.channels[&#39;type&#39;] == &#39;ECOG&#39;) | (d.channels[&#39;type&#39;] == &#39;SEEG&#39;))
+        &amp; (d.channels[&#39;type&#39;] == &#39;ECOG&#39;)
         ]
 
     if continuous:

@@ -9,7 +9,7 @@ def read_data(filename, event_onsets, continuous=False):
     d = BIDSEEG(filename)
     chans = d.channels[
         (d.channels['status'] == 'good')
-        & ((d.channels['type'] == 'ECOG') | (d.channels['type'] == 'SEEG'))
+        & (d.channels['type'] == 'ECOG')
         ]
 
     if continuous:

@@ -39,7 +39,7 @@ def add_nyu_subjects():
     ----
     add line to participants.tsv
     &#34;&#34;&#34;
-    for nyu_sub in NYU_DIR.glob(&#39;sub-*&#39;):
+    for nyu_sub in NYU_DIR.glob(&#39;*-som705&#39;):
         out_dir = copytree(nyu_sub, BIDS_DIR / nyu_sub.name)
 
     for event_file in out_dir.rglob(&#39;*_events.tsv&#39;):
@@ -94,7 +94,7 @@ def fix_nyu_channels(channel_file):
     ----
     add line to participants.tsv
     &#34;&#34;&#34;
-    for nyu_sub in NYU_DIR.glob(&#39;sub-*&#39;):
+    for nyu_sub in NYU_DIR.glob(&#39;*-som705&#39;):
         out_dir = copytree(nyu_sub, BIDS_DIR / nyu_sub.name)
 
     for event_file in out_dir.rglob(&#39;*_events.tsv&#39;):

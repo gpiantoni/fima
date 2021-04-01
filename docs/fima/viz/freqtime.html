@@ -70,7 +70,7 @@ def plot_conditions_per_chan(tf_cht, names, statistics=&#39;sem&#39;, fs=None, e
     data_m, events = group_per_condition(tf_cht, names, &#39;mean&#39;)
     data_sd, events = group_per_condition(tf_cht, names, statistics)  # you can also use sem
 
-    if elec is not None and fs is not None:
+    if False and elec is not None and fs is not None:
         regions = _compute_regions(fs, elec)
 
     divs = []
@@ -80,7 +80,7 @@ def plot_conditions_per_chan(tf_cht, names, statistics=&#39;sem&#39;, fs=None, e
         s = data_sd(trial=0, chan=chan)
         fig = plot_per_chan(y, s, chan, names)
 
-        if elec is not None and fs is not None:
+        if False and elec is not None and fs is not None:
             region = _get_region(regions, chan)
             fig.update_layout(title=f&#39;{chan} ({region})&#39;)
 
@@ -206,7 +206,7 @@ def plot_per_chan(y, s, chan, names):
     data_m, events = group_per_condition(tf_cht, names, &#39;mean&#39;)
     data_sd, events = group_per_condition(tf_cht, names, statistics)  # you can also use sem
 
-    if elec is not None and fs is not None:
+    if False and elec is not None and fs is not None:
         regions = _compute_regions(fs, elec)
 
     divs = []
@@ -216,7 +216,7 @@ def plot_per_chan(y, s, chan, names):
         s = data_sd(trial=0, chan=chan)
         fig = plot_per_chan(y, s, chan, names)
 
-        if elec is not None and fs is not None:
+        if False and elec is not None and fs is not None:
             region = _get_region(regions, chan)
             fig.update_layout(title=f&#39;{chan} ({region})&#39;)
 

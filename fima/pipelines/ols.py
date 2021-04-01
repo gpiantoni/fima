@@ -86,7 +86,7 @@ def pipeline_ols_allchan(subject, run):
         return
 
     indices = find_movement_indices(mov, tf_cht.time[0])
-    for chan in tf_cht.chan[0]:
+    for chan in tf_cht.chan[0][::-1]:
         lg.info(f'{subject:<10}/ {run} Fitting OLS on {chan}')
         x = tf_cht(trial=0, chan=chan, trial_axis='trial000000')
 
