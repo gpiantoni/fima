@@ -5,8 +5,11 @@ from ..spectrum import compute_timefreq, get_chan, get_chantime
 from ..viz import plot_tfr, plot_tfr_time, to_div, to_html, plot_surf, plot_conditions_per_chan
 from ..read import load
 from ..utils import find_max_point
+from ..parameters import P, RESULTS_DIR
 
 from wonambi.trans import math
+
+SPECTRUM_DIR = RESULTS_DIR / 'spectrum'
 
 
 def pipeline_spectrum(subject, run, event_type='cues'):
@@ -47,9 +50,9 @@ def pipeline_spectrum(subject, run, event_type='cues'):
     tf_ch = get_chan(tf_m, time=best_time)
 
     divs = []
-    fig = plot_tfr(tf_m, best_chan, time=best_time, freq=P['spectrum']['select']['freq'])
+    fig = plot_tfr(tf_m, best_chan)  # , time=best_time, freq=P['spectrum']['select']['freq'])
     divs.append(to_div(fig))
-    fig = plot_tfr_time(tf_cht, highlight=best_time)
+    fig = plot_tfr_time(tf_cht)  # , highlight=best_time)
     divs.append(to_div(fig))
 
     if elec is not None:

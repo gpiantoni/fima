@@ -44,7 +44,7 @@ def plot_conditions_per_chan(tf_cht, names, statistics='sem', fs=None, elec=None
     data_m, events = group_per_condition(tf_cht, names, 'mean')
     data_sd, events = group_per_condition(tf_cht, names, statistics)  # you can also use sem
 
-    if elec is not None and fs is not None:
+    if False and elec is not None and fs is not None:
         regions = _compute_regions(fs, elec)
 
     divs = []
@@ -54,7 +54,7 @@ def plot_conditions_per_chan(tf_cht, names, statistics='sem', fs=None, elec=None
         s = data_sd(trial=0, chan=chan)
         fig = plot_per_chan(y, s, chan, names)
 
-        if elec is not None and fs is not None:
+        if False and elec is not None and fs is not None:
             region = _get_region(regions, chan)
             fig.update_layout(title=f'{chan} ({region})')
 

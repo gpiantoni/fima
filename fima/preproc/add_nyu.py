@@ -13,7 +13,7 @@ def add_nyu_subjects():
     ----
     add line to participants.tsv
     """
-    for nyu_sub in NYU_DIR.glob('sub-*'):
+    for nyu_sub in NYU_DIR.glob('*-som705'):
         out_dir = copytree(nyu_sub, BIDS_DIR / nyu_sub.name)
 
     for event_file in out_dir.rglob('*_events.tsv'):

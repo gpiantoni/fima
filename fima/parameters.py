@@ -52,10 +52,10 @@ P = dict(
     viz=dict(
         colorscale='Jet',
         tfr=dict(
-            max=10,
+            max=3,
             ),
         tfr_mean=dict(
-            max=5,
+            max=2,
             ),
         ),
     spectrum=dict(
@@ -68,7 +68,7 @@ P = dict(
             type='zscore',  # dB or zscore or percent or relchange
             ),
         select=dict(
-            freq=(60, 200),  # (60, 200)
+            freq=(60, 150),  # (60, 200)
             timeinterval=0.3,  # fima/utils.py
             ),
         ),
@@ -150,6 +150,9 @@ SUBJECTS = {
     'warmond': {
         '1': [],
         '2': [],
+        },
+    'som705': {
+        '01': [],
         },
     }
 
