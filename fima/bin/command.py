@@ -2,9 +2,10 @@
 
 from argparse import ArgumentParser, RawTextHelpFormatter
 from logging import getLogger, INFO, DEBUG, StreamHandler, Formatter
+from json import load
+from pathlib import Path
 
 from ..pipelines import pipeline_fima
-from ..parameters import P
 
 lg = getLogger('fima')
 lg.setLevel(DEBUG)
@@ -51,9 +52,6 @@ def main():
         help='Plot the time-course continuously in the high-frequency range',
         )
     action.set_defaults(function='continuous')
-    action.add_argument(
-        '--baseline', action='store_true',
-        help='Baseline correction with ' + P['spectrum']['baseline']['type'])
 
     action = list_pipelines.add_parser(
         'ols',
@@ -84,29 +82,16 @@ def main():
         help='Analyze each finger individually',
         )
     action.set_defaults(function='fingers')
-    action.add_argument(
-        '--bars', action='store_true',
-        help='Plot bars with t-statistics')
-    action.add_argument(
-        '--corr', action='store_true',
-        help='Correlation across fingers')
-    action.add_argument(
-        '--each', action='store_true',
-        help='Correlation across fingers based on each finger')
 
     action = list_pipelines.add_parser(
         'fitting',
         help='Fit a PRF model to the data',
         )
     action.set_defaults(function='fitting')
-    action.add_argument(
-        '--model', default='linear_separate_gaussians_per_finger',
-        help='Specify which model to run')
-    action.add_argument(
-        '--response', default=None,
-        help='If specify, use all the datapoints (options: "mean")')
 
     args = parser.parse_args()
+
+    parameters = read_parameters(args.parameters)
 
     if args.log[:1].lower() == 'i':
         LEVEL = INFO
@@ -124,18 +109,27 @@ def main():
     handler.setFormatter(formatter)
     lg.addHandler(handler)
 
-    kwargs = {}
-    if args.function == 'continuous':
-        kwargs['baseline'] = args.baseline
     if args.function == 'ols':
-        kwargs['skip_ols'] = args.skip_ols
-        kwargs['skip_prf'] = args.skip_prf
+        if 'ols' not in parameters:
+            parameters['ols'] = {}
+        parameters['ols']['skip_ols'] = args.skip_ols
+        parameters['ols']['skip_prf'] = args.skip_prf
 
     pipeline_fima(
+        parameters,
         args.function,
         subject_only=args.subject,
-        parallel=args.parallel,
-        kwargs=kwargs)
+        parallel=args.parallel)
+
+
+def read_parameters(parameters_path):
+    parameters_path = Path(parameters_path).resolve()
+    with parameters_path.open() as f:
+        parameters = load(f)
+    for k in parameters['paths']:
+        parameters['paths'][k] = Path(parameters['paths'][k]).resolve()
+
+    return parameters
 
 
 if __name__ == '__main__':

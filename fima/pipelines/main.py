@@ -7,79 +7,57 @@ from .dataglove import pipeline_dataglove
 from .ols import pipeline_ols, pipeline_ols_all
 from .brainregions import pipeline_brainregions
 from .spectrum import pipeline_spectrum
-from ..parameters import SUBJECTS
 from ..utils import be_nice
 
 
 lg = getLogger(__name__)
 
 
-def pipeline_fima(pipeline=None, subject_only=None, parallel=False, kwargs=None):
+def pipeline_fima(parameters, pipeline, subject_only='*', parallel=False):
     """Run pipeline to compute power spectrum on all the participants
 
     Parameters
     ----------
+    parameters : dict
+        analysis specific parameters
     pipeline : str
         one of the pipelines to run
-    event_type : str
-        event type used to identify the trials (one of 'cues', 'open', 'close',
-        'movements', 'extension', 'flexion')
     subject_only : str
         compute pipeline only for this participant
+    parallel : bool
+        where to run it with multiprocessing
     """
-    func = partial(sub_pipeline, pipeline=pipeline, kwargs=kwargs)
+    func = partial(sub_pipeline, parameters=parameters, pipeline=pipeline)
+    list_ieeg = bids_dir.rglob(f'sub-{subject_only}_ses-*_acq-*_run-*_ieeg.eeg')
     if parallel:
-        args = gen_subject_run()
         with Pool(initializer=be_nice) as p:
-            p.starmap(func, args)
+            p.starmap(func, list_ieeg)
 
     else:
-        for subject, runs in SUBJECTS.items():
-            if subject_only is not None and subject != subject_only:
-                continue
-
-            for run in runs:
-                lg.info(f'{subject:<10}/ {run}')
-                func(subject, run)
+        for ieeg in list_ieeg:
+            lg.info(f'Running {ieeg.stem}')
+            func(ieeg)
 
     if pipeline == 'ols':
         pipeline_ols_all()
 
 
-def sub_pipeline(subject, run, pipeline, kwargs):
+def sub_pipeline(ieeg, parameters, pipeline):
 
     if pipeline == 'continuous':
-        pipeline_continuous(
-            subject,
-            run,
-            baseline=kwargs['baseline'],
-            )
+        pipeline_continuous(parameters, ieeg)
 
     elif pipeline == 'dataglove':
-        pipeline_dataglove(
-            subject,
-            run,
-            )
+        pipeline_dataglove(parameters, ieeg)
 
     elif pipeline == 'brainregions':
-        pipeline_brainregions(
-            subject,
-            )
+        pipeline_brainregions(parameters, ieeg)
 
     elif pipeline == 'ols':
-        pipeline_ols(
-            subject,
-            run,
-            skip_ols=kwargs['skip_ols'],
-            skip_prf=kwargs['skip_prf'],
-            )
+        pipeline_ols(parameters, ieeg)
 
     elif pipeline == 'spectrum':
-        pipeline_spectrum(
-            subject,
-            run,
-            event_type='cues',
-            )
+        pipeline_spectrum(parameters, ieeg)
 
     elif pipeline == 'flex_ext':
         pipeline_flexext_all(
@@ -93,12 +71,3 @@ def sub_pipeline(subject, run, pipeline, kwargs):
             model_name=args.model,
             response=args.response,
             subject_only=args.subject)
-
-
-def gen_subject_run():
-    val = []
-    for subj, runs in SUBJECTS.items():
-        for run in runs:
-            val.append((subj, run))
-
-    return val

@@ -29,7 +29,7 @@ FS_LABELS = [
 timepoints = ', '.join(f"'{x}'" for x in CRITICAL_TIMEPOINTS)
 
 
-def load(what, subject, run=None, acq=None, event_type=None):
+def load(what, ieeg, event_type):
     f"""
     WHAT:
       - 'continuous' returns: ChanTime, event_names, events_onsets
@@ -55,17 +55,6 @@ def load(what, subject, run=None, acq=None, event_type=None):
       - extension : actual extension of all fingers
       - flexion : actual flexion of all fingers
     """
-    if run is None:
-        run = '*'
-    else:
-        run = str(run)
-
-    if acq is None:
-        if subject == 'ommen':
-            acq = 'blackrock'
-        else:
-            acq = '*'
-
     if what in ('continuous', 'data') or what in CRITICAL_TIMEPOINTS:
         pattern = f'sub-{subject}_*_acq-{acq}_run-{run}_ieeg.eeg'
         folder = BIDS_DIR

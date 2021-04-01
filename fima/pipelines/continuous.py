@@ -9,20 +9,15 @@ from ..spectrum.continuous import get_continuous_cht
 lg = getLogger(__name__)
 
 
-def pipeline_continuous(subject, run, event_type='cues', baseline=False):
+def pipeline_continuous(parameters, ieeg):
     """Run pipeline to compute power spectrum on one participant, one run
 
     Parameters
     ----------
-    subject : str
-        subject code
-    run : str
-        number of the run of interest
-    event_type : str
-        event type used to identify the trials (one of 'cues', 'open', 'close',
-        'movements', 'extension', 'flexion')
+    parameters : dict
+        "data" / "event_type" event type used to identify the trials (one of 'cues', 'open', 'close', 'movements', 'extension', 'flexion')
     """
-    tf_cht, events, onsets = get_continuous_cht(subject, run, event_type)
+    tf_cht, events, onsets = get_continuous_cht(ieeg, event_type)
 
     if baseline:
         lg.info(f'{subject:<10}/ {run} Applying baseline to continuous')
