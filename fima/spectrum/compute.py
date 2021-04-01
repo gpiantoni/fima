@@ -3,10 +3,9 @@ from wonambi.trans import apply_baseline, timefrequency, concatenate, math, sele
 
 from ..parameters import P
 from .baseline import apply_common_baseline
-from ..utils import hide_artifacts
 
 
-def compute_timefreq(data, artifacts=None, baseline=True, mean=True):
+def compute_timefreq(data, baseline=True, mean=True):
 
     if P['spectrum']['method'] == 'spectrogram':
         tf = timefrequency(
@@ -39,9 +38,6 @@ def compute_timefreq(data, artifacts=None, baseline=True, mean=True):
     tf = concatenate(
         tf,
         axis='trial')
-
-    if artifacts is not None:
-        tf = hide_artifacts(tf, artifacts)
 
     if baseline:
         if P['spectrum']['baseline']['common']:

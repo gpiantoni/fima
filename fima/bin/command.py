@@ -11,11 +11,14 @@ lg.setLevel(DEBUG)
 
 
 def main():
-    """Command line function to compute the analyzses"""
+    """Command line function to compute the analyses"""
     parser = ArgumentParser(
         formatter_class=RawTextHelpFormatter,
         description='Analysis finger mapping')
 
+    parser.add_argument(
+        'parameters',
+        help='point to parameters.json')
     parser.add_argument(
         '-p', '--parallel',
         action='store_true',

@@ -74,8 +74,8 @@ P = dict(
 
 
 GRID_TYPES = DataFrame({
-    'subject': ['drouwen', 'duiven', 'franeker', 'heek', 'intraop008', 'intraop013', 'intraop016', 'itens', 'lemmer', 'ommen', 'vledder', 'warmond', 'veere'],
-    'grid_type': ['clinical', 'HD', 'HD', 'HD', 'HD', 'HD', 'HD', 'clinical', 'clinical', 'HD', 'HD', 'HD', 'HD']
+    'subject': ['drouwen', 'duiven', 'franeker', 'heek', 'intraop008', 'intraop013', 'intraop016', 'itens', 'lemmer', 'ommen', 'vledder', 'warmond', 'veere', 'som705'],
+    'grid_type': ['clinical', 'HD', 'HD', 'HD', 'HD', 'HD', 'HD', 'clinical', 'clinical', 'HD', 'HD', 'HD', 'HD', 'HD']
     })
 
 

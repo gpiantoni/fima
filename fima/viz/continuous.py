@@ -27,6 +27,9 @@ def plot_continuous(tf_cht, onsets, events):
 def plot_continuous_per_chan(tf_cht, onsets, events, chan):
     dat = tf_cht(trial=0, trial_axis='trial000000', chan=chan)
 
+    yaxis_label = 'power spectral density (μV²)'
+    baseline_name = '_' + P['spectrum']['baseline']['type']
+
     fig = go.Figure(data=[
         go.Scatter(
             x=tf_cht.time[0],
@@ -45,7 +48,7 @@ def plot_continuous_per_chan(tf_cht, onsets, events, chan):
                 title='absolute time (s) from start of the task',
                 ),
             yaxis=dict(
-                title='power spectral density (μV²)',
+                title=yaxis_label,
                 range=(-1, 30),
                 ),
             ))
