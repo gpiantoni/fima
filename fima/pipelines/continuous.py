@@ -17,10 +17,10 @@ def pipeline_continuous(parameters, ieeg):
     parameters : dict
         "data" / "event_type" event type used to identify the trials (one of 'cues', 'open', 'close', 'movements', 'extension', 'flexion')
     """
-    tf_cht, events, onsets = get_continuous_cht(ieeg, event_type)
+    tf_cht, events, onsets = get_continuous_cht(parameters, ieeg, event_type)
 
-    if baseline:
-        lg.info(f'{subject:<10}/ {run} Applying baseline to continuous')
+    if parameters['spectrum']['baseline']['apply']:
+        lg.info(f'Applying baseline to continuous')
         tf_cht = apply_baseline_to_continuous(tf_cht, onsets)
         baseline_name = '_' + P['spectrum']['baseline']['type']
     else:

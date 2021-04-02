@@ -1,5 +1,5 @@
 """Read the data, based on event type and onset time"""
-from numpy import genfromtxt, isin, isnan, empty, NaN
+from numpy import genfromtxt, isin, empty, NaN
 from numpy.lib.recfunctions import append_fields
 from bidso.objects import Electrodes
 from nibabel.freesurfer.io import read_annot
@@ -29,7 +29,7 @@ FS_LABELS = [
 timepoints = ', '.join(f"'{x}'" for x in CRITICAL_TIMEPOINTS)
 
 
-def load(what, ieeg, event_type):
+def load(what, ieeg_file, event_type='cues'):
     f"""
     WHAT:
       - 'continuous' returns: ChanTime, event_names, events_onsets
@@ -55,6 +55,16 @@ def load(what, ieeg, event_type):
       - extension : actual extension of all fingers
       - flexion : actual flexion of all fingers
     """
+    ieeg = Task(ieeg_file)
+    events_tsv = ieeg.events.tsv
+
+    if what == 'continuous':
+        events, onsets = select_events(events_tsv, event_type)
+        data = read_data(filename, event_onsets=onsets, continuous=True)
+        return data, events, onsets
+
+
+def old():
     if what in ('continuous', 'data') or what in CRITICAL_TIMEPOINTS:
         pattern = f'sub-{subject}_*_acq-{acq}_run-{run}_ieeg.eeg'
         folder = BIDS_DIR
@@ -94,8 +104,6 @@ def load(what, ieeg, event_type):
         events, onsets = select_events(subject, run, event_type)
 
         if what == 'continuous':
-            data = read_data(filename, event_onsets=onsets, continuous=True)
-            return data, events, onsets
 
         if what in CRITICAL_TIMEPOINTS:
             data = read_data(filename, event_onsets=onsets)
@@ -171,15 +179,13 @@ def load(what, ieeg, event_type):
         return events
 
 
-def select_events(subject, run, t):
+def select_events(events, t):
     """Select events for one subject / run
 
     Parameters
     ----------
-    subject : str
-        subject code
-    run : str
-        number of the run of interest
+    events : ndarray
+        events with onset, duration, trial_type
     t : str
         event type used to identify the trials (one of 'cues', 'open', 'close',
         'movements', 'extension', 'flexion')
@@ -212,12 +218,11 @@ def select_events(subject, run, t):
     else:
         raise ValueError(f'Unknown event_type "{t}"')
 
-    events = load(to_load, subject, run)
     if to_load == 'events':
         # get rid of "palm open" etc
         events['trial_type'] = [' '.join(x.split(' ')[:2]) for x in events['trial_type']]
 
-    i_evt = isin(events['trial_type'], trial_types) & isnan(events['response_time'])
+    i_evt = isin(events['trial_type'], trial_types)
     event_onsets = events['onset'][i_evt]
     event_types = events['trial_type'][i_evt]
     return event_types, event_onsets

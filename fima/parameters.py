@@ -19,10 +19,6 @@ FREESURFER_DIR = Path(environ['SUBJECTS_DIR'])
 RESULTS_DIR = PROJ_DIR / 'results'
 
 P = dict(
-    read=dict(
-        pre=2,
-        post=2,
-        ),
     data_quality=dict(
         histogram=dict(
             contamination=0.04,
