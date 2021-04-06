@@ -4,6 +4,7 @@ Information to store in `parameters.json` file.
 
   - paths:
     - input: str, path to bids folder,
+    - movements: str, path to movements (should have the same prefix as `_events.tsv` but ends with `_dataglove.tsv`)
     - freesurfer_subjects_dir: str, path to freesurfer folder,
     - output: str, path to output folder which will contain the results
   - read:

@@ -12,4 +12,13 @@ def name(parameters, ieeg_file, what):
     elif what == 'continuous':
         out = out_dir / 'continuous' / f'{ieeg_file.stem}.html'
 
+    elif what == 'spectrum':
+        out = out_dir / 'spectrum' / 'overview' / f'{ieeg_file.stem}.html'
+
+    elif what == 'spectrum_all':
+        out = out_dir / 'spectrum' / 'channels' / f'{ieeg_file.stem}.html'
+
+    elif what == 'ols_chan':
+        out = out_dir / 'ols' / ieeg_file.stem
+
     return out

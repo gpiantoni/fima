@@ -32,39 +32,30 @@ from ..spectrum import compute_timefreq, get_chan, get_chantime
 from ..viz import plot_tfr, plot_tfr_time, to_div, to_html, plot_surf, plot_conditions_per_chan
 from ..read import load
 from ..utils import find_max_point
-from ..parameters import P, RESULTS_DIR
+from ..names import name
 
 from wonambi.trans import math
 
-SPECTRUM_DIR = RESULTS_DIR / &#39;spectrum&#39;
 
-
-def pipeline_spectrum(subject, run, event_type=&#39;cues&#39;):
+def pipeline_spectrum(parameters, ieeg_file):
     &#34;&#34;&#34;Run pipeline to compute power spectrum on one participant, one run
 
     Parameters
     ----------
-    subject : str
-        subject code
-    run : str
-        number of the run of interest
-    event_type : str
-        event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
-        &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
     &#34;&#34;&#34;
-    data, names = load(&#39;data&#39;, subject, run, event_type=event_type)
+    data, names = load(&#39;data&#39;, parameters, ieeg_file)
 
     try:
-        elec = load(&#39;electrodes&#39;, subject, run)
+        elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
     except Exception:
-        print(f&#39;No electrodes for {subject}&#39;)
+        print(f&#39;No electrodes for {ieeg_file.stem}&#39;)
         elec = None
 
     try:
-        pial = load(&#39;surface&#39;, subject, run)
-        fs = load(&#39;freesurfer&#39;, subject, run)
+        pial = load(&#39;surface&#39;, parameters, ieeg_file)
+        fs = load(&#39;freesurfer&#39;, parameters, ieeg_file)
     except Exception:
-        print(f&#39;No surfaces for {subject}&#39;)
+        print(f&#39;No surfaces for {ieeg_file.stem}&#39;)
         pial = None
         fs = None
 
@@ -77,23 +68,20 @@ def pipeline_spectrum(subject, run, event_type=&#39;cues&#39;):
     tf_ch = get_chan(tf_m, time=best_time)
 
     divs = []
-    fig = plot_tfr(tf_m, best_chan)  # , time=best_time, freq=P[&#39;spectrum&#39;][&#39;select&#39;][&#39;freq&#39;])
+    fig = plot_tfr(tf_m, best_chan, time=best_time, freq=parameters[&#39;spectrum&#39;][&#39;select&#39;][&#39;freq&#39;])
     divs.append(to_div(fig))
-    fig = plot_tfr_time(tf_cht)  # , highlight=best_time)
+    fig = plot_tfr_time(tf_cht, highlight=best_time)
     divs.append(to_div(fig))
 
     if elec is not None:
         fig = plot_surf(tf_ch, elec, pial)
         divs.append(to_div(fig))
 
-    html_file = SPECTRUM_DIR / event_type / f&#39;{subject}_run-{run}_{event_type}.html&#39;
-    to_html(divs, html_file)
-
-    html_file = SPECTRUM_DIR / event_type / f&#39;{subject}_run-{run}_{event_type}_allchan.html&#39;
+    to_html(divs, name(parameters, ieeg_file, &#39;spectrum&#39;))
 
     tf_cht = get_chantime(tf)
     divs = plot_conditions_per_chan(tf_cht, names, fs=fs, elec=elec)
-    to_html(divs, html_file)
+    to_html(divs, name(parameters, ieeg_file, &#39;spectrum_all&#39;))
 
 
 def find_max_true(x):
@@ -201,50 +189,34 @@ def find_runs(x):
 </details>
 </dd>
 <dt id="fima.pipelines.spectrum.pipeline_spectrum"><code class="name flex">
-<span>def <span class="ident">pipeline_spectrum</span></span>(<span>subject, run, event_type='cues')</span>
+<span>def <span class="ident">pipeline_spectrum</span></span>(<span>parameters, ieeg_file)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Run pipeline to compute power spectrum on one participant, one run</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>subject</code></strong> :&ensp;<code>str</code></dt>
-<dd>subject code</dd>
-<dt><strong><code>run</code></strong> :&ensp;<code>str</code></dt>
-<dd>number of the run of interest</dd>
-<dt><strong><code>event_type</code></strong> :&ensp;<code>str</code></dt>
-<dd>event type used to identify the trials (one of 'cues', 'open', 'close',
-'movements', 'extension', 'flexion')</dd>
-</dl></div>
+<h2 id="parameters">Parameters</h2></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def pipeline_spectrum(subject, run, event_type=&#39;cues&#39;):
+<pre><code class="python">def pipeline_spectrum(parameters, ieeg_file):
     &#34;&#34;&#34;Run pipeline to compute power spectrum on one participant, one run
 
     Parameters
     ----------
-    subject : str
-        subject code
-    run : str
-        number of the run of interest
-    event_type : str
-        event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
-        &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
     &#34;&#34;&#34;
-    data, names = load(&#39;data&#39;, subject, run, event_type=event_type)
+    data, names = load(&#39;data&#39;, parameters, ieeg_file)
 
     try:
-        elec = load(&#39;electrodes&#39;, subject, run)
+        elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
     except Exception:
-        print(f&#39;No electrodes for {subject}&#39;)
+        print(f&#39;No electrodes for {ieeg_file.stem}&#39;)
         elec = None
 
     try:
-        pial = load(&#39;surface&#39;, subject, run)
-        fs = load(&#39;freesurfer&#39;, subject, run)
+        pial = load(&#39;surface&#39;, parameters, ieeg_file)
+        fs = load(&#39;freesurfer&#39;, parameters, ieeg_file)
     except Exception:
-        print(f&#39;No surfaces for {subject}&#39;)
+        print(f&#39;No surfaces for {ieeg_file.stem}&#39;)
         pial = None
         fs = None
 
@@ -257,23 +229,20 @@ def find_runs(x):
     tf_ch = get_chan(tf_m, time=best_time)
 
     divs = []
-    fig = plot_tfr(tf_m, best_chan)  # , time=best_time, freq=P[&#39;spectrum&#39;][&#39;select&#39;][&#39;freq&#39;])
+    fig = plot_tfr(tf_m, best_chan, time=best_time, freq=parameters[&#39;spectrum&#39;][&#39;select&#39;][&#39;freq&#39;])
     divs.append(to_div(fig))
-    fig = plot_tfr_time(tf_cht)  # , highlight=best_time)
+    fig = plot_tfr_time(tf_cht, highlight=best_time)
     divs.append(to_div(fig))
 
     if elec is not None:
         fig = plot_surf(tf_ch, elec, pial)
         divs.append(to_div(fig))
 
-    html_file = SPECTRUM_DIR / event_type / f&#39;{subject}_run-{run}_{event_type}.html&#39;
-    to_html(divs, html_file)
-
-    html_file = SPECTRUM_DIR / event_type / f&#39;{subject}_run-{run}_{event_type}_allchan.html&#39;
+    to_html(divs, name(parameters, ieeg_file, &#39;spectrum&#39;))
 
     tf_cht = get_chantime(tf)
     divs = plot_conditions_per_chan(tf_cht, names, fs=fs, elec=elec)
-    to_html(divs, html_file)</code></pre>
+    to_html(divs, name(parameters, ieeg_file, &#39;spectrum_all&#39;))</code></pre>
 </details>
 </dd>
 </dl>

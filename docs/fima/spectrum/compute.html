@@ -29,10 +29,9 @@ from wonambi.trans import apply_baseline, timefrequency, concatenate, math, sele
 
 from ..parameters import P
 from .baseline import apply_common_baseline
-from ..utils import hide_artifacts
 
 
-def compute_timefreq(data, artifacts=None, baseline=True, mean=True):
+def compute_timefreq(data, baseline=True, mean=True):
 
     if P[&#39;spectrum&#39;][&#39;method&#39;] == &#39;spectrogram&#39;:
         tf = timefrequency(
@@ -65,9 +64,6 @@ def compute_timefreq(data, artifacts=None, baseline=True, mean=True):
     tf = concatenate(
         tf,
         axis=&#39;trial&#39;)
-
-    if artifacts is not None:
-        tf = hide_artifacts(tf, artifacts)
 
     if baseline:
         if P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;common&#39;]:
@@ -136,7 +132,7 @@ def get_chan(tf, freq=None, baseline=False, time=None, operator_name=&#39;mean&#
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="fima.spectrum.compute.compute_timefreq"><code class="name flex">
-<span>def <span class="ident">compute_timefreq</span></span>(<span>data, artifacts=None, baseline=True, mean=True)</span>
+<span>def <span class="ident">compute_timefreq</span></span>(<span>data, baseline=True, mean=True)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -144,7 +140,7 @@ def get_chan(tf, freq=None, baseline=False, time=None, operator_name=&#39;mean&#
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def compute_timefreq(data, artifacts=None, baseline=True, mean=True):
+<pre><code class="python">def compute_timefreq(data, baseline=True, mean=True):
 
     if P[&#39;spectrum&#39;][&#39;method&#39;] == &#39;spectrogram&#39;:
         tf = timefrequency(
@@ -177,9 +173,6 @@ def get_chan(tf, freq=None, baseline=False, time=None, operator_name=&#39;mean&#
     tf = concatenate(
         tf,
         axis=&#39;trial&#39;)
-
-    if artifacts is not None:
-        tf = hide_artifacts(tf, artifacts)
 
     if baseline:
         if P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;common&#39;]:

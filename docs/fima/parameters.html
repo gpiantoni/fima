@@ -46,10 +46,6 @@ FREESURFER_DIR = Path(environ[&#39;SUBJECTS_DIR&#39;])
 RESULTS_DIR = PROJ_DIR / &#39;results&#39;
 
 P = dict(
-    read=dict(
-        pre=2,
-        post=2,
-        ),
     data_quality=dict(
         histogram=dict(
             contamination=0.04,
@@ -101,8 +97,8 @@ P = dict(
 
 
 GRID_TYPES = DataFrame({
-    &#39;subject&#39;: [&#39;drouwen&#39;, &#39;duiven&#39;, &#39;franeker&#39;, &#39;heek&#39;, &#39;intraop008&#39;, &#39;intraop013&#39;, &#39;intraop016&#39;, &#39;itens&#39;, &#39;lemmer&#39;, &#39;ommen&#39;, &#39;vledder&#39;, &#39;warmond&#39;, &#39;veere&#39;],
-    &#39;grid_type&#39;: [&#39;clinical&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;clinical&#39;, &#39;clinical&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;]
+    &#39;subject&#39;: [&#39;drouwen&#39;, &#39;duiven&#39;, &#39;franeker&#39;, &#39;heek&#39;, &#39;intraop008&#39;, &#39;intraop013&#39;, &#39;intraop016&#39;, &#39;itens&#39;, &#39;lemmer&#39;, &#39;ommen&#39;, &#39;vledder&#39;, &#39;warmond&#39;, &#39;veere&#39;, &#39;som705&#39;],
+    &#39;grid_type&#39;: [&#39;clinical&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;clinical&#39;, &#39;clinical&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;]
     })
 
 

@@ -27,40 +27,31 @@
 <pre><code class="python">from logging import getLogger
 
 from ..spectrum.baseline import apply_baseline_to_continuous
-from ..parameters import RESULTS_DIR, P
 from ..viz import to_html
 from ..viz.continuous import plot_continuous
 from ..spectrum.continuous import get_continuous_cht
 
+from ..names import name
+
 lg = getLogger(__name__)
 
 
-def pipeline_continuous(subject, run, event_type=&#39;cues&#39;, baseline=False):
+def pipeline_continuous(parameters, ieeg):
     &#34;&#34;&#34;Run pipeline to compute power spectrum on one participant, one run
 
     Parameters
     ----------
-    subject : str
-        subject code
-    run : str
-        number of the run of interest
-    event_type : str
-        event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
-        &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
+    parameters : dict
     &#34;&#34;&#34;
-    tf_cht, events, onsets = get_continuous_cht(subject, run, event_type)
+    tf_cht, events, onsets = get_continuous_cht(parameters, ieeg)
 
-    if baseline:
-        lg.info(f&#39;{subject:&lt;10}/ {run} Applying baseline to continuous&#39;)
+    if parameters[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;apply&#39;]:
+        lg.info(&#39;Applying baseline to continuous&#39;)
         tf_cht = apply_baseline_to_continuous(tf_cht, onsets)
-        baseline_name = &#39;_&#39; + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]
-    else:
-        baseline_name = &#39;&#39;
-    lg.info(f&#39;{subject:&lt;10}/ {run} Plotting continuous&#39;)
+    lg.info(&#39;Plotting continuous&#39;)
     divs = plot_continuous(tf_cht, onsets, events)
 
-    html_file = RESULTS_DIR / &#39;continuous&#39; / event_type / f&#39;{subject}_run-{run}_{event_type}{baseline_name}.html&#39;
-    to_html(divs, html_file)</code></pre>
+    to_html(divs, name(parameters, ieeg, &#39;continuous&#39;))</code></pre>
 </details>
 </section>
 <section>
@@ -71,50 +62,35 @@ def pipeline_continuous(subject, run, event_type=&#39;cues&#39;, baseline=False)
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="fima.pipelines.continuous.pipeline_continuous"><code class="name flex">
-<span>def <span class="ident">pipeline_continuous</span></span>(<span>subject, run, event_type='cues', baseline=False)</span>
+<span>def <span class="ident">pipeline_continuous</span></span>(<span>parameters, ieeg)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Run pipeline to compute power spectrum on one participant, one run</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>subject</code></strong> :&ensp;<code>str</code></dt>
-<dd>subject code</dd>
-<dt><strong><code>run</code></strong> :&ensp;<code>str</code></dt>
-<dd>number of the run of interest</dd>
-<dt><strong><code>event_type</code></strong> :&ensp;<code>str</code></dt>
-<dd>event type used to identify the trials (one of 'cues', 'open', 'close',
-'movements', 'extension', 'flexion')</dd>
+<dt><strong><code>parameters</code></strong> :&ensp;<code>dict</code></dt>
+<dd>&nbsp;</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def pipeline_continuous(subject, run, event_type=&#39;cues&#39;, baseline=False):
+<pre><code class="python">def pipeline_continuous(parameters, ieeg):
     &#34;&#34;&#34;Run pipeline to compute power spectrum on one participant, one run
 
     Parameters
     ----------
-    subject : str
-        subject code
-    run : str
-        number of the run of interest
-    event_type : str
-        event type used to identify the trials (one of &#39;cues&#39;, &#39;open&#39;, &#39;close&#39;,
-        &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;)
+    parameters : dict
     &#34;&#34;&#34;
-    tf_cht, events, onsets = get_continuous_cht(subject, run, event_type)
+    tf_cht, events, onsets = get_continuous_cht(parameters, ieeg)
 
-    if baseline:
-        lg.info(f&#39;{subject:&lt;10}/ {run} Applying baseline to continuous&#39;)
+    if parameters[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;apply&#39;]:
+        lg.info(&#39;Applying baseline to continuous&#39;)
         tf_cht = apply_baseline_to_continuous(tf_cht, onsets)
-        baseline_name = &#39;_&#39; + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]
-    else:
-        baseline_name = &#39;&#39;
-    lg.info(f&#39;{subject:&lt;10}/ {run} Plotting continuous&#39;)
+    lg.info(&#39;Plotting continuous&#39;)
     divs = plot_continuous(tf_cht, onsets, events)
 
-    html_file = RESULTS_DIR / &#39;continuous&#39; / event_type / f&#39;{subject}_run-{run}_{event_type}{baseline_name}.html&#39;
-    to_html(divs, html_file)</code></pre>
+    to_html(divs, name(parameters, ieeg, &#39;continuous&#39;))</code></pre>
 </details>
 </dd>
 </dl>

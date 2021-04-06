@@ -79,8 +79,8 @@ def load(what, parameters, ieeg_file):
         folder = parameters['paths']['input']
 
     elif what == 'movements':
-        pattern = f'{subject}_run-{run}_dataglove.tsv'
-        folder = SCRIPTS_DIR / 'movements'  # todo
+        pattern = f'sub-{ieeg.subject}_*_run-{ieeg.run}_dataglove.tsv'
+        folder = parameters['paths']['movements']
 
     elif what in ['surface', 'freesurfer'] + FS_LABELS:
         pattern = 'sub-' + ieeg.subject

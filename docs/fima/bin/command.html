@@ -28,26 +28,30 @@
 
 from argparse import ArgumentParser, RawTextHelpFormatter
 from logging import getLogger, INFO, DEBUG, StreamHandler, Formatter
+from json import load
+from pathlib import Path
 
 from ..pipelines import pipeline_fima
-from ..parameters import P
 
 lg = getLogger(&#39;fima&#39;)
 lg.setLevel(DEBUG)
 
 
 def main():
-    &#34;&#34;&#34;Command line function to compute the analyzses&#34;&#34;&#34;
+    &#34;&#34;&#34;Command line function to compute the analyses&#34;&#34;&#34;
     parser = ArgumentParser(
         formatter_class=RawTextHelpFormatter,
         description=&#39;Analysis finger mapping&#39;)
 
     parser.add_argument(
+        &#39;parameters&#39;,
+        help=&#39;point to parameters.json&#39;)
+    parser.add_argument(
         &#39;-p&#39;, &#39;--parallel&#39;,
         action=&#39;store_true&#39;,
         help=&#39;Run analysis for all the subjects in parallel&#39;)
     parser.add_argument(
-        &#39;-s&#39;, &#39;--subject&#39;, default=None,
+        &#39;-s&#39;, &#39;--subject&#39;, default=&#39;*&#39;,
         help=&#39;Run analysis only on one subject&#39;)
     parser.add_argument(
         &#39;-l&#39;, &#39;--log&#39;,
@@ -74,9 +78,6 @@ def main():
         help=&#39;Plot the time-course continuously in the high-frequency range&#39;,
         )
     action.set_defaults(function=&#39;continuous&#39;)
-    action.add_argument(
-        &#39;--baseline&#39;, action=&#39;store_true&#39;,
-        help=&#39;Baseline correction with &#39; + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;])
 
     action = list_pipelines.add_parser(
         &#39;ols&#39;,
@@ -107,29 +108,16 @@ def main():
         help=&#39;Analyze each finger individually&#39;,
         )
     action.set_defaults(function=&#39;fingers&#39;)
-    action.add_argument(
-        &#39;--bars&#39;, action=&#39;store_true&#39;,
-        help=&#39;Plot bars with t-statistics&#39;)
-    action.add_argument(
-        &#39;--corr&#39;, action=&#39;store_true&#39;,
-        help=&#39;Correlation across fingers&#39;)
-    action.add_argument(
-        &#39;--each&#39;, action=&#39;store_true&#39;,
-        help=&#39;Correlation across fingers based on each finger&#39;)
 
     action = list_pipelines.add_parser(
         &#39;fitting&#39;,
         help=&#39;Fit a PRF model to the data&#39;,
         )
     action.set_defaults(function=&#39;fitting&#39;)
-    action.add_argument(
-        &#39;--model&#39;, default=&#39;linear_separate_gaussians_per_finger&#39;,
-        help=&#39;Specify which model to run&#39;)
-    action.add_argument(
-        &#39;--response&#39;, default=None,
-        help=&#39;If specify, use all the datapoints (options: &#34;mean&#34;)&#39;)
 
     args = parser.parse_args()
+
+    parameters = read_parameters(args.parameters)
 
     if args.log[:1].lower() == &#39;i&#39;:
         LEVEL = INFO
@@ -147,18 +135,27 @@ def main():
     handler.setFormatter(formatter)
     lg.addHandler(handler)
 
-    kwargs = {}
-    if args.function == &#39;continuous&#39;:
-        kwargs[&#39;baseline&#39;] = args.baseline
     if args.function == &#39;ols&#39;:
-        kwargs[&#39;skip_ols&#39;] = args.skip_ols
-        kwargs[&#39;skip_prf&#39;] = args.skip_prf
+        if &#39;ols&#39; not in parameters:
+            parameters[&#39;ols&#39;] = {}
+        parameters[&#39;ols&#39;][&#39;skip_ols&#39;] = args.skip_ols
+        parameters[&#39;ols&#39;][&#39;skip_prf&#39;] = args.skip_prf
 
     pipeline_fima(
+        parameters,
         args.function,
         subject_only=args.subject,
-        parallel=args.parallel,
-        kwargs=kwargs)
+        parallel=args.parallel)
+
+
+def read_parameters(parameters_path):
+    parameters_path = Path(parameters_path).resolve()
+    with parameters_path.open() as f:
+        parameters = load(f)
+    for k in parameters[&#39;paths&#39;]:
+        parameters[&#39;paths&#39;][k] = Path(parameters[&#39;paths&#39;][k]).resolve()
+
+    return parameters
 
 
 if __name__ == &#39;__main__&#39;:
@@ -176,23 +173,26 @@ if __name__ == &#39;__main__&#39;:
 <span>def <span class="ident">main</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Command line function to compute the analyzses</p></div>
+<div class="desc"><p>Command line function to compute the analyses</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def main():
-    &#34;&#34;&#34;Command line function to compute the analyzses&#34;&#34;&#34;
+    &#34;&#34;&#34;Command line function to compute the analyses&#34;&#34;&#34;
     parser = ArgumentParser(
         formatter_class=RawTextHelpFormatter,
         description=&#39;Analysis finger mapping&#39;)
 
     parser.add_argument(
+        &#39;parameters&#39;,
+        help=&#39;point to parameters.json&#39;)
+    parser.add_argument(
         &#39;-p&#39;, &#39;--parallel&#39;,
         action=&#39;store_true&#39;,
         help=&#39;Run analysis for all the subjects in parallel&#39;)
     parser.add_argument(
-        &#39;-s&#39;, &#39;--subject&#39;, default=None,
+        &#39;-s&#39;, &#39;--subject&#39;, default=&#39;*&#39;,
         help=&#39;Run analysis only on one subject&#39;)
     parser.add_argument(
         &#39;-l&#39;, &#39;--log&#39;,
@@ -219,9 +219,6 @@ if __name__ == &#39;__main__&#39;:
         help=&#39;Plot the time-course continuously in the high-frequency range&#39;,
         )
     action.set_defaults(function=&#39;continuous&#39;)
-    action.add_argument(
-        &#39;--baseline&#39;, action=&#39;store_true&#39;,
-        help=&#39;Baseline correction with &#39; + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;])
 
     action = list_pipelines.add_parser(
         &#39;ols&#39;,
@@ -252,29 +249,16 @@ if __name__ == &#39;__main__&#39;:
         help=&#39;Analyze each finger individually&#39;,
         )
     action.set_defaults(function=&#39;fingers&#39;)
-    action.add_argument(
-        &#39;--bars&#39;, action=&#39;store_true&#39;,
-        help=&#39;Plot bars with t-statistics&#39;)
-    action.add_argument(
-        &#39;--corr&#39;, action=&#39;store_true&#39;,
-        help=&#39;Correlation across fingers&#39;)
-    action.add_argument(
-        &#39;--each&#39;, action=&#39;store_true&#39;,
-        help=&#39;Correlation across fingers based on each finger&#39;)
 
     action = list_pipelines.add_parser(
         &#39;fitting&#39;,
         help=&#39;Fit a PRF model to the data&#39;,
         )
     action.set_defaults(function=&#39;fitting&#39;)
-    action.add_argument(
-        &#39;--model&#39;, default=&#39;linear_separate_gaussians_per_finger&#39;,
-        help=&#39;Specify which model to run&#39;)
-    action.add_argument(
-        &#39;--response&#39;, default=None,
-        help=&#39;If specify, use all the datapoints (options: &#34;mean&#34;)&#39;)
 
     args = parser.parse_args()
+
+    parameters = read_parameters(args.parameters)
 
     if args.log[:1].lower() == &#39;i&#39;:
         LEVEL = INFO
@@ -292,18 +276,36 @@ if __name__ == &#39;__main__&#39;:
     handler.setFormatter(formatter)
     lg.addHandler(handler)
 
-    kwargs = {}
-    if args.function == &#39;continuous&#39;:
-        kwargs[&#39;baseline&#39;] = args.baseline
     if args.function == &#39;ols&#39;:
-        kwargs[&#39;skip_ols&#39;] = args.skip_ols
-        kwargs[&#39;skip_prf&#39;] = args.skip_prf
+        if &#39;ols&#39; not in parameters:
+            parameters[&#39;ols&#39;] = {}
+        parameters[&#39;ols&#39;][&#39;skip_ols&#39;] = args.skip_ols
+        parameters[&#39;ols&#39;][&#39;skip_prf&#39;] = args.skip_prf
 
     pipeline_fima(
+        parameters,
         args.function,
         subject_only=args.subject,
-        parallel=args.parallel,
-        kwargs=kwargs)</code></pre>
+        parallel=args.parallel)</code></pre>
+</details>
+</dd>
+<dt id="fima.bin.command.read_parameters"><code class="name flex">
+<span>def <span class="ident">read_parameters</span></span>(<span>parameters_path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def read_parameters(parameters_path):
+    parameters_path = Path(parameters_path).resolve()
+    with parameters_path.open() as f:
+        parameters = load(f)
+    for k in parameters[&#39;paths&#39;]:
+        parameters[&#39;paths&#39;][k] = Path(parameters[&#39;paths&#39;][k]).resolve()
+
+    return parameters</code></pre>
 </details>
 </dd>
 </dl>
@@ -325,6 +327,7 @@ if __name__ == &#39;__main__&#39;:
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="fima.bin.command.main" href="#fima.bin.command.main">main</a></code></li>
+<li><code><a title="fima.bin.command.read_parameters" href="#fima.bin.command.read_parameters">read_parameters</a></code></li>
 </ul>
 </li>
 </ul>

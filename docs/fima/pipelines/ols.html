@@ -41,31 +41,22 @@ from ..viz import to_div, to_html
 from ..viz.surf import plot_surf
 from ..viz.ols import plot_coefficient, plot_data_prediction
 from ..viz.ols_summary import plot_ols_rsquared, plot_ols_params
-from ..parameters import RESULTS_DIR, P
+from ..names import name
 
 lg = getLogger(__name__)
 
-OLS_DIR = RESULTS_DIR / &#39;ols&#39; / &#39;movement&#39;
-SUMMARY_DIR = RESULTS_DIR / &#39;ols&#39; / &#39;summary&#39;
-ALL_DIR = RESULTS_DIR / &#39;ols&#39; / &#39;alltogether&#39;
-PLOTS_DIR = RESULTS_DIR / &#39;ols&#39; / &#39;plots&#39;
 
-
-def pipeline_ols(subject, run, skip_ols=False, skip_prf=False):
+def pipeline_ols(parameters, ieeg_file):
     &#34;&#34;&#34;
     Parameters
     ----------
-    skip_ols : bool
-        if True, skip time-consuming computation of OLS for each channel
-    skip_prf : bool
-        if True, skip time-consuming computation of PRF on the parameters
     &#34;&#34;&#34;
-    if not skip_ols:
-        pipeline_ols_allchan(subject, run)
-    if not skip_prf:
-        pipeline_ols_prf(subject, run)
+    if not parameters[&#39;ols&#39;][&#39;skip_ols&#39;]:
+        pipeline_ols_allchan(parameters, ieeg_file)
+    if not parameters[&#39;ols&#39;][&#39;skip_prf&#39;]:
+        pipeline_ols_prf(parameters, ieeg_file)
 
-    pipeline_ols_summary(subject, run)
+    pipeline_ols_summary(parameters, ieeg_file)
 
 
 def pipeline_ols_all():
@@ -101,19 +92,19 @@ def pipeline_ols_all():
     to_html(divs, ALL_DIR / &#39;ols_movement_all_summary.html&#39;)
 
 
-def pipeline_ols_allchan(subject, run):
+def pipeline_ols_allchan(parameters, ieeg_file):
 
-    tf_cht, events, onsets = get_continuous_cht(subject, run, event_type=&#39;cues&#39;)
+    tf_cht, events, onsets = get_continuous_cht(parameters, ieeg_file)
     t = tf_cht.time[0]
 
     try:
-        mov = load(&#39;movements&#39;, subject, run)
+        mov = load(&#39;movements&#39;, parameters, ieeg_file)
     except FileNotFoundError:
         return
 
     indices = find_movement_indices(mov, tf_cht.time[0])
     for chan in tf_cht.chan[0][::-1]:
-        lg.info(f&#39;{subject:&lt;10}/ {run} Fitting OLS on {chan}&#39;)
+        lg.info(f&#39;{ieeg_file.stem} Fitting OLS on {chan}&#39;)
         x = tf_cht(trial=0, chan=chan, trial_axis=&#39;trial000000&#39;)
 
         MAT = fit_one_channel(t, x, indices)
@@ -131,7 +122,7 @@ def pipeline_ols_allchan(subject, run):
         fig = plot_data_prediction(tf_cht.time[0], result)
         divs.append(to_div(fig))
 
-        html_file = OLS_DIR / f&#39;{subject}_run-{run}&#39; / f&#39;{subject}_run-{run}_{chan}.html&#39;
+        html_file = name(parameters, ieeg_file, &#39;ols_chan&#39;) / f&#39;{chan}.html&#39;
         to_html(divs, html_file)
 
         json_file = html_file.with_suffix(&#39;.json&#39;)
@@ -139,7 +130,7 @@ def pipeline_ols_allchan(subject, run):
             dump(out, f, indent=2)
 
 
-def pipeline_ols_summary(subject, run):
+def pipeline_ols_summary(parameters, ieeg_file):
     df = import_ols(subject, run)
     if df is None:
         return
@@ -171,7 +162,7 @@ def pipeline_ols_summary(subject, run):
         to_html([to_div(fig), ], PLOTS_DIR / f&#39;ols_movement_{subject}_run-{run}_{param.replace(&#34; &#34;, &#34;&#34;)}.html&#39;)
 
 
-def import_ols(subject, run):
+def import_ols(parameters, ieeg_file):
 
     out_dir = OLS_DIR / f&#39;{subject}_run-{run}&#39;
 
@@ -188,7 +179,7 @@ def import_ols(subject, run):
     return df
 
 
-def pipeline_ols_prf(subject, run):
+def pipeline_ols_prf(parameters, ieeg_file):
 
     out_dir = OLS_DIR / f&#39;{subject}_run-{run}&#39;
 
@@ -204,7 +195,7 @@ def pipeline_ols_prf(subject, run):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="fima.pipelines.ols.import_ols"><code class="name flex">
-<span>def <span class="ident">import_ols</span></span>(<span>subject, run)</span>
+<span>def <span class="ident">import_ols</span></span>(<span>parameters, ieeg_file)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -212,7 +203,7 @@ def pipeline_ols_prf(subject, run):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def import_ols(subject, run):
+<pre><code class="python">def import_ols(parameters, ieeg_file):
 
     out_dir = OLS_DIR / f&#39;{subject}_run-{run}&#39;
 
@@ -230,35 +221,25 @@ def pipeline_ols_prf(subject, run):
 </details>
 </dd>
 <dt id="fima.pipelines.ols.pipeline_ols"><code class="name flex">
-<span>def <span class="ident">pipeline_ols</span></span>(<span>subject, run, skip_ols=False, skip_prf=False)</span>
+<span>def <span class="ident">pipeline_ols</span></span>(<span>parameters, ieeg_file)</span>
 </code></dt>
 <dd>
-<div class="desc"><h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>skip_ols</code></strong> :&ensp;<code>bool</code></dt>
-<dd>if True, skip time-consuming computation of OLS for each channel</dd>
-<dt><strong><code>skip_prf</code></strong> :&ensp;<code>bool</code></dt>
-<dd>if True, skip time-consuming computation of PRF on the parameters</dd>
-</dl></div>
+<div class="desc"><h2 id="parameters">Parameters</h2></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def pipeline_ols(subject, run, skip_ols=False, skip_prf=False):
+<pre><code class="python">def pipeline_ols(parameters, ieeg_file):
     &#34;&#34;&#34;
     Parameters
     ----------
-    skip_ols : bool
-        if True, skip time-consuming computation of OLS for each channel
-    skip_prf : bool
-        if True, skip time-consuming computation of PRF on the parameters
     &#34;&#34;&#34;
-    if not skip_ols:
-        pipeline_ols_allchan(subject, run)
-    if not skip_prf:
-        pipeline_ols_prf(subject, run)
+    if not parameters[&#39;ols&#39;][&#39;skip_ols&#39;]:
+        pipeline_ols_allchan(parameters, ieeg_file)
+    if not parameters[&#39;ols&#39;][&#39;skip_prf&#39;]:
+        pipeline_ols_prf(parameters, ieeg_file)
 
-    pipeline_ols_summary(subject, run)</code></pre>
+    pipeline_ols_summary(parameters, ieeg_file)</code></pre>
 </details>
 </dd>
 <dt id="fima.pipelines.ols.pipeline_ols_all"><code class="name flex">
@@ -304,7 +285,7 @@ def pipeline_ols_prf(subject, run):
 </details>
 </dd>
 <dt id="fima.pipelines.ols.pipeline_ols_allchan"><code class="name flex">
-<span>def <span class="ident">pipeline_ols_allchan</span></span>(<span>subject, run)</span>
+<span>def <span class="ident">pipeline_ols_allchan</span></span>(<span>parameters, ieeg_file)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -312,19 +293,19 @@ def pipeline_ols_prf(subject, run):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def pipeline_ols_allchan(subject, run):
+<pre><code class="python">def pipeline_ols_allchan(parameters, ieeg_file):
 
-    tf_cht, events, onsets = get_continuous_cht(subject, run, event_type=&#39;cues&#39;)
+    tf_cht, events, onsets = get_continuous_cht(parameters, ieeg_file)
     t = tf_cht.time[0]
 
     try:
-        mov = load(&#39;movements&#39;, subject, run)
+        mov = load(&#39;movements&#39;, parameters, ieeg_file)
     except FileNotFoundError:
         return
 
     indices = find_movement_indices(mov, tf_cht.time[0])
     for chan in tf_cht.chan[0][::-1]:
-        lg.info(f&#39;{subject:&lt;10}/ {run} Fitting OLS on {chan}&#39;)
+        lg.info(f&#39;{ieeg_file.stem} Fitting OLS on {chan}&#39;)
         x = tf_cht(trial=0, chan=chan, trial_axis=&#39;trial000000&#39;)
 
         MAT = fit_one_channel(t, x, indices)
@@ -342,7 +323,7 @@ def pipeline_ols_prf(subject, run):
         fig = plot_data_prediction(tf_cht.time[0], result)
         divs.append(to_div(fig))
 
-        html_file = OLS_DIR / f&#39;{subject}_run-{run}&#39; / f&#39;{subject}_run-{run}_{chan}.html&#39;
+        html_file = name(parameters, ieeg_file, &#39;ols_chan&#39;) / f&#39;{chan}.html&#39;
         to_html(divs, html_file)
 
         json_file = html_file.with_suffix(&#39;.json&#39;)
@@ -351,7 +332,7 @@ def pipeline_ols_prf(subject, run):
 </details>
 </dd>
 <dt id="fima.pipelines.ols.pipeline_ols_prf"><code class="name flex">
-<span>def <span class="ident">pipeline_ols_prf</span></span>(<span>subject, run)</span>
+<span>def <span class="ident">pipeline_ols_prf</span></span>(<span>parameters, ieeg_file)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -359,7 +340,7 @@ def pipeline_ols_prf(subject, run):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def pipeline_ols_prf(subject, run):
+<pre><code class="python">def pipeline_ols_prf(parameters, ieeg_file):
 
     out_dir = OLS_DIR / f&#39;{subject}_run-{run}&#39;
 
@@ -368,7 +349,7 @@ def pipeline_ols_prf(subject, run):
 </details>
 </dd>
 <dt id="fima.pipelines.ols.pipeline_ols_summary"><code class="name flex">
-<span>def <span class="ident">pipeline_ols_summary</span></span>(<span>subject, run)</span>
+<span>def <span class="ident">pipeline_ols_summary</span></span>(<span>parameters, ieeg_file)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -376,7 +357,7 @@ def pipeline_ols_prf(subject, run):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def pipeline_ols_summary(subject, run):
+<pre><code class="python">def pipeline_ols_summary(parameters, ieeg_file):
     df = import_ols(subject, run)
     if df is None:
         return

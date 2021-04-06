@@ -15,14 +15,9 @@ from ..viz import to_div, to_html
 from ..viz.surf import plot_surf
 from ..viz.ols import plot_coefficient, plot_data_prediction
 from ..viz.ols_summary import plot_ols_rsquared, plot_ols_params
-from ..parameters import RESULTS_DIR
+from ..names import name
 
 lg = getLogger(__name__)
-
-OLS_DIR = RESULTS_DIR / 'ols' / 'movement'
-SUMMARY_DIR = RESULTS_DIR / 'ols' / 'summary'
-ALL_DIR = RESULTS_DIR / 'ols' / 'alltogether'
-PLOTS_DIR = RESULTS_DIR / 'ols' / 'plots'
 
 
 def pipeline_ols(parameters, ieeg_file):
@@ -73,17 +68,17 @@ def pipeline_ols_all():
 
 def pipeline_ols_allchan(parameters, ieeg_file):
 
-    tf_cht, events, onsets = get_continuous_cht(subject, run, event_type='cues')
+    tf_cht, events, onsets = get_continuous_cht(parameters, ieeg_file)
     t = tf_cht.time[0]
 
     try:
-        mov = load('movements', subject, run)
+        mov = load('movements', parameters, ieeg_file)
     except FileNotFoundError:
         return
 
     indices = find_movement_indices(mov, tf_cht.time[0])
     for chan in tf_cht.chan[0][::-1]:
-        lg.info(f'{subject:<10}/ {run} Fitting OLS on {chan}')
+        lg.info(f'{ieeg_file.stem} Fitting OLS on {chan}')
         x = tf_cht(trial=0, chan=chan, trial_axis='trial000000')
 
         MAT = fit_one_channel(t, x, indices)
@@ -101,7 +96,7 @@ def pipeline_ols_allchan(parameters, ieeg_file):
         fig = plot_data_prediction(tf_cht.time[0], result)
         divs.append(to_div(fig))
 
-        html_file = OLS_DIR / f'{subject}_run-{run}' / f'{subject}_run-{run}_{chan}.html'
+        html_file = name(parameters, ieeg_file, 'ols_chan') / f'{chan}.html'
         to_html(divs, html_file)
 
         json_file = html_file.with_suffix('.json')

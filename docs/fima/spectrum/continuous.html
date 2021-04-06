@@ -28,21 +28,19 @@
 
 from .compute import compute_timefreq, get_chantime
 from ..read import load
-from ..parameters import SUBJECTS, P
 
 lg = getLogger(__name__)
 
 
-def get_continuous_cht(subject, run, event_type=&#39;cues&#39;):
+def get_continuous_cht(parameters, ieeg_file):
 
-    lg.info(f&#39;{subject:&lt;10}/ {run} Loading data for events: {event_type}&#39;)
-    data, events, onsets = load(&#39;continuous&#39;, subject, run, event_type=event_type)
+    data, events, onsets = load(&#39;continuous&#39;, parameters, ieeg_file)
 
-    lg.info(f&#39;{subject:&lt;10}/ {run} Computing timefreq (baseline=False, mean=False)&#39;)
-    tf = compute_timefreq(data, artifacts=SUBJECTS[subject][run], baseline=False, mean=False)
+    lg.info(&#39;Computing timefreq (baseline=False, mean=False)&#39;)
+    tf = compute_timefreq(data, baseline=False, mean=False)
 
-    if P[&#39;spectrum&#39;][&#39;method&#39;] != &#39;hilbert&#39;:
-        lg.info(f&#39;{subject:&lt;10}/ {run} Selecting frequency&#39;)
+    if parameters[&#39;spectrum&#39;][&#39;method&#39;] != &#39;hilbert&#39;:
+        lg.info(&#39;Selecting frequency&#39;)
         tf = get_chantime(tf)
 
     return tf, events, onsets</code></pre>
@@ -56,7 +54,7 @@ def get_continuous_cht(subject, run, event_type=&#39;cues&#39;):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="fima.spectrum.continuous.get_continuous_cht"><code class="name flex">
-<span>def <span class="ident">get_continuous_cht</span></span>(<span>subject, run, event_type='cues')</span>
+<span>def <span class="ident">get_continuous_cht</span></span>(<span>parameters, ieeg_file)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -64,16 +62,15 @@ def get_continuous_cht(subject, run, event_type=&#39;cues&#39;):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_continuous_cht(subject, run, event_type=&#39;cues&#39;):
+<pre><code class="python">def get_continuous_cht(parameters, ieeg_file):
 
-    lg.info(f&#39;{subject:&lt;10}/ {run} Loading data for events: {event_type}&#39;)
-    data, events, onsets = load(&#39;continuous&#39;, subject, run, event_type=event_type)
+    data, events, onsets = load(&#39;continuous&#39;, parameters, ieeg_file)
 
-    lg.info(f&#39;{subject:&lt;10}/ {run} Computing timefreq (baseline=False, mean=False)&#39;)
-    tf = compute_timefreq(data, artifacts=SUBJECTS[subject][run], baseline=False, mean=False)
+    lg.info(&#39;Computing timefreq (baseline=False, mean=False)&#39;)
+    tf = compute_timefreq(data, baseline=False, mean=False)
 
-    if P[&#39;spectrum&#39;][&#39;method&#39;] != &#39;hilbert&#39;:
-        lg.info(f&#39;{subject:&lt;10}/ {run} Selecting frequency&#39;)
+    if parameters[&#39;spectrum&#39;][&#39;method&#39;] != &#39;hilbert&#39;:
+        lg.info(&#39;Selecting frequency&#39;)
         tf = get_chantime(tf)
 
     return tf, events, onsets</code></pre>

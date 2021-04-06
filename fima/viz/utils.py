@@ -73,7 +73,7 @@ def to_html(divs, filename):
     html = '''
         <html>
          <head>
-            <script src="plotly-latest.min.js"></script>
+            <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
          </head>
          <body>
             {div}
