@@ -28,7 +28,6 @@ def plot_continuous_per_chan(tf_cht, onsets, events, chan):
     dat = tf_cht(trial=0, trial_axis='trial000000', chan=chan)
 
     yaxis_label = 'power spectral density (μV²)'
-    baseline_name = '_' + P['spectrum']['baseline']['type']
 
     fig = go.Figure(data=[
         go.Scatter(

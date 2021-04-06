@@ -25,7 +25,7 @@ def main():
         action='store_true',
         help='Run analysis for all the subjects in parallel')
     parser.add_argument(
-        '-s', '--subject', default=None,
+        '-s', '--subject', default='*',
         help='Run analysis only on one subject')
     parser.add_argument(
         '-l', '--log',

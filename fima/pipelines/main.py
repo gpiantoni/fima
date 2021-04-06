@@ -2,6 +2,11 @@ from logging import getLogger
 from functools import partial
 from multiprocessing import Pool
 
+try:
+    from setproctitle import setproctitle
+except ImportError:
+    setproctitle = None
+
 from .continuous import pipeline_continuous
 from .dataglove import pipeline_dataglove
 from .ols import pipeline_ols, pipeline_ols_all
@@ -28,10 +33,11 @@ def pipeline_fima(parameters, pipeline, subject_only='*', parallel=False):
         where to run it with multiprocessing
     """
     func = partial(sub_pipeline, parameters=parameters, pipeline=pipeline)
+    bids_dir = parameters['paths']['input']
     list_ieeg = bids_dir.rglob(f'sub-{subject_only}_ses-*_acq-*_run-*_ieeg.eeg')
     if parallel:
         with Pool(initializer=be_nice) as p:
-            p.starmap(func, list_ieeg)
+            p.map(func, list_ieeg)
 
     else:
         for ieeg in list_ieeg:
@@ -43,6 +49,8 @@ def pipeline_fima(parameters, pipeline, subject_only='*', parallel=False):
 
 
 def sub_pipeline(ieeg, parameters, pipeline):
+    if setproctitle is not None:
+        setproctitle(f'fima {pipeline} {ieeg.stem}')
 
     if pipeline == 'continuous':
         pipeline_continuous(parameters, ieeg)

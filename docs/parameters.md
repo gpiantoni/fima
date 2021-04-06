@@ -6,7 +6,7 @@ Information to store in `parameters.json` file.
     - input: str, path to bids folder,
     - freesurfer_subjects_dir: str, path to freesurfer folder,
     - output: str, path to output folder which will contain the results
-  - data:
+  - read:
     - event_type : str, one of 'cues', 'open', 'close', 'movements', 'extension', 'flexion'
     - pre: float, time in s to include before the events
     - post: float, time in s to include after the event

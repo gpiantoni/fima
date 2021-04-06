@@ -2,6 +2,7 @@
 from numpy import genfromtxt, isin, empty, NaN
 from numpy.lib.recfunctions import append_fields
 from bidso.objects import Electrodes
+from bidso import Task
 from nibabel.freesurfer.io import read_annot
 from wonambi.attr import Freesurfer
 
@@ -10,9 +11,6 @@ from .dataglove.read_dataglove import read_physio
 from .preproc.elec import read_surf
 from .align.maxmin import main_func, CRITICAL_TIMEPOINTS
 from .parameters import (
-    BIDS_DIR,
-    SCRIPTS_DIR,
-    FREESURFER_DIR,
     FINGERS_OPEN,
     FINGERS_CLOSED,
     FINGERS_FLEXION,
@@ -29,7 +27,7 @@ FS_LABELS = [
 timepoints = ', '.join(f"'{x}'" for x in CRITICAL_TIMEPOINTS)
 
 
-def load(what, ieeg_file, event_type='cues'):
+def load(what, parameters, ieeg_file):
     f"""
     WHAT:
       - 'continuous' returns: ChanTime, event_names, events_onsets
@@ -59,102 +57,43 @@ def load(what, ieeg_file, event_type='cues'):
     events_tsv = ieeg.events.tsv
 
     if what == 'continuous':
-        events, onsets = select_events(events_tsv, event_type)
-        data = read_data(filename, event_onsets=onsets, continuous=True)
+        events, onsets = select_events(events_tsv, parameters['read']['event_type'])
+        data = read_data(parameters, ieeg_file, event_onsets=onsets, continuous=True)
         return data, events, onsets
 
-
-def old():
-    if what in ('continuous', 'data') or what in CRITICAL_TIMEPOINTS:
-        pattern = f'sub-{subject}_*_acq-{acq}_run-{run}_ieeg.eeg'
-        folder = BIDS_DIR
+    if what == 'electrodes':
+        pattern = f'sub-{ieeg.subject}_*_acq-{ieeg.acquisition}_electrodes.tsv'
+        folder = parameters['paths']['input']
 
     elif what == 'events':
-        pattern = f'sub-{subject}_*_run-{run}_events.tsv'
-        folder = BIDS_DIR
-
-    elif what == 'electrodes':
-        pattern = f'sub-{subject}_*_acq-{acq}_electrodes.tsv'
-        folder = BIDS_DIR
-
-    elif what in ['surface', 'freesurfer'] + FS_LABELS:
-        pattern = 'sub-' + subject
-        folder = FREESURFER_DIR
+        pattern = f'sub-{ieeg.subject}_*_run-{ieeg.run}_events.tsv'
+        folder = parameters['paths']['input']
 
     elif what == 'dataglove':
-        pattern = f'sub-{subject}_*_run-{run}_recording-dataglove_physio.tsv.gz'
-        folder = BIDS_DIR
+        pattern = f'sub-{ieeg.subject}_*_run-{ieeg.run}_recording-dataglove_physio.tsv.gz'
+        folder = parameters['paths']['input']
 
     elif what == 'movements':
         pattern = f'{subject}_run-{run}_dataglove.tsv'
-        folder = SCRIPTS_DIR / 'movements'
+        folder = SCRIPTS_DIR / 'movements'  # todo
+
+    elif what in ['surface', 'freesurfer'] + FS_LABELS:
+        pattern = 'sub-' + ieeg.subject
+        folder = parameters['paths']['freesurfer_subjects_dir']
 
     else:
         raise ValueError(f'Unrecognize "{what}" selection')
 
     found = list(folder.rglob(pattern))
-
     if len(found) == 0:
-        raise FileNotFoundError('Could not find any file')
+        raise FileNotFoundError(f'Could not find any file matching {pattern} in {folder}')
     elif len(found) > 1:
         raise ValueError('You need to specify more parameters')
     filename = found[0]
 
-    if what in ('continuous', 'data') or what in CRITICAL_TIMEPOINTS:
-        events, onsets = select_events(subject, run, event_type)
-
-        if what == 'continuous':
-
-        if what in CRITICAL_TIMEPOINTS:
-            data = read_data(filename, event_onsets=onsets)
-            offsets = main_func(data, events)
-            onsets = onsets + offsets[what]
-
-        data = read_data(filename, event_onsets=onsets)
-        return data, events
-
-    elif what == 'dataglove':
-        return read_physio(filename)
-
-    elif what == 'electrodes':
+    if what == 'electrodes':
         elec = Electrodes(filename)
         return elec.electrodes.tsv[['name', 'x', 'y', 'z']]
-
-    elif what == 'surface':
-        elec = load('electrodes', subject, run, acq)
-        right_or_left = (elec['x'] > 0).sum() / elec.shape[0]
-        return read_surf(filename, right_or_left)
-
-    elif what in FS_LABELS:
-        fs = load('freesurfer', subject)
-        pial = load('surface', subject)
-        hemi = pial.surf_file.stem
-
-        aparc_file = fs.dir / 'label' / f'{hemi}.{what}.annot'
-        region_values, _, region_names = read_annot(aparc_file)
-
-        out = {
-            'aparc': what,
-            'ras_shift': fs.surface_ras_shift,
-            'vert': pial.vert,
-            'regions': {
-                'values': region_values,
-                'names': [x.decode() for x in region_names],
-                }
-            }
-
-        return out
-
-    elif what == 'freesurfer':
-        return Freesurfer(filename)
-
-    elif what == 'movements':
-        dtypes = [
-            ('onset', 'float'),
-            ('duration', 'float'),
-            ('trial_type', 'U4096'),
-            ]
-        return genfromtxt(filename, delimiter='\t', skip_header=1, dtype=dtypes)
 
     elif what == 'events':
         with filename.open() as f:
@@ -177,6 +116,67 @@ def old():
             events = append_fields(events, 'response_time', x, usemask=False)
 
         return events
+
+    elif what == 'dataglove':
+        return read_physio(filename)
+
+    elif what == 'movements':
+        dtypes = [
+            ('onset', 'float'),
+            ('duration', 'float'),
+            ('trial_type', 'U4096'),
+            ]
+        return genfromtxt(filename, delimiter='\t', skip_header=1, dtype=dtypes)
+
+    elif what == 'surface':
+        elec = load('electrodes', parameters, ieeg_file)
+        right_or_left = (elec['x'] > 0).sum() / elec.shape[0]
+        return read_surf(filename, right_or_left)
+
+    elif what in FS_LABELS:
+        fs = load('freesurfer', parameters, ieeg_file)
+        pial = load('surface', parameters, ieeg_file)
+        hemi = pial.surf_file.stem
+
+        aparc_file = fs.dir / 'label' / f'{hemi}.{what}.annot'
+        region_values, _, region_names = read_annot(aparc_file)
+
+        out = {
+            'aparc': what,
+            'ras_shift': fs.surface_ras_shift,
+            'vert': pial.vert,
+            'regions': {
+                'values': region_values,
+                'names': [x.decode() for x in region_names],
+                }
+            }
+
+        return out
+
+    elif what == 'freesurfer':
+        return Freesurfer(filename)
+
+
+def old():
+    if what in ('continuous', 'data') or what in CRITICAL_TIMEPOINTS:
+        pattern = f'sub-{subject}_*_acq-{acq}_run-{run}_ieeg.eeg'
+        folder = BIDS_DIR
+
+
+    if what in ('continuous', 'data') or what in CRITICAL_TIMEPOINTS:
+        events, onsets = select_events(subject, run, event_type)
+
+        if what == 'continuous':
+            pass
+
+        if what in CRITICAL_TIMEPOINTS:
+            data = read_data(filename, event_onsets=onsets)
+            offsets = main_func(data, events)
+            onsets = onsets + offsets[what]
+
+        data = read_data(filename, event_onsets=onsets)
+        return data, events
+
 
 
 def select_events(events, t):

@@ -2,13 +2,14 @@ from logging import getLogger
 from numpy import r_, argmin
 from numpy.linalg import norm
 
+from bidso import Task
+
 from ..read import load
-from ..parameters import RESULTS_DIR
 
 lg = getLogger(__name__)
 
 
-def pipeline_brainregions(subject):
+def pipeline_brainregions(parameters, ieeg_file):
     """Run pipeline to compute power spectrum on one participant, one run
 
     Parameters
@@ -16,16 +17,18 @@ def pipeline_brainregions(subject):
     subject : str
         subject code
     """
-    elec = load('electrodes', subject)
+    elec = load('electrodes', parameters, ieeg_file)
 
     aparc = {}
     for template in ('aparc.a2009s', 'aparc.DKTatlas', 'BA_exvivo'):
-        aparc[template] = load(template, subject)
+        aparc[template] = load(template, parameters, ieeg_file)
 
-    out_dir = RESULTS_DIR / 'brainregions'
+    out_dir = parameters['paths']['output'] / 'brainregions'
     out_dir.mkdir(exist_ok=True, parents=True)
 
-    tsv_file = out_dir / f'{subject}_regions.tsv'
+    ieeg = Task(ieeg_file)
+
+    tsv_file = out_dir / f'sub-{ieeg.subject}_ses-{ieeg.session}_acq-{ieeg.acquisition}_brainregions.tsv'
     with tsv_file.open('w') as f:
         f.write('chan\tx\ty\tz\ta2009s\tDKTatlas\tBA')
 
