@@ -56,10 +56,15 @@ def load(what, parameters, ieeg_file):
     ieeg = Task(ieeg_file)
     events_tsv = ieeg.events.tsv
 
-    if what == 'continuous':
+    if what in ('continuous', 'data'):
         events, onsets = select_events(events_tsv, parameters['read']['event_type'])
-        data = read_data(parameters, ieeg_file, event_onsets=onsets, continuous=True)
-        return data, events, onsets
+
+        if what == 'continuous':
+            data = read_data(parameters, ieeg_file, event_onsets=onsets, continuous=True)
+            return data, events, onsets
+        elif what == 'data':
+            data = read_data(parameters, ieeg_file, event_onsets=onsets, continuous=False)
+            return data, events
 
     if what == 'electrodes':
         pattern = f'sub-{ieeg.subject}_*_acq-{ieeg.acquisition}_electrodes.tsv'
@@ -164,18 +169,13 @@ def old():
 
 
     if what in ('continuous', 'data') or what in CRITICAL_TIMEPOINTS:
-        events, onsets = select_events(subject, run, event_type)
 
-        if what == 'continuous':
-            pass
 
         if what in CRITICAL_TIMEPOINTS:
             data = read_data(filename, event_onsets=onsets)
             offsets = main_func(data, events)
             onsets = onsets + offsets[what]
 
-        data = read_data(filename, event_onsets=onsets)
-        return data, events
 
 
 

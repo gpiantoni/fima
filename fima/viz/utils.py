@@ -1,7 +1,7 @@
 from logging import getLogger
 
 from numpy import isnan, array, where
-from plotly.offline import plot, get_plotlyjs
+from plotly.offline import plot
 from scipy.stats import ttest_rel
 from wonambi.trans import select
 
@@ -73,13 +73,13 @@ def to_html(divs, filename):
     html = '''
         <html>
          <head>
-             <script type="text/javascript">{plotlyjs}</script>
+            <script src="plotly-latest.min.js"></script>
          </head>
          <body>
             {div}
          </body>
      </html>
-    '''.format(plotlyjs=get_plotlyjs(), div='\n'.join(divs))
+    '''.format(div='\n'.join(divs))
 
     with filename.open('w') as f:
         f.write(html)

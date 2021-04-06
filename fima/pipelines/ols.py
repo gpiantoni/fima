@@ -15,7 +15,7 @@ from ..viz import to_div, to_html
 from ..viz.surf import plot_surf
 from ..viz.ols import plot_coefficient, plot_data_prediction
 from ..viz.ols_summary import plot_ols_rsquared, plot_ols_params
-from ..parameters import RESULTS_DIR, P
+from ..parameters import RESULTS_DIR
 
 lg = getLogger(__name__)
 
@@ -25,21 +25,17 @@ ALL_DIR = RESULTS_DIR / 'ols' / 'alltogether'
 PLOTS_DIR = RESULTS_DIR / 'ols' / 'plots'
 
 
-def pipeline_ols(subject, run, skip_ols=False, skip_prf=False):
+def pipeline_ols(parameters, ieeg_file):
     """
     Parameters
     ----------
-    skip_ols : bool
-        if True, skip time-consuming computation of OLS for each channel
-    skip_prf : bool
-        if True, skip time-consuming computation of PRF on the parameters
     """
-    if not skip_ols:
-        pipeline_ols_allchan(subject, run)
-    if not skip_prf:
-        pipeline_ols_prf(subject, run)
+    if not parameters['ols']['skip_ols']:
+        pipeline_ols_allchan(parameters, ieeg_file)
+    if not parameters['ols']['skip_prf']:
+        pipeline_ols_prf(parameters, ieeg_file)
 
-    pipeline_ols_summary(subject, run)
+    pipeline_ols_summary(parameters, ieeg_file)
 
 
 def pipeline_ols_all():
@@ -75,7 +71,7 @@ def pipeline_ols_all():
     to_html(divs, ALL_DIR / 'ols_movement_all_summary.html')
 
 
-def pipeline_ols_allchan(subject, run):
+def pipeline_ols_allchan(parameters, ieeg_file):
 
     tf_cht, events, onsets = get_continuous_cht(subject, run, event_type='cues')
     t = tf_cht.time[0]
@@ -113,7 +109,7 @@ def pipeline_ols_allchan(subject, run):
             dump(out, f, indent=2)
 
 
-def pipeline_ols_summary(subject, run):
+def pipeline_ols_summary(parameters, ieeg_file):
     df = import_ols(subject, run)
     if df is None:
         return
@@ -145,7 +141,7 @@ def pipeline_ols_summary(subject, run):
         to_html([to_div(fig), ], PLOTS_DIR / f'ols_movement_{subject}_run-{run}_{param.replace(" ", "")}.html')
 
 
-def import_ols(subject, run):
+def import_ols(parameters, ieeg_file):
 
     out_dir = OLS_DIR / f'{subject}_run-{run}'
 
@@ -162,7 +158,7 @@ def import_ols(subject, run):
     return df
 
 
-def pipeline_ols_prf(subject, run):
+def pipeline_ols_prf(parameters, ieeg_file):
 
     out_dir = OLS_DIR / f'{subject}_run-{run}'
 

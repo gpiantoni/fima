@@ -5,6 +5,8 @@ from ..viz import to_html
 from ..viz.continuous import plot_continuous
 from ..spectrum.continuous import get_continuous_cht
 
+from ..names import name
+
 lg = getLogger(__name__)
 
 
@@ -23,5 +25,4 @@ def pipeline_continuous(parameters, ieeg):
     lg.info('Plotting continuous')
     divs = plot_continuous(tf_cht, onsets, events)
 
-    html_file = parameters['paths']['output'] / 'continuous' / f'{ieeg.stem}.html'
-    to_html(divs, html_file)
+    to_html(divs, name(parameters, ieeg, 'continuous'))
