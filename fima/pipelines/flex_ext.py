@@ -1,7 +1,7 @@
 from scipy.stats import ttest_ind
 
 from ..spectrum import compute_timefreq, get_chan
-from ..parameters import SUBJECTS, FINGERS
+from ..parameters import FINGERS
 from ..read import load
 from ..utils import group_per_condition, create_bool
 

@@ -47,6 +47,15 @@ def name(parameters, ieeg_file, what):
     elif what == &#39;ols_chan&#39;:
         out = out_dir / &#39;ols&#39; / ieeg_file.stem
 
+    elif what == &#39;ols_summary&#39;:
+        summary_dir = out_dir / &#39;ols&#39; / &#39;summary&#39;
+        summary_dir.mkdir(parents=True, exist_ok=True)
+        out = summary_dir / f&#39;{ieeg_file.stem}.tsv&#39;
+
+    elif what == &#39;ols_plot&#39;:
+        out = out_dir / &#39;ols&#39; / &#39;plots&#39; / ieeg_file.stem
+        out.mkdir(parents=True, exist_ok=True)
+
     return out</code></pre>
 </details>
 </section>
@@ -85,6 +94,15 @@ def name(parameters, ieeg_file, what):
 
     elif what == &#39;ols_chan&#39;:
         out = out_dir / &#39;ols&#39; / ieeg_file.stem
+
+    elif what == &#39;ols_summary&#39;:
+        summary_dir = out_dir / &#39;ols&#39; / &#39;summary&#39;
+        summary_dir.mkdir(parents=True, exist_ok=True)
+        out = summary_dir / f&#39;{ieeg_file.stem}.tsv&#39;
+
+    elif what == &#39;ols_plot&#39;:
+        out = out_dir / &#39;ols&#39; / &#39;plots&#39; / ieeg_file.stem
+        out.mkdir(parents=True, exist_ok=True)
 
     return out</code></pre>
 </details>

@@ -71,7 +71,7 @@ def pipeline_fima(parameters, pipeline, subject_only=&#39;*&#39;, parallel=False
             func(ieeg)
 
     if pipeline == &#39;ols&#39;:
-        pipeline_ols_all()
+        pipeline_ols_all(parameters)
 
 
 def sub_pipeline(ieeg, parameters, pipeline):
@@ -161,7 +161,7 @@ def sub_pipeline(ieeg, parameters, pipeline):
             func(ieeg)
 
     if pipeline == &#39;ols&#39;:
-        pipeline_ols_all()</code></pre>
+        pipeline_ols_all(parameters)</code></pre>
 </details>
 </dd>
 <dt id="fima.pipelines.main.sub_pipeline"><code class="name flex">

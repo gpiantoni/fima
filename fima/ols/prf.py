@@ -2,7 +2,7 @@
 """
 from scipy.stats import norm
 from scipy.optimize import least_squares
-from numpy import sqrt, Inf, arange, array, corrcoef, argmax
+from numpy import arange, array, corrcoef, argmax
 from json import load as json_load
 from json import dump
 

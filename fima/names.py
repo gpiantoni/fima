@@ -21,4 +21,13 @@ def name(parameters, ieeg_file, what):
     elif what == 'ols_chan':
         out = out_dir / 'ols' / ieeg_file.stem
 
+    elif what == 'ols_summary':
+        summary_dir = out_dir / 'ols' / 'summary'
+        summary_dir.mkdir(parents=True, exist_ok=True)
+        out = summary_dir / f'{ieeg_file.stem}.tsv'
+
+    elif what == 'ols_plot':
+        out = out_dir / 'ols' / 'plots' / ieeg_file.stem
+        out.mkdir(parents=True, exist_ok=True)
+
     return out

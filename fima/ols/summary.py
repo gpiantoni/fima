@@ -2,7 +2,6 @@ from numpy import where
 from pandas import merge, read_csv, concat, MultiIndex
 
 from .regressors import compute_canonical
-from ..parameters import RESULTS_DIR, GRID_TYPES
 
 COLUMNS = {
     'recording/subject': 'subject',
@@ -27,7 +26,7 @@ COLUMNS = {
 }
 
 
-def import_all_ols():
+def import_all_ols(parameters):
 
     df_ols = import_df_ols()
     df_regions = import_df_regions()

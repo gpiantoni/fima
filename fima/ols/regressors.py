@@ -3,8 +3,6 @@ from scipy.signal import unit_impulse, convolve
 from scipy.stats import norm as normal
 from scipy.stats import gamma
 
-from ..parameters import P
-
 
 def find_movement_indices(mov, t):
     reg_idx = {}

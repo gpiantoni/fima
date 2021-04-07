@@ -1,8 +1,6 @@
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
-from ..parameters import FINGER_COLOR, P
-
 
 def plot_correlation(dat, events):
     """To be merged with .viz/plot_fingerbars"""

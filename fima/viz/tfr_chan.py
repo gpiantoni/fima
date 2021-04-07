@@ -1,13 +1,10 @@
 import plotly.graph_objects as go
 
-from ..parameters import P
-
 
 def plot_tfr(tf_m, chan, time=None, freq=None):
     """Plot time frequency representation for one channel
 
     """
-
     V = tf_m(trial=0, chan=chan)
 
     fig = go.Figure(

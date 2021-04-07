@@ -28,7 +28,6 @@
 from pandas import merge, read_csv, concat, MultiIndex
 
 from .regressors import compute_canonical
-from ..parameters import RESULTS_DIR, GRID_TYPES
 
 COLUMNS = {
     &#39;recording/subject&#39;: &#39;subject&#39;,
@@ -53,7 +52,7 @@ COLUMNS = {
 }
 
 
-def import_all_ols():
+def import_all_ols(parameters):
 
     df_ols = import_df_ols()
     df_regions = import_df_regions()
@@ -193,7 +192,7 @@ certain threshold (percent of the max)</p>
 </details>
 </dd>
 <dt id="fima.ols.summary.import_all_ols"><code class="name flex">
-<span>def <span class="ident">import_all_ols</span></span>(<span>)</span>
+<span>def <span class="ident">import_all_ols</span></span>(<span>parameters)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -201,7 +200,7 @@ certain threshold (percent of the max)</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def import_all_ols():
+<pre><code class="python">def import_all_ols(parameters):
 
     df_ols = import_df_ols()
     df_regions = import_df_regions()

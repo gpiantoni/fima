@@ -20,7 +20,9 @@ Information to store in `parameters.json` file.
       - time: list of two values (start and end time of the baseline)
       - common: bool, use the same baseline for all the trials
       - type: "zscore"
+    - select:
+      - freq: [float, float], frequency range to include
+      - time: float, center of the time window
+  - ols:
+    - threshold: float
 
-    "select": {
-      "freq": [60, 150],
-      "time": 0.3

@@ -4,9 +4,8 @@ from wonambi.trans import montage, frequency
 from numpy import arange, array, histogram, log10, empty, copy, isnan
 import plotly.graph_objects as go
 
-
 from ..viz import to_div
-from ..parameters import P
+
 
 AUTOMATIC = False
 

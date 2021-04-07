@@ -1,6 +1,5 @@
 import plotly.graph_objects as go
 
-from ..parameters import P
 
 
 def plot_tfr_time(tf_time, highlight=None):

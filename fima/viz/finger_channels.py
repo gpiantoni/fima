@@ -1,7 +1,6 @@
 import plotly.graph_objs as go
 
 from ..fingers.max_activity import FINGERS
-from ..parameters import P
 
 
 def plot_finger_chan(v, chans):

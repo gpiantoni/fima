@@ -3,7 +3,6 @@ from logging import getLogger
 from ..viz.dataglove import plot_dataglove
 from ..read import load
 from ..viz import to_div, to_html
-from ..parameters import RESULTS_DIR
 
 lg = getLogger(__name__)
 

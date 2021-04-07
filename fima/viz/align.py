@@ -1,9 +1,6 @@
 import plotly.graph_objs as go
 
 
-from ..parameters import P
-
-
 def plot():
     divs = []
     for i_chan, chan in enumerate(tf_cht.chan[0]):

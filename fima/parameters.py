@@ -1,23 +1,9 @@
 """General parameters useful for all the functions"""
 
-from pathlib import Path
-from platform import node
-from pandas import DataFrame
-from os import environ
 from .utils import get_color_for_val
 
 
-if node() == 'archxps':
-    PROJ_DIR = Path('/home/gio/projects/finger_mapping')
-else:
-    PROJ_DIR = Path('/Fridge/users/giovanni/projects/finger_mapping')
-
-SCRIPTS_DIR = PROJ_DIR / 'scripts'
-BIDS_DIR = PROJ_DIR / 'subjects'
-FREESURFER_DIR = Path(environ['SUBJECTS_DIR'])
-
-RESULTS_DIR = PROJ_DIR / 'results'
-
+"""
 P = dict(
     data_quality=dict(
         histogram=dict(
@@ -35,7 +21,6 @@ P = dict(
             ),
         ),
     ols=dict(
-        threshold=0.05,  # fima/pipelines/ols.py
         window=dict(
             method='gaussian',  # gaussian or gamma (for gamma, use a as well)
             loc=[-.8, .3, 0.05],  # [-1, +1],
@@ -73,7 +58,6 @@ GRID_TYPES = DataFrame({
     'subject': ['drouwen', 'duiven', 'franeker', 'heek', 'intraop008', 'intraop013', 'intraop016', 'itens', 'lemmer', 'ommen', 'vledder', 'warmond', 'veere', 'som705'],
     'grid_type': ['clinical', 'HD', 'HD', 'HD', 'HD', 'HD', 'HD', 'clinical', 'clinical', 'HD', 'HD', 'HD', 'HD', 'HD']
     })
-
 
 SUBJECTS = {
     'drouwen': {
@@ -149,6 +133,9 @@ SUBJECTS = {
         '01': [],
         },
     }
+"""
+
+COLORSCALE = 'Jet'
 
 MOVEMENT_SYMBOL_DATA = {
     'open': 'circle-open',
@@ -166,12 +153,12 @@ MOVEMENT_LINE = {
     }
 
 FINGER_COLOR = {
-    'thumb': get_color_for_val(4, P['viz']['colorscale'], -1, 5),
-    'index': get_color_for_val(3, P['viz']['colorscale'], -1, 5),
-    'middle': get_color_for_val(2, P['viz']['colorscale'], -1, 5),
-    'ring': get_color_for_val(1, P['viz']['colorscale'], -1, 5),
-    'little': get_color_for_val(0, P['viz']['colorscale'], -1, 5),
-}
+    'thumb': get_color_for_val(4, COLORSCALE, -1, 5),
+    'index': get_color_for_val(3, COLORSCALE, -1, 5),
+    'middle': get_color_for_val(2, COLORSCALE, -1, 5),
+    'ring': get_color_for_val(1, COLORSCALE, -1, 5),
+    'little': get_color_for_val(0, COLORSCALE, -1, 5),
+    }
 
 FINGERS = list(FINGER_COLOR)
 

@@ -1,8 +1,6 @@
 from numpy import mean, std, log10, moveaxis, concatenate, nanmean, nanstd
 from wonambi.trans import select
 
-from ..parameters import P
-
 
 def apply_baseline_to_continuous(tf, onsets, baseline='zscore'):
 

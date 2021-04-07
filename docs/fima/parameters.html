@@ -27,24 +27,10 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;General parameters useful for all the functions&#34;&#34;&#34;
 
-from pathlib import Path
-from platform import node
-from pandas import DataFrame
-from os import environ
 from .utils import get_color_for_val
 
 
-if node() == &#39;archxps&#39;:
-    PROJ_DIR = Path(&#39;/home/gio/projects/finger_mapping&#39;)
-else:
-    PROJ_DIR = Path(&#39;/Fridge/users/giovanni/projects/finger_mapping&#39;)
-
-SCRIPTS_DIR = PROJ_DIR / &#39;scripts&#39;
-BIDS_DIR = PROJ_DIR / &#39;subjects&#39;
-FREESURFER_DIR = Path(environ[&#39;SUBJECTS_DIR&#39;])
-
-RESULTS_DIR = PROJ_DIR / &#39;results&#39;
-
+&#34;&#34;&#34;
 P = dict(
     data_quality=dict(
         histogram=dict(
@@ -62,7 +48,6 @@ P = dict(
             ),
         ),
     ols=dict(
-        threshold=0.05,  # fima/pipelines/ols.py
         window=dict(
             method=&#39;gaussian&#39;,  # gaussian or gamma (for gamma, use a as well)
             loc=[-.8, .3, 0.05],  # [-1, +1],
@@ -100,7 +85,6 @@ GRID_TYPES = DataFrame({
     &#39;subject&#39;: [&#39;drouwen&#39;, &#39;duiven&#39;, &#39;franeker&#39;, &#39;heek&#39;, &#39;intraop008&#39;, &#39;intraop013&#39;, &#39;intraop016&#39;, &#39;itens&#39;, &#39;lemmer&#39;, &#39;ommen&#39;, &#39;vledder&#39;, &#39;warmond&#39;, &#39;veere&#39;, &#39;som705&#39;],
     &#39;grid_type&#39;: [&#39;clinical&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;clinical&#39;, &#39;clinical&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;, &#39;HD&#39;]
     })
-
 
 SUBJECTS = {
     &#39;drouwen&#39;: {
@@ -176,6 +160,9 @@ SUBJECTS = {
         &#39;01&#39;: [],
         },
     }
+&#34;&#34;&#34;
+
+COLORSCALE = &#39;Jet&#39;
 
 MOVEMENT_SYMBOL_DATA = {
     &#39;open&#39;: &#39;circle-open&#39;,
@@ -193,12 +180,12 @@ MOVEMENT_LINE = {
     }
 
 FINGER_COLOR = {
-    &#39;thumb&#39;: get_color_for_val(4, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;index&#39;: get_color_for_val(3, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;middle&#39;: get_color_for_val(2, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;ring&#39;: get_color_for_val(1, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-    &#39;little&#39;: get_color_for_val(0, P[&#39;viz&#39;][&#39;colorscale&#39;], -1, 5),
-}
+    &#39;thumb&#39;: get_color_for_val(4, COLORSCALE, -1, 5),
+    &#39;index&#39;: get_color_for_val(3, COLORSCALE, -1, 5),
+    &#39;middle&#39;: get_color_for_val(2, COLORSCALE, -1, 5),
+    &#39;ring&#39;: get_color_for_val(1, COLORSCALE, -1, 5),
+    &#39;little&#39;: get_color_for_val(0, COLORSCALE, -1, 5),
+    }
 
 FINGERS = list(FINGER_COLOR)
 

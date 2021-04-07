@@ -33,9 +33,9 @@ def pipeline_ols(parameters, ieeg_file):
     pipeline_ols_summary(parameters, ieeg_file)
 
 
-def pipeline_ols_all():
+def pipeline_ols_all(parameters):
 
-    df = import_all_ols()
+    df = import_all_ols(parameters)
 
     REGIONS = ['brainregion', 'BA']
     divs = []
@@ -105,40 +105,41 @@ def pipeline_ols_allchan(parameters, ieeg_file):
 
 
 def pipeline_ols_summary(parameters, ieeg_file):
-    df = import_ols(subject, run)
+    df = import_ols(parameters, ieeg_file)
     if df is None:
         return
 
-    SUMMARY_DIR.mkdir(parents=True, exist_ok=True)
     df.to_csv(
-        SUMMARY_DIR / f'ols_movement_{subject}_run-{run}_summary.tsv',
+        name(parameters, ieeg_file, 'ols_summary'),
         sep='\t', index=False)
 
-    elec = load('electrodes', subject, run)
+    elec = load('electrodes', parameters, ieeg_file)
     try:
-        pial = load('surface', subject, run)
+        pial = load('surface', parameters, ieeg_file)
     except FileNotFoundError:
         pial = None
 
     dat = Data(array(df['rsquared']), chan=array(df['chan']))
     fig = plot_surf(dat, elec, pial=pial, clim=(0, nanmax(df['rsquared'])), colorscale='Hot')
-    to_html([to_div(fig), ], PLOTS_DIR / f'ols_movement_{subject}_run-{run}_rsquared.html')
 
-    df = df[df['rsquared'] >= P['ols']['threshold']]
+    plots_dir = name(parameters, ieeg_file, 'ols_plot')
+    to_html([to_div(fig), ], plots_dir / 'rsquared.html')
+
+    df = df[df['rsquared'] >= parameters['ols']['threshold']]
     if len(df) == 0:
-        lg.warning(f'No channels had a fit better than threshold {P["ols"]["threshold"]}')
+        lg.warning(f'No channels had a fit better than threshold {parameters["ols"]["threshold"]}')
         return
 
     params = set(df) - {'rsquared', 'chan'}
     for param in params:
         dat = Data(array(df[param]), chan=array(df['chan']))
         fig = plot_surf(dat, elec, pial=pial, clim=(nanmin(df[param]), nanmax(df[param])), colorscale='Hot')
-        to_html([to_div(fig), ], PLOTS_DIR / f'ols_movement_{subject}_run-{run}_{param.replace(" ", "")}.html')
+        to_html([to_div(fig), ], plots_dir / f'{param.replace(" ", "_")}.html')
 
 
 def import_ols(parameters, ieeg_file):
 
-    out_dir = OLS_DIR / f'{subject}_run-{run}'
+    out_dir = name(parameters, ieeg_file, 'ols_chan')
 
     df = []
     for json_file in out_dir.glob('*.json'):
@@ -155,7 +156,7 @@ def import_ols(parameters, ieeg_file):
 
 def pipeline_ols_prf(parameters, ieeg_file):
 
-    out_dir = OLS_DIR / f'{subject}_run-{run}'
+    out_dir = name(parameters, ieeg_file, 'ols_chan')
 
     for json_file in out_dir.glob('*.json'):
         add_prf_estimates(json_file)

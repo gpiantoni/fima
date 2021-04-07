@@ -45,7 +45,7 @@ def pipeline_fima(parameters, pipeline, subject_only='*', parallel=False):
             func(ieeg)
 
     if pipeline == 'ols':
-        pipeline_ols_all()
+        pipeline_ols_all(parameters)
 
 
 def sub_pipeline(ieeg, parameters, pipeline):

@@ -1,8 +1,6 @@
 import plotly.graph_objects as go
 from numpy import sign, NaN
 
-from ..parameters import P
-
 
 AXIS = dict(
     title="",
