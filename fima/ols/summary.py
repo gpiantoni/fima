@@ -1,12 +1,16 @@
 from numpy import where
 from pandas import merge, read_csv, concat, MultiIndex
+from bidso import file_Core
 
 from .regressors import compute_canonical
+from ..names import name
+
 
 COLUMNS = {
     'recording/subject': 'subject',
+    'recording/session': 'session',
+    'recording/acquisition': 'acquisition',
     'recording/run': 'run',
-    'channel/type': 'grid_type',
     'channel/chan': 'chan',
     'channel/brainregion': 'a2009s',
     'channel/BA': 'BA',
@@ -28,49 +32,53 @@ COLUMNS = {
 
 def import_all_ols(parameters):
 
-    df_ols = import_df_ols()
-    df_regions = import_df_regions()
+    df_ols = import_df_ols(parameters)
+    df_regions = import_df_regions(parameters)
 
     df = merge(df_ols, df_regions, how='left', on=['subject', 'chan'])
 
     df = df.sort_values('rsquared', ascending=False).reset_index(drop=True)
 
     missing_columns = set(df.columns) - set(COLUMNS.values())
-    print('Missing columns: ' + ', '.join(missing_columns))
+    print('These columns will not be included in overview dataset: ' + ', '.join(missing_columns))
 
-    df1 = df[list(COLUMNS.values())]
-    df1.columns = MultiIndex.from_tuples([tuple(k.split('/')) for k in COLUMNS.keys()])
+    # exclude columns which are in the overview but were not computed
+    columns = {k: v for k, v in COLUMNS.items() if v in df.columns}
+    df1 = df[list(columns.values())]
+    df1.columns = MultiIndex.from_tuples([tuple(k.split('/')) for k in columns.keys()])
 
     return df1
 
 
-def import_df_ols():
+def import_df_ols(parameters):
     """Compute onset as well"""
-    SUMMARY_DIR = RESULTS_DIR / 'ols' / 'summary'
+    SUMMARY_DIR = name(parameters, 'ols_summary')
 
     all_ols = []
     for tsv_file in SUMMARY_DIR.glob('*.tsv'):
-        subject, run = tsv_file.stem.split('_')[2:4]
+        bids = file_Core(tsv_file.name)
         ols = read_csv(tsv_file, sep='\t')
-        ols['subject'] = subject
-        ols['run'] = run[4:]
+        ols['subject'] = bids.subject
+        ols['session'] = bids.session
+        ols['run'] = bids.run
+        ols['acquisition'] = bids.acquisition
         all_ols.append(ols)
 
     ols = concat(all_ols, sort=False)   # pandas throws a warning when data is not complete
 
     onsets = []
     for row in ols.itertuples():
-        onsets.append(compute_onset(row, 0.1))
+        onsets.append(compute_onset(parameters, row))
     ols['onset'] = onsets
 
     return ols
 
 
-def import_df_regions():
-    regions_dir = RESULTS_DIR / 'brainregions'
+def import_df_regions(parameters):
+    regions_dir = name(parameters, 'brainregions_dir')
 
     all_df = []
-    for tsv_file in regions_dir.glob('*_regions.tsv'):
+    for tsv_file in regions_dir.glob('*_brainregions.tsv'):
         subject, run = tsv_file.stem.split('_')[:2]
 
         temp = read_csv(tsv_file, sep='\t')
@@ -79,10 +87,10 @@ def import_df_regions():
 
     regions = concat(all_df)
     regions.drop(['x', 'y', 'z'], axis=1, inplace=True)
-    return merge(regions, GRID_TYPES, on=['subject', ])
+    return regions
 
 
-def compute_onset(row, percent=0.1):
+def compute_onset(parameters, row):
     """Compute onset calculating when the estimated function raises above a
     certain threshold (percent of the max)
 
@@ -94,15 +102,20 @@ def compute_onset(row, percent=0.1):
     ----
     - tdiff should be in row (new version has it, but older version not)
 
-    - implement for gaussian
     """
     tdiff = 0.009765625  # this should be row.tdiff
 
+    if parameters['ols']['window']['method'] == 'gaussian':
+        params = [row.loc, row.scale]
+    else:
+        params = [row.loc, row.scale, row.a]
+
     t, resp = compute_canonical(
+        parameters,
         [0, tdiff],
-        [row.loc, row.scale, row.a],
+        params
         )
-    thresh = resp.max() * percent
+    thresh = resp.max() * parameters['ols']['window']['onset_percent']
 
     i_onset = where(resp >= thresh)[0][0]
     return t[i_onset]

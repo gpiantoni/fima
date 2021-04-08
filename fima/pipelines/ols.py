@@ -42,7 +42,7 @@ def pipeline_ols_all(parameters):
     for region in REGIONS:
         fig = plot_ols_rsquared(df, region)
         divs.append(to_div(fig))
-    to_html(divs, ALL_DIR / 'ols_movement_all_rsquared_bars.html')
+    to_html(divs, name(parameters, 'ols_plot') / 'ols_movement_all_rsquared_bars.html')
 
     PARAMS = (
         ('estimate', 'onset', 'Onset time (ms, movement onset = 0)'),
@@ -63,7 +63,7 @@ def pipeline_ols_all(parameters):
                 param[2],
                 )
             divs.append(to_div(fig))
-    to_html(divs, ALL_DIR / 'ols_movement_all_summary.html')
+    to_html(divs, name(parameters, 'ols_plot') / 'ols_movement_all_summary.html')
 
 
 def pipeline_ols_allchan(parameters, ieeg_file):
@@ -96,7 +96,7 @@ def pipeline_ols_allchan(parameters, ieeg_file):
         fig = plot_data_prediction(tf_cht.time[0], result)
         divs.append(to_div(fig))
 
-        html_file = name(parameters, ieeg_file, 'ols_chan') / f'{chan}.html'
+        html_file = name(parameters, 'ols_chan', ieeg_file) / f'{chan}.html'
         to_html(divs, html_file)
 
         json_file = html_file.with_suffix('.json')
@@ -110,7 +110,7 @@ def pipeline_ols_summary(parameters, ieeg_file):
         return
 
     df.to_csv(
-        name(parameters, ieeg_file, 'ols_summary'),
+        name(parameters, 'ols_summary') / f'{ieeg_file.stem}.tsv',
         sep='\t', index=False)
 
     elec = load('electrodes', parameters, ieeg_file)
@@ -122,7 +122,7 @@ def pipeline_ols_summary(parameters, ieeg_file):
     dat = Data(array(df['rsquared']), chan=array(df['chan']))
     fig = plot_surf(dat, elec, pial=pial, clim=(0, nanmax(df['rsquared'])), colorscale='Hot')
 
-    plots_dir = name(parameters, ieeg_file, 'ols_plot')
+    plots_dir = name(parameters, 'ols_plot', ieeg_file)
     to_html([to_div(fig), ], plots_dir / 'rsquared.html')
 
     df = df[df['rsquared'] >= parameters['ols']['threshold']]
@@ -139,7 +139,7 @@ def pipeline_ols_summary(parameters, ieeg_file):
 
 def import_ols(parameters, ieeg_file):
 
-    out_dir = name(parameters, ieeg_file, 'ols_chan')
+    out_dir = name(parameters, 'ols_chan', ieeg_file)
 
     df = []
     for json_file in out_dir.glob('*.json'):
@@ -156,7 +156,7 @@ def import_ols(parameters, ieeg_file):
 
 def pipeline_ols_prf(parameters, ieeg_file):
 
-    out_dir = name(parameters, ieeg_file, 'ols_chan')
+    out_dir = name(parameters, 'ols_chan', ieeg_file)
 
     for json_file in out_dir.glob('*.json'):
         add_prf_estimates(json_file)

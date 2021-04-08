@@ -19,10 +19,13 @@ Information to store in `parameters.json` file.
       - apply: bool
       - time: list of two values (start and end time of the baseline)
       - common: bool, use the same baseline for all the trials
-      - type: "zscore"
+      - type: "zscore", "dB"
     - select:
       - freq: [float, float], frequency range to include
       - time: float, center of the time window
   - ols:
     - threshold: float
+    - window:
+      - method: str, 'gaussian' or 'gamma'
+      - onset_percent: float, value between 0 and 1 to calculate onset of the gaussian or gamma window
 

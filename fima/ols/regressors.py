@@ -30,11 +30,11 @@ def make_regressors_from_indices(indices, t, params):
     return regressors
 
 
-def compute_canonical(t, params):
+def compute_canonical(parameters, t, params):
 
     t_diff = t[1] - t[0]
     t_window = arange(-3, 3, t_diff)
-    if P['ols']['window']['method'] == 'gaussian':
+    if parameters['ols']['window']['method'] == 'gaussian':
         canonical_resp = normal.pdf(t_window, loc=params[0], scale=params[1])
     else:
         canonical_resp = gamma.pdf(t_window, a=params[2], loc=params[0], scale=params[1])

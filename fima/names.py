@@ -1,12 +1,16 @@
 from bidso import Task
 
 
-def name(parameters, ieeg_file, what):
+def name(parameters, what, ieeg_file=None):
 
     out_dir = parameters['paths']['output']
-    ieeg = Task(ieeg_file)
+    if ieeg_file is not None:
+        ieeg = Task(ieeg_file)
 
-    if what == 'brainregions':
+    if what == 'brainregions_dir':
+        out = out_dir / 'brainregions'
+
+    elif what == 'brainregions':
         out = out_dir / 'brainregions' / f'sub-{ieeg.subject}_ses-{ieeg.session}_acq-{ieeg.acquisition}_brainregions.tsv'
 
     elif what == 'continuous':
@@ -22,12 +26,11 @@ def name(parameters, ieeg_file, what):
         out = out_dir / 'ols' / ieeg_file.stem
 
     elif what == 'ols_summary':
-        summary_dir = out_dir / 'ols' / 'summary'
-        summary_dir.mkdir(parents=True, exist_ok=True)
-        out = summary_dir / f'{ieeg_file.stem}.tsv'
+        out = out_dir / 'ols' / 'summary'
+        out.mkdir(parents=True, exist_ok=True)
 
     elif what == 'ols_plot':
-        out = out_dir / 'ols' / 'plots' / ieeg_file.stem
+        out = out_dir / 'ols' / 'plots'
         out.mkdir(parents=True, exist_ok=True)
 
     return out
