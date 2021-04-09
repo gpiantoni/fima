@@ -10,11 +10,11 @@ from .regressors import make_regressors_from_indices
 from ..utils import be_nice
 
 
-def fit_one_channel(t, x, indices):
+def fit_one_channel(parameters, t, x, indices):
 
-    matrix_values, out_dim = compute_param_matrix(t)
+    matrix_values, out_dim = compute_param_matrix(parameters, t)
 
-    func = partial(get_rsquared, t=t, x=x, indices=indices)
+    func = partial(get_rsquared, parameters=parameters, t=t, x=x, indices=indices)
 
     with Pool(initializer=be_nice) as p:
         results = p.map(func, matrix_values)
@@ -22,12 +22,12 @@ def fit_one_channel(t, x, indices):
     return reshape(array(results), out_dim)
 
 
-def get_max(t, x, indices, MAT):
+def get_max(parameters, t, x, indices, MAT):
 
-    val_mat = compute_param_matrix(t)[0]
+    val_mat = compute_param_matrix(parameters, t)[0]
     max_values = list(val_mat)[argmax(MAT)]
 
-    regressors = make_regressors_from_indices(indices, t, max_values)
+    regressors = make_regressors_from_indices(parameters, indices, t, max_values)
     results = fit_ols(regressors, x)
 
     out = {
@@ -37,14 +37,14 @@ def get_max(t, x, indices, MAT):
         'rsquared': results.rsquared,
         }
     out.update(dict(results.params))
-    if P['ols']['window']['method'] == 'gamma':
+    if parameters['ols']['window']['method'] == 'gamma':
         out['a'] = max_values[2]
 
     return out, results
 
 
-def get_rsquared(params, t, x, indices):
-    regressors = make_regressors_from_indices(indices, t, params)
+def get_rsquared(params, parameters, t, x, indices):
+    regressors = make_regressors_from_indices(parameters, indices, t, params)
     results = fit_ols(regressors, x)
     return results.rsquared
 
@@ -58,7 +58,7 @@ def fit_ols(regressors, x):
     return model.fit()
 
 
-def compute_param_matrix(t):
+def compute_param_matrix(parameters, t):
     """Calculate all the possible parameters for a set of search values
 
     Parameters
@@ -83,23 +83,23 @@ def compute_param_matrix(t):
     """
     t_diff = t[1] - t[0]
 
-    loc = P['ols']['window']['loc']
+    loc = parameters['ols']['window']['loc']
     if len(loc) == 2:
         loc.append(t_diff)
 
-    scale = P['ols']['window']['scale']
+    scale = parameters['ols']['window']['scale']
     if len(scale) == 2:
         scale.append(t_diff)
 
     a_loc = arange(*loc)
     a_scale = arange(*scale)
 
-    if P['ols']['window']['method'] == 'gaussian':
+    if parameters['ols']['window']['method'] == 'gaussian':
         matrix_values = product(a_loc, a_scale)
         out_dim = (len(a_loc), len(a_scale))
 
-    elif P['ols']['window']['method'] == 'gamma':
-        a_a = arange(*P['ols']['window']['a'])
+    elif parameters['ols']['window']['method'] == 'gamma':
+        a_a = arange(*parameters['ols']['window']['a'])
         matrix_values = product(a_loc, a_scale, a_a)
         out_dim = (len(a_loc), len(a_scale), len(a_a))
 

@@ -25,6 +25,10 @@ def name(parameters, what, ieeg_file=None):
     elif what == 'ols_chan':
         out = out_dir / 'ols' / ieeg_file.stem
 
+    elif what == 'ols_tsv':
+        out = out_dir / 'ols' / 'tsv'
+        out.mkdir(parents=True, exist_ok=True)
+
     elif what == 'ols_summary':
         out = out_dir / 'ols' / 'summary'
         out.mkdir(parents=True, exist_ok=True)

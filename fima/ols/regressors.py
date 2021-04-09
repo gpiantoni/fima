@@ -19,9 +19,9 @@ def find_movement_indices(mov, t):
     return reg_idx
 
 
-def make_regressors_from_indices(indices, t, params):
+def make_regressors_from_indices(parameters, indices, t, params):
 
-    canonical_resp = compute_canonical(t, params)[1]
+    canonical_resp = compute_canonical(parameters, t, params)[1]
     regressors = {}
     for k, v in indices.items():
         r = unit_impulse(t.shape, v)

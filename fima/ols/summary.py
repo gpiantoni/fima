@@ -1,5 +1,5 @@
 from numpy import where
-from pandas import merge, read_csv, concat, MultiIndex
+from pandas import merge, read_csv, concat, MultiIndex, isnull
 from bidso import file_Core
 
 from .regressors import compute_canonical
@@ -19,15 +19,15 @@ COLUMNS = {
     'estimate/skewness': 'a',
     'estimate/spread': 'scale',
     'estimate/const': 'const',
-    'extension/corr': 'extension corr',
+    'extension/rsquared': 'extension rsquared',
     'extension/finger': 'extension loc',
     'extension/spread': 'extension scale',
-    'flexion/corr': 'flexion corr',
+    'flexion/rsquared': 'flexion rsquared',
     'flexion/finger': 'flexion loc',
     'flexion/spread': 'flexion scale',
     'flexext/diff': 'params diff',
     'flexext/corr': 'params corr',
-}
+    }
 
 
 def import_all_ols(parameters):
@@ -35,7 +35,7 @@ def import_all_ols(parameters):
     df_ols = import_df_ols(parameters)
     df_regions = import_df_regions(parameters)
 
-    df = merge(df_ols, df_regions, how='left', on=['subject', 'chan'])
+    df = merge(df_ols, df_regions, how='left', on=['subject', 'session', 'acquisition', 'chan'])
 
     df = df.sort_values('rsquared', ascending=False).reset_index(drop=True)
 
@@ -47,15 +47,18 @@ def import_all_ols(parameters):
     df1 = df[list(columns.values())]
     df1.columns = MultiIndex.from_tuples([tuple(k.split('/')) for k in columns.keys()])
 
+    df1.loc[isnull(df1['channel']['brainregion']), ('channel', 'brainregion')] = 'unknown'
+    df1.loc[isnull(df1['channel']['BA']), ('channel', 'BA')] = 'unknown'
+
     return df1
 
 
 def import_df_ols(parameters):
     """Compute onset as well"""
-    SUMMARY_DIR = name(parameters, 'ols_summary')
+    TSV_DIR = name(parameters, 'ols_tsv')
 
     all_ols = []
-    for tsv_file in SUMMARY_DIR.glob('*.tsv'):
+    for tsv_file in TSV_DIR.glob('*.tsv'):
         bids = file_Core(tsv_file.name)
         ols = read_csv(tsv_file, sep='\t')
         ols['subject'] = bids.subject
@@ -79,10 +82,13 @@ def import_df_regions(parameters):
 
     all_df = []
     for tsv_file in regions_dir.glob('*_brainregions.tsv'):
-        subject, run = tsv_file.stem.split('_')[:2]
+
+        bids = file_Core(tsv_file.name)
 
         temp = read_csv(tsv_file, sep='\t')
-        temp['subject'] = subject
+        temp['subject'] = bids.subject
+        temp['session'] = bids.session
+        temp['acquisition'] = bids.acquisition
         all_df.append(temp)
 
     regions = concat(all_df)

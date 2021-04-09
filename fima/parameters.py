@@ -53,87 +53,8 @@ P = dict(
         ),
     )
 
-
-GRID_TYPES = DataFrame({
-    'subject': ['drouwen', 'duiven', 'franeker', 'heek', 'intraop008', 'intraop013', 'intraop016', 'itens', 'lemmer', 'ommen', 'vledder', 'warmond', 'veere', 'som705'],
-    'grid_type': ['clinical', 'HD', 'HD', 'HD', 'HD', 'HD', 'HD', 'clinical', 'clinical', 'HD', 'HD', 'HD', 'HD', 'HD']
-    })
-
-SUBJECTS = {
-    'drouwen': {
-        '1': [],
-        },
-    'duiven': {
-        '1': [
-            (225, 243),
-            ],
-        '2': [],
-        },
-    'franeker': {
-        '1': [],
-        '2': [],
-        },
-    'heek': {
-        '1': [
-            (190, 194),
-            ],
-        '2': [
-            (21, 28),
-            ],
-        },
-    'intraop008': {
-        '1': [
-            (85, 86),
-            (112.5, 113),
-            (345, 346),
-            ],
-        },
-    'intraop013': {
-        '1': [
-            (36, 37),
-            (63.5, 64.5),
-            ],
-        '2': [
-            (27.5, 29.5),
-            (33.5, 40),
-            (247.5, 249),
-            (257, 261),
-            ],
-        },
-    'intraop016': {
-        '1': [],
-        },
-    'itens': {
-        '1': [
-            (215, 216),
-            ],
-        '2': [],
-        '3': [],
-        },
-    'lemmer': {
-        '1': [],
-        '2': [],
-        },
-    'ommen': {
-        '1': [],
-        '2': [],
-        },
-    'veere': {
-        '1': [],
-        },
-    'vledder': {
-        '2': [],
-        '3': [],
-        },
-    'warmond': {
-        '1': [],
-        '2': [],
-        },
-    'som705': {
-        '01': [],
-        },
-    }
 """
+
 
 COLORSCALE = 'Jet'
 

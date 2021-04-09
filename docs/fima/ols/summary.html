@@ -25,14 +25,18 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from numpy import where
-from pandas import merge, read_csv, concat, MultiIndex
+from pandas import merge, read_csv, concat, MultiIndex, isnull
+from bidso import file_Core
 
 from .regressors import compute_canonical
+from ..names import name
+
 
 COLUMNS = {
     &#39;recording/subject&#39;: &#39;subject&#39;,
+    &#39;recording/session&#39;: &#39;session&#39;,
+    &#39;recording/acquisition&#39;: &#39;acquisition&#39;,
     &#39;recording/run&#39;: &#39;run&#39;,
-    &#39;channel/type&#39;: &#39;grid_type&#39;,
     &#39;channel/chan&#39;: &#39;chan&#39;,
     &#39;channel/brainregion&#39;: &#39;a2009s&#39;,
     &#39;channel/BA&#39;: &#39;BA&#39;,
@@ -41,74 +45,84 @@ COLUMNS = {
     &#39;estimate/skewness&#39;: &#39;a&#39;,
     &#39;estimate/spread&#39;: &#39;scale&#39;,
     &#39;estimate/const&#39;: &#39;const&#39;,
-    &#39;extension/corr&#39;: &#39;extension corr&#39;,
+    &#39;extension/rsquared&#39;: &#39;extension rsquared&#39;,
     &#39;extension/finger&#39;: &#39;extension loc&#39;,
     &#39;extension/spread&#39;: &#39;extension scale&#39;,
-    &#39;flexion/corr&#39;: &#39;flexion corr&#39;,
+    &#39;flexion/rsquared&#39;: &#39;flexion rsquared&#39;,
     &#39;flexion/finger&#39;: &#39;flexion loc&#39;,
     &#39;flexion/spread&#39;: &#39;flexion scale&#39;,
     &#39;flexext/diff&#39;: &#39;params diff&#39;,
     &#39;flexext/corr&#39;: &#39;params corr&#39;,
-}
+    }
 
 
 def import_all_ols(parameters):
 
-    df_ols = import_df_ols()
-    df_regions = import_df_regions()
+    df_ols = import_df_ols(parameters)
+    df_regions = import_df_regions(parameters)
 
-    df = merge(df_ols, df_regions, how=&#39;left&#39;, on=[&#39;subject&#39;, &#39;chan&#39;])
+    df = merge(df_ols, df_regions, how=&#39;left&#39;, on=[&#39;subject&#39;, &#39;session&#39;, &#39;acquisition&#39;, &#39;chan&#39;])
 
     df = df.sort_values(&#39;rsquared&#39;, ascending=False).reset_index(drop=True)
 
     missing_columns = set(df.columns) - set(COLUMNS.values())
-    print(&#39;Missing columns: &#39; + &#39;, &#39;.join(missing_columns))
+    print(&#39;These columns will not be included in overview dataset: &#39; + &#39;, &#39;.join(missing_columns))
 
-    df1 = df[list(COLUMNS.values())]
-    df1.columns = MultiIndex.from_tuples([tuple(k.split(&#39;/&#39;)) for k in COLUMNS.keys()])
+    # exclude columns which are in the overview but were not computed
+    columns = {k: v for k, v in COLUMNS.items() if v in df.columns}
+    df1 = df[list(columns.values())]
+    df1.columns = MultiIndex.from_tuples([tuple(k.split(&#39;/&#39;)) for k in columns.keys()])
+
+    df1.loc[isnull(df1[&#39;channel&#39;][&#39;brainregion&#39;]), (&#39;channel&#39;, &#39;brainregion&#39;)] = &#39;unknown&#39;
+    df1.loc[isnull(df1[&#39;channel&#39;][&#39;BA&#39;]), (&#39;channel&#39;, &#39;BA&#39;)] = &#39;unknown&#39;
 
     return df1
 
 
-def import_df_ols():
+def import_df_ols(parameters):
     &#34;&#34;&#34;Compute onset as well&#34;&#34;&#34;
-    SUMMARY_DIR = RESULTS_DIR / &#39;ols&#39; / &#39;summary&#39;
+    TSV_DIR = name(parameters, &#39;ols_tsv&#39;)
 
     all_ols = []
-    for tsv_file in SUMMARY_DIR.glob(&#39;*.tsv&#39;):
-        subject, run = tsv_file.stem.split(&#39;_&#39;)[2:4]
+    for tsv_file in TSV_DIR.glob(&#39;*.tsv&#39;):
+        bids = file_Core(tsv_file.name)
         ols = read_csv(tsv_file, sep=&#39;\t&#39;)
-        ols[&#39;subject&#39;] = subject
-        ols[&#39;run&#39;] = run[4:]
+        ols[&#39;subject&#39;] = bids.subject
+        ols[&#39;session&#39;] = bids.session
+        ols[&#39;run&#39;] = bids.run
+        ols[&#39;acquisition&#39;] = bids.acquisition
         all_ols.append(ols)
 
     ols = concat(all_ols, sort=False)   # pandas throws a warning when data is not complete
 
     onsets = []
     for row in ols.itertuples():
-        onsets.append(compute_onset(row, 0.1))
+        onsets.append(compute_onset(parameters, row))
     ols[&#39;onset&#39;] = onsets
 
     return ols
 
 
-def import_df_regions():
-    regions_dir = RESULTS_DIR / &#39;brainregions&#39;
+def import_df_regions(parameters):
+    regions_dir = name(parameters, &#39;brainregions_dir&#39;)
 
     all_df = []
-    for tsv_file in regions_dir.glob(&#39;*_regions.tsv&#39;):
-        subject, run = tsv_file.stem.split(&#39;_&#39;)[:2]
+    for tsv_file in regions_dir.glob(&#39;*_brainregions.tsv&#39;):
+
+        bids = file_Core(tsv_file.name)
 
         temp = read_csv(tsv_file, sep=&#39;\t&#39;)
-        temp[&#39;subject&#39;] = subject
+        temp[&#39;subject&#39;] = bids.subject
+        temp[&#39;session&#39;] = bids.session
+        temp[&#39;acquisition&#39;] = bids.acquisition
         all_df.append(temp)
 
     regions = concat(all_df)
     regions.drop([&#39;x&#39;, &#39;y&#39;, &#39;z&#39;], axis=1, inplace=True)
-    return merge(regions, GRID_TYPES, on=[&#39;subject&#39;, ])
+    return regions
 
 
-def compute_onset(row, percent=0.1):
+def compute_onset(parameters, row):
     &#34;&#34;&#34;Compute onset calculating when the estimated function raises above a
     certain threshold (percent of the max)
 
@@ -120,15 +134,20 @@ def compute_onset(row, percent=0.1):
     ----
     - tdiff should be in row (new version has it, but older version not)
 
-    - implement for gaussian
     &#34;&#34;&#34;
     tdiff = 0.009765625  # this should be row.tdiff
 
+    if parameters[&#39;ols&#39;][&#39;window&#39;][&#39;method&#39;] == &#39;gaussian&#39;:
+        params = [row.loc, row.scale]
+    else:
+        params = [row.loc, row.scale, row.a]
+
     t, resp = compute_canonical(
+        parameters,
         [0, tdiff],
-        [row.loc, row.scale, row.a],
+        params
         )
-    thresh = resp.max() * percent
+    thresh = resp.max() * parameters[&#39;ols&#39;][&#39;window&#39;][&#39;onset_percent&#39;]
 
     i_onset = where(resp &gt;= thresh)[0][0]
     return t[i_onset]</code></pre>
@@ -142,7 +161,7 @@ def compute_onset(row, percent=0.1):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="fima.ols.summary.compute_onset"><code class="name flex">
-<span>def <span class="ident">compute_onset</span></span>(<span>row, percent=0.1)</span>
+<span>def <span class="ident">compute_onset</span></span>(<span>parameters, row)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Compute onset calculating when the estimated function raises above a
@@ -154,18 +173,13 @@ certain threshold (percent of the max)</p>
 </dl>
 <h2 id="todo">Todo</h2>
 <ul>
-<li>
-<p>tdiff should be in row (new version has it, but older version not)</p>
-</li>
-<li>
-<p>implement for gaussian</p>
-</li>
+<li>tdiff should be in row (new version has it, but older version not)</li>
 </ul></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def compute_onset(row, percent=0.1):
+<pre><code class="python">def compute_onset(parameters, row):
     &#34;&#34;&#34;Compute onset calculating when the estimated function raises above a
     certain threshold (percent of the max)
 
@@ -177,15 +191,20 @@ certain threshold (percent of the max)</p>
     ----
     - tdiff should be in row (new version has it, but older version not)
 
-    - implement for gaussian
     &#34;&#34;&#34;
     tdiff = 0.009765625  # this should be row.tdiff
 
+    if parameters[&#39;ols&#39;][&#39;window&#39;][&#39;method&#39;] == &#39;gaussian&#39;:
+        params = [row.loc, row.scale]
+    else:
+        params = [row.loc, row.scale, row.a]
+
     t, resp = compute_canonical(
+        parameters,
         [0, tdiff],
-        [row.loc, row.scale, row.a],
+        params
         )
-    thresh = resp.max() * percent
+    thresh = resp.max() * parameters[&#39;ols&#39;][&#39;window&#39;][&#39;onset_percent&#39;]
 
     i_onset = where(resp &gt;= thresh)[0][0]
     return t[i_onset]</code></pre>
@@ -202,24 +221,29 @@ certain threshold (percent of the max)</p>
 </summary>
 <pre><code class="python">def import_all_ols(parameters):
 
-    df_ols = import_df_ols()
-    df_regions = import_df_regions()
+    df_ols = import_df_ols(parameters)
+    df_regions = import_df_regions(parameters)
 
-    df = merge(df_ols, df_regions, how=&#39;left&#39;, on=[&#39;subject&#39;, &#39;chan&#39;])
+    df = merge(df_ols, df_regions, how=&#39;left&#39;, on=[&#39;subject&#39;, &#39;session&#39;, &#39;acquisition&#39;, &#39;chan&#39;])
 
     df = df.sort_values(&#39;rsquared&#39;, ascending=False).reset_index(drop=True)
 
     missing_columns = set(df.columns) - set(COLUMNS.values())
-    print(&#39;Missing columns: &#39; + &#39;, &#39;.join(missing_columns))
+    print(&#39;These columns will not be included in overview dataset: &#39; + &#39;, &#39;.join(missing_columns))
 
-    df1 = df[list(COLUMNS.values())]
-    df1.columns = MultiIndex.from_tuples([tuple(k.split(&#39;/&#39;)) for k in COLUMNS.keys()])
+    # exclude columns which are in the overview but were not computed
+    columns = {k: v for k, v in COLUMNS.items() if v in df.columns}
+    df1 = df[list(columns.values())]
+    df1.columns = MultiIndex.from_tuples([tuple(k.split(&#39;/&#39;)) for k in columns.keys()])
+
+    df1.loc[isnull(df1[&#39;channel&#39;][&#39;brainregion&#39;]), (&#39;channel&#39;, &#39;brainregion&#39;)] = &#39;unknown&#39;
+    df1.loc[isnull(df1[&#39;channel&#39;][&#39;BA&#39;]), (&#39;channel&#39;, &#39;BA&#39;)] = &#39;unknown&#39;
 
     return df1</code></pre>
 </details>
 </dd>
 <dt id="fima.ols.summary.import_df_ols"><code class="name flex">
-<span>def <span class="ident">import_df_ols</span></span>(<span>)</span>
+<span>def <span class="ident">import_df_ols</span></span>(<span>parameters)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Compute onset as well</p></div>
@@ -227,30 +251,32 @@ certain threshold (percent of the max)</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def import_df_ols():
+<pre><code class="python">def import_df_ols(parameters):
     &#34;&#34;&#34;Compute onset as well&#34;&#34;&#34;
-    SUMMARY_DIR = RESULTS_DIR / &#39;ols&#39; / &#39;summary&#39;
+    TSV_DIR = name(parameters, &#39;ols_tsv&#39;)
 
     all_ols = []
-    for tsv_file in SUMMARY_DIR.glob(&#39;*.tsv&#39;):
-        subject, run = tsv_file.stem.split(&#39;_&#39;)[2:4]
+    for tsv_file in TSV_DIR.glob(&#39;*.tsv&#39;):
+        bids = file_Core(tsv_file.name)
         ols = read_csv(tsv_file, sep=&#39;\t&#39;)
-        ols[&#39;subject&#39;] = subject
-        ols[&#39;run&#39;] = run[4:]
+        ols[&#39;subject&#39;] = bids.subject
+        ols[&#39;session&#39;] = bids.session
+        ols[&#39;run&#39;] = bids.run
+        ols[&#39;acquisition&#39;] = bids.acquisition
         all_ols.append(ols)
 
     ols = concat(all_ols, sort=False)   # pandas throws a warning when data is not complete
 
     onsets = []
     for row in ols.itertuples():
-        onsets.append(compute_onset(row, 0.1))
+        onsets.append(compute_onset(parameters, row))
     ols[&#39;onset&#39;] = onsets
 
     return ols</code></pre>
 </details>
 </dd>
 <dt id="fima.ols.summary.import_df_regions"><code class="name flex">
-<span>def <span class="ident">import_df_regions</span></span>(<span>)</span>
+<span>def <span class="ident">import_df_regions</span></span>(<span>parameters)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -258,20 +284,23 @@ certain threshold (percent of the max)</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def import_df_regions():
-    regions_dir = RESULTS_DIR / &#39;brainregions&#39;
+<pre><code class="python">def import_df_regions(parameters):
+    regions_dir = name(parameters, &#39;brainregions_dir&#39;)
 
     all_df = []
-    for tsv_file in regions_dir.glob(&#39;*_regions.tsv&#39;):
-        subject, run = tsv_file.stem.split(&#39;_&#39;)[:2]
+    for tsv_file in regions_dir.glob(&#39;*_brainregions.tsv&#39;):
+
+        bids = file_Core(tsv_file.name)
 
         temp = read_csv(tsv_file, sep=&#39;\t&#39;)
-        temp[&#39;subject&#39;] = subject
+        temp[&#39;subject&#39;] = bids.subject
+        temp[&#39;session&#39;] = bids.session
+        temp[&#39;acquisition&#39;] = bids.acquisition
         all_df.append(temp)
 
     regions = concat(all_df)
     regions.drop([&#39;x&#39;, &#39;y&#39;, &#39;z&#39;], axis=1, inplace=True)
-    return merge(regions, GRID_TYPES, on=[&#39;subject&#39;, ])</code></pre>
+    return regions</code></pre>
 </details>
 </dd>
 </dl>

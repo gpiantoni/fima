@@ -28,20 +28,20 @@
 from wonambi.trans import select
 
 
-def apply_baseline_to_continuous(tf, onsets, baseline=&#39;zscore&#39;):
+def apply_baseline_to_continuous(parameters, tf, onsets):
 
     v = []
     for on in onsets:
-        x = select(tf, time=on + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;time&#39;])
+        x = select(tf, time=on + parameters[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;time&#39;])
         v.append(x.data[0])
 
     A = concatenate(v, axis=1)
     bline_m = nanmean(A, axis=1)[:, :, None]
     bline_sd = nanstd(A, axis=1)[:, :, None]
 
-    if baseline == &#39;zscore&#39;:
+    if parameters[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;] == &#39;zscore&#39;:
         tf.data[0] = (tf.data[0] - bline_m) / bline_sd
-    elif baseline == &#39;dB&#39;:
+    elif parameters[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]== &#39;dB&#39;:
         tf.data[0] = 10 * log10(tf.data[0] / bline_m)
 
     return tf
@@ -82,7 +82,7 @@ def apply_common_baseline(tf, time, baseline):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="fima.spectrum.baseline.apply_baseline_to_continuous"><code class="name flex">
-<span>def <span class="ident">apply_baseline_to_continuous</span></span>(<span>tf, onsets, baseline='zscore')</span>
+<span>def <span class="ident">apply_baseline_to_continuous</span></span>(<span>parameters, tf, onsets)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -90,20 +90,20 @@ def apply_common_baseline(tf, time, baseline):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def apply_baseline_to_continuous(tf, onsets, baseline=&#39;zscore&#39;):
+<pre><code class="python">def apply_baseline_to_continuous(parameters, tf, onsets):
 
     v = []
     for on in onsets:
-        x = select(tf, time=on + P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;time&#39;])
+        x = select(tf, time=on + parameters[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;time&#39;])
         v.append(x.data[0])
 
     A = concatenate(v, axis=1)
     bline_m = nanmean(A, axis=1)[:, :, None]
     bline_sd = nanstd(A, axis=1)[:, :, None]
 
-    if baseline == &#39;zscore&#39;:
+    if parameters[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;] == &#39;zscore&#39;:
         tf.data[0] = (tf.data[0] - bline_m) / bline_sd
-    elif baseline == &#39;dB&#39;:
+    elif parameters[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]== &#39;dB&#39;:
         tf.data[0] = 10 * log10(tf.data[0] / bline_m)
 
     return tf</code></pre>

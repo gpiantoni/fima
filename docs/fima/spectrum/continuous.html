@@ -37,11 +37,11 @@ def get_continuous_cht(parameters, ieeg_file):
     data, events, onsets = load(&#39;continuous&#39;, parameters, ieeg_file)
 
     lg.info(&#39;Computing timefreq (baseline=False, mean=False)&#39;)
-    tf = compute_timefreq(data, baseline=False, mean=False)
+    tf = compute_timefreq(parameters, data, baseline=False, mean=False)
 
     if parameters[&#39;spectrum&#39;][&#39;method&#39;] != &#39;hilbert&#39;:
         lg.info(&#39;Selecting frequency&#39;)
-        tf = get_chantime(tf)
+        tf = get_chantime(parameters, tf)
 
     return tf, events, onsets</code></pre>
 </details>
@@ -67,11 +67,11 @@ def get_continuous_cht(parameters, ieeg_file):
     data, events, onsets = load(&#39;continuous&#39;, parameters, ieeg_file)
 
     lg.info(&#39;Computing timefreq (baseline=False, mean=False)&#39;)
-    tf = compute_timefreq(data, baseline=False, mean=False)
+    tf = compute_timefreq(parameters, data, baseline=False, mean=False)
 
     if parameters[&#39;spectrum&#39;][&#39;method&#39;] != &#39;hilbert&#39;:
         lg.info(&#39;Selecting frequency&#39;)
-        tf = get_chantime(tf)
+        tf = get_chantime(parameters, tf)
 
     return tf, events, onsets</code></pre>
 </details>

@@ -52,8 +52,6 @@ def plot_ols_rsquared(df, region_type):
     rsquared_levels = arange(0, 1, .1)
     BARS = {}
     for region in sorted(df['channel'][region_type].unique()):
-        if region == 'unknown':
-            continue
 
         vals = []
         for i in rsquared_levels:

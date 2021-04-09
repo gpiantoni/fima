@@ -45,9 +45,9 @@ def find_movement_indices(mov, t):
     return reg_idx
 
 
-def make_regressors_from_indices(indices, t, params):
+def make_regressors_from_indices(parameters, indices, t, params):
 
-    canonical_resp = compute_canonical(t, params)[1]
+    canonical_resp = compute_canonical(parameters, t, params)[1]
     regressors = {}
     for k, v in indices.items():
         r = unit_impulse(t.shape, v)
@@ -56,11 +56,11 @@ def make_regressors_from_indices(indices, t, params):
     return regressors
 
 
-def compute_canonical(t, params):
+def compute_canonical(parameters, t, params):
 
     t_diff = t[1] - t[0]
     t_window = arange(-3, 3, t_diff)
-    if P[&#39;ols&#39;][&#39;window&#39;][&#39;method&#39;] == &#39;gaussian&#39;:
+    if parameters[&#39;ols&#39;][&#39;window&#39;][&#39;method&#39;] == &#39;gaussian&#39;:
         canonical_resp = normal.pdf(t_window, loc=params[0], scale=params[1])
     else:
         canonical_resp = gamma.pdf(t_window, a=params[2], loc=params[0], scale=params[1])
@@ -78,7 +78,7 @@ def compute_canonical(t, params):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="fima.ols.regressors.compute_canonical"><code class="name flex">
-<span>def <span class="ident">compute_canonical</span></span>(<span>t, params)</span>
+<span>def <span class="ident">compute_canonical</span></span>(<span>parameters, t, params)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -86,11 +86,11 @@ def compute_canonical(t, params):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def compute_canonical(t, params):
+<pre><code class="python">def compute_canonical(parameters, t, params):
 
     t_diff = t[1] - t[0]
     t_window = arange(-3, 3, t_diff)
-    if P[&#39;ols&#39;][&#39;window&#39;][&#39;method&#39;] == &#39;gaussian&#39;:
+    if parameters[&#39;ols&#39;][&#39;window&#39;][&#39;method&#39;] == &#39;gaussian&#39;:
         canonical_resp = normal.pdf(t_window, loc=params[0], scale=params[1])
     else:
         canonical_resp = gamma.pdf(t_window, a=params[2], loc=params[0], scale=params[1])
@@ -125,7 +125,7 @@ def compute_canonical(t, params):
 </details>
 </dd>
 <dt id="fima.ols.regressors.make_regressors_from_indices"><code class="name flex">
-<span>def <span class="ident">make_regressors_from_indices</span></span>(<span>indices, t, params)</span>
+<span>def <span class="ident">make_regressors_from_indices</span></span>(<span>parameters, indices, t, params)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -133,9 +133,9 @@ def compute_canonical(t, params):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def make_regressors_from_indices(indices, t, params):
+<pre><code class="python">def make_regressors_from_indices(parameters, indices, t, params):
 
-    canonical_resp = compute_canonical(t, params)[1]
+    canonical_resp = compute_canonical(parameters, t, params)[1]
     regressors = {}
     for k, v in indices.items():
         r = unit_impulse(t.shape, v)

@@ -43,7 +43,8 @@ def compute_prf_from_parameters(j, finger_group):
 
     j[movement_type + ' loc'] = result.x[0]
     j[movement_type + ' scale'] = result.x[1]
-    j[movement_type + ' corr'] = 1 - result.fun[0]
+    # from 1 - cc to rsquared
+    j[movement_type + ' rsquared'] = (1 - result.fun[0]) ** 2
 
 
 def gaussian(x0, y):

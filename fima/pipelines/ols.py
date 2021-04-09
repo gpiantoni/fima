@@ -35,6 +35,8 @@ def pipeline_ols(parameters, ieeg_file):
 
 def pipeline_ols_all(parameters):
 
+    summary_dir = name(parameters, 'ols_plot')
+
     df = import_all_ols(parameters)
 
     REGIONS = ['brainregion', 'BA']
@@ -42,7 +44,7 @@ def pipeline_ols_all(parameters):
     for region in REGIONS:
         fig = plot_ols_rsquared(df, region)
         divs.append(to_div(fig))
-    to_html(divs, name(parameters, 'ols_plot') / 'ols_movement_all_rsquared_bars.html')
+    to_html(divs, summary_dir / 'ols_movement_all_rsquared_bars.html')
 
     PARAMS = (
         ('estimate', 'onset', 'Onset time (ms, movement onset = 0)'),
@@ -63,7 +65,11 @@ def pipeline_ols_all(parameters):
                 param[2],
                 )
             divs.append(to_div(fig))
-    to_html(divs, name(parameters, 'ols_plot') / 'ols_movement_all_summary.html')
+    to_html(divs, summary_dir / 'ols_movement_all_summary.html')
+
+    df.to_csv(
+        name(parameters, 'ols_tsv') / f'{ieeg_file.stem}.tsv',
+        sep='\t', index=False)
 
 
 def pipeline_ols_allchan(parameters, ieeg_file):
@@ -81,8 +87,8 @@ def pipeline_ols_allchan(parameters, ieeg_file):
         lg.info(f'{ieeg_file.stem} Fitting OLS on {chan}')
         x = tf_cht(trial=0, chan=chan, trial_axis='trial000000')
 
-        MAT = fit_one_channel(t, x, indices)
-        out, result = get_max(t, x, indices, MAT)
+        MAT = fit_one_channel(parameters, t, x, indices)
+        out, result = get_max(parameters, t, x, indices, MAT)
         out['chan'] = chan
 
         divs = []
@@ -110,7 +116,7 @@ def pipeline_ols_summary(parameters, ieeg_file):
         return
 
     df.to_csv(
-        name(parameters, 'ols_summary') / f'{ieeg_file.stem}.tsv',
+        name(parameters, 'ols_tsv') / f'{ieeg_file.stem}.tsv',
         sep='\t', index=False)
 
     elec = load('electrodes', parameters, ieeg_file)
@@ -122,7 +128,7 @@ def pipeline_ols_summary(parameters, ieeg_file):
     dat = Data(array(df['rsquared']), chan=array(df['chan']))
     fig = plot_surf(dat, elec, pial=pial, clim=(0, nanmax(df['rsquared'])), colorscale='Hot')
 
-    plots_dir = name(parameters, 'ols_plot', ieeg_file)
+    plots_dir = name(parameters, 'ols_plot') / ieeg_file.stem
     to_html([to_div(fig), ], plots_dir / 'rsquared.html')
 
     df = df[df['rsquared'] >= parameters['ols']['threshold']]

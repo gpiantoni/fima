@@ -27,12 +27,16 @@
 <pre><code class="python">from bidso import Task
 
 
-def name(parameters, ieeg_file, what):
+def name(parameters, what, ieeg_file=None):
 
     out_dir = parameters[&#39;paths&#39;][&#39;output&#39;]
-    ieeg = Task(ieeg_file)
+    if ieeg_file is not None:
+        ieeg = Task(ieeg_file)
 
-    if what == &#39;brainregions&#39;:
+    if what == &#39;brainregions_dir&#39;:
+        out = out_dir / &#39;brainregions&#39;
+
+    elif what == &#39;brainregions&#39;:
         out = out_dir / &#39;brainregions&#39; / f&#39;sub-{ieeg.subject}_ses-{ieeg.session}_acq-{ieeg.acquisition}_brainregions.tsv&#39;
 
     elif what == &#39;continuous&#39;:
@@ -47,13 +51,16 @@ def name(parameters, ieeg_file, what):
     elif what == &#39;ols_chan&#39;:
         out = out_dir / &#39;ols&#39; / ieeg_file.stem
 
+    elif what == &#39;ols_tsv&#39;:
+        out = out_dir / &#39;ols&#39; / &#39;tsv&#39;
+        out.mkdir(parents=True, exist_ok=True)
+
     elif what == &#39;ols_summary&#39;:
-        summary_dir = out_dir / &#39;ols&#39; / &#39;summary&#39;
-        summary_dir.mkdir(parents=True, exist_ok=True)
-        out = summary_dir / f&#39;{ieeg_file.stem}.tsv&#39;
+        out = out_dir / &#39;ols&#39; / &#39;summary&#39;
+        out.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;ols_plot&#39;:
-        out = out_dir / &#39;ols&#39; / &#39;plots&#39; / ieeg_file.stem
+        out = out_dir / &#39;ols&#39; / &#39;plots&#39;
         out.mkdir(parents=True, exist_ok=True)
 
     return out</code></pre>
@@ -67,7 +74,7 @@ def name(parameters, ieeg_file, what):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="fima.names.name"><code class="name flex">
-<span>def <span class="ident">name</span></span>(<span>parameters, ieeg_file, what)</span>
+<span>def <span class="ident">name</span></span>(<span>parameters, what, ieeg_file=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -75,12 +82,16 @@ def name(parameters, ieeg_file, what):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def name(parameters, ieeg_file, what):
+<pre><code class="python">def name(parameters, what, ieeg_file=None):
 
     out_dir = parameters[&#39;paths&#39;][&#39;output&#39;]
-    ieeg = Task(ieeg_file)
+    if ieeg_file is not None:
+        ieeg = Task(ieeg_file)
 
-    if what == &#39;brainregions&#39;:
+    if what == &#39;brainregions_dir&#39;:
+        out = out_dir / &#39;brainregions&#39;
+
+    elif what == &#39;brainregions&#39;:
         out = out_dir / &#39;brainregions&#39; / f&#39;sub-{ieeg.subject}_ses-{ieeg.session}_acq-{ieeg.acquisition}_brainregions.tsv&#39;
 
     elif what == &#39;continuous&#39;:
@@ -95,13 +106,16 @@ def name(parameters, ieeg_file, what):
     elif what == &#39;ols_chan&#39;:
         out = out_dir / &#39;ols&#39; / ieeg_file.stem
 
+    elif what == &#39;ols_tsv&#39;:
+        out = out_dir / &#39;ols&#39; / &#39;tsv&#39;
+        out.mkdir(parents=True, exist_ok=True)
+
     elif what == &#39;ols_summary&#39;:
-        summary_dir = out_dir / &#39;ols&#39; / &#39;summary&#39;
-        summary_dir.mkdir(parents=True, exist_ok=True)
-        out = summary_dir / f&#39;{ieeg_file.stem}.tsv&#39;
+        out = out_dir / &#39;ols&#39; / &#39;summary&#39;
+        out.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;ols_plot&#39;:
-        out = out_dir / &#39;ols&#39; / &#39;plots&#39; / ieeg_file.stem
+        out = out_dir / &#39;ols&#39; / &#39;plots&#39;
         out.mkdir(parents=True, exist_ok=True)
 
     return out</code></pre>
