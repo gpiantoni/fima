@@ -35,14 +35,14 @@ from ..parameters import FINGER_COLOR, MOVEMENT_LINE
 lg = getLogger(__name__)
 
 
-def plot_continuous(tf_cht, onsets, events):
+def plot_continuous(parameters, tf_cht, onsets, events):
 
-    chans = select_significant_channels(tf_cht, onsets)
+    # chans = select_significant_channels(tf_cht, onsets)
 
     divs = []
-    for chan in chans:
+    for chan in tf_cht.chan[0]:
         lg.debug(f&#39;Plotting {chan}&#39;)
-        fig = plot_continuous_per_chan(tf_cht, onsets, events, chan)
+        fig = plot_continuous_per_chan(parameters, tf_cht, onsets, events, chan)
         if fig is None:
             continue
         divs.append(to_div(fig))
@@ -50,7 +50,7 @@ def plot_continuous(tf_cht, onsets, events):
     return divs
 
 
-def plot_continuous_per_chan(tf_cht, onsets, events, chan):
+def plot_continuous_per_chan(parameters, tf_cht, onsets, events, chan):
     dat = tf_cht(trial=0, trial_axis=&#39;trial000000&#39;, chan=chan)
 
     yaxis_label = &#39;power spectral density (μV²)&#39;
@@ -74,7 +74,7 @@ def plot_continuous_per_chan(tf_cht, onsets, events, chan):
                 ),
             yaxis=dict(
                 title=yaxis_label,
-                range=(-1, 30),
+                range=parameters[&#39;viz&#39;][&#39;continuous&#39;][&#39;yaxis&#39;],
                 ),
             ))
 
@@ -118,7 +118,7 @@ def plot_continuous_per_chan(tf_cht, onsets, events, chan):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="fima.viz.continuous.plot_continuous"><code class="name flex">
-<span>def <span class="ident">plot_continuous</span></span>(<span>tf_cht, onsets, events)</span>
+<span>def <span class="ident">plot_continuous</span></span>(<span>parameters, tf_cht, onsets, events)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -126,14 +126,14 @@ def plot_continuous_per_chan(tf_cht, onsets, events, chan):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def plot_continuous(tf_cht, onsets, events):
+<pre><code class="python">def plot_continuous(parameters, tf_cht, onsets, events):
 
-    chans = select_significant_channels(tf_cht, onsets)
+    # chans = select_significant_channels(tf_cht, onsets)
 
     divs = []
-    for chan in chans:
+    for chan in tf_cht.chan[0]:
         lg.debug(f&#39;Plotting {chan}&#39;)
-        fig = plot_continuous_per_chan(tf_cht, onsets, events, chan)
+        fig = plot_continuous_per_chan(parameters, tf_cht, onsets, events, chan)
         if fig is None:
             continue
         divs.append(to_div(fig))
@@ -142,7 +142,7 @@ def plot_continuous_per_chan(tf_cht, onsets, events, chan):
 </details>
 </dd>
 <dt id="fima.viz.continuous.plot_continuous_per_chan"><code class="name flex">
-<span>def <span class="ident">plot_continuous_per_chan</span></span>(<span>tf_cht, onsets, events, chan)</span>
+<span>def <span class="ident">plot_continuous_per_chan</span></span>(<span>parameters, tf_cht, onsets, events, chan)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -150,7 +150,7 @@ def plot_continuous_per_chan(tf_cht, onsets, events, chan):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def plot_continuous_per_chan(tf_cht, onsets, events, chan):
+<pre><code class="python">def plot_continuous_per_chan(parameters, tf_cht, onsets, events, chan):
     dat = tf_cht(trial=0, trial_axis=&#39;trial000000&#39;, chan=chan)
 
     yaxis_label = &#39;power spectral density (μV²)&#39;
@@ -174,7 +174,7 @@ def plot_continuous_per_chan(tf_cht, onsets, events, chan):
                 ),
             yaxis=dict(
                 title=yaxis_label,
-                range=(-1, 30),
+                range=parameters[&#39;viz&#39;][&#39;continuous&#39;][&#39;yaxis&#39;],
                 ),
             ))
 

@@ -27,10 +27,11 @@
 <pre><code class="python">import plotly.graph_objects as go
 
 
-def plot_tfr(tf_m, chan, time=None, freq=None):
+def plot_tfr(parameters, tf_m, chan, time=None):
     &#34;&#34;&#34;Plot time frequency representation for one channel
 
     &#34;&#34;&#34;
+    freq = parameters[&#39;spectrum&#39;][&#39;select&#39;][&#39;freq&#39;]
     V = tf_m(trial=0, chan=chan)
 
     fig = go.Figure(
@@ -38,9 +39,9 @@ def plot_tfr(tf_m, chan, time=None, freq=None):
             x=tf_m.time[0],
             y=tf_m.freq[0],
             z=V.T,
-            colorscale=P[&#39;viz&#39;][&#39;colorscale&#39;],
-            zmax=P[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;],
-            zmin=P[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;] * -1,
+            colorscale=parameters[&#39;viz&#39;][&#39;colorscale&#39;],
+            zmax=parameters[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;],
+            zmin=parameters[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;] * -1,
             hovertemplate=&#34;time: %{x:.3f}s&lt;br /&gt;freq: %{y:.0f}Hz&lt;br /&gt;dB: %{z:.3f}&lt;extra&gt;&lt;/extra&gt;&#34;,
             colorbar=dict(
                 title=dict(
@@ -89,7 +90,7 @@ def plot_tfr(tf_m, chan, time=None, freq=None):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="fima.viz.tfr_chan.plot_tfr"><code class="name flex">
-<span>def <span class="ident">plot_tfr</span></span>(<span>tf_m, chan, time=None, freq=None)</span>
+<span>def <span class="ident">plot_tfr</span></span>(<span>parameters, tf_m, chan, time=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Plot time frequency representation for one channel</p></div>
@@ -97,10 +98,11 @@ def plot_tfr(tf_m, chan, time=None, freq=None):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def plot_tfr(tf_m, chan, time=None, freq=None):
+<pre><code class="python">def plot_tfr(parameters, tf_m, chan, time=None):
     &#34;&#34;&#34;Plot time frequency representation for one channel
 
     &#34;&#34;&#34;
+    freq = parameters[&#39;spectrum&#39;][&#39;select&#39;][&#39;freq&#39;]
     V = tf_m(trial=0, chan=chan)
 
     fig = go.Figure(
@@ -108,9 +110,9 @@ def plot_tfr(tf_m, chan, time=None, freq=None):
             x=tf_m.time[0],
             y=tf_m.freq[0],
             z=V.T,
-            colorscale=P[&#39;viz&#39;][&#39;colorscale&#39;],
-            zmax=P[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;],
-            zmin=P[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;] * -1,
+            colorscale=parameters[&#39;viz&#39;][&#39;colorscale&#39;],
+            zmax=parameters[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;],
+            zmin=parameters[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;] * -1,
             hovertemplate=&#34;time: %{x:.3f}s&lt;br /&gt;freq: %{y:.0f}Hz&lt;br /&gt;dB: %{z:.3f}&lt;extra&gt;&lt;/extra&gt;&#34;,
             colorbar=dict(
                 title=dict(

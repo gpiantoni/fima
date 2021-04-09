@@ -15,7 +15,7 @@ def apply_baseline_to_continuous(parameters, tf, onsets):
 
     if parameters['spectrum']['baseline']['type'] == 'zscore':
         tf.data[0] = (tf.data[0] - bline_m) / bline_sd
-    elif parameters['spectrum']['baseline']['type']== 'dB':
+    elif parameters['spectrum']['baseline']['type'] == 'dB':
         tf.data[0] = 10 * log10(tf.data[0] / bline_m)
 
     return tf

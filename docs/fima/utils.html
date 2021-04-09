@@ -61,7 +61,7 @@ def make_name(filename, event_type, ext=&#39;.html&#39;):
     return f&#39;{f.subject}_run-{f.run}{acq}_{event_type}{ext}&#39;
 
 
-def find_max_point(tf_cht):
+def find_max_point(parameters, tf_cht):
     &#34;&#34;&#34;Take the channel with the highest value and the interval containing that
     point
 
@@ -76,8 +76,7 @@ def find_max_point(tf_cht):
     tuple of float
         interval centered around largest activity (width depends on P[&#39;
     &#34;&#34;&#34;
-    from .parameters import P
-    INTERVAL = P[&#39;spectrum&#39;][&#39;select&#39;][&#39;timeinterval&#39;]
+    INTERVAL = parameters[&#39;spectrum&#39;][&#39;select&#39;][&#39;timeinterval&#39;]
     ind = unravel_index(argmax(tf_cht.data[0], axis=None), tf_cht.data[0].shape)
     max_chan = tf_cht.chan[0][ind[0]]
     max_timeinterval = (
@@ -211,7 +210,7 @@ def be_nice():
 </details>
 </dd>
 <dt id="fima.utils.find_max_point"><code class="name flex">
-<span>def <span class="ident">find_max_point</span></span>(<span>tf_cht)</span>
+<span>def <span class="ident">find_max_point</span></span>(<span>parameters, tf_cht)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Take the channel with the highest value and the interval containing that
@@ -232,7 +231,7 @@ point</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def find_max_point(tf_cht):
+<pre><code class="python">def find_max_point(parameters, tf_cht):
     &#34;&#34;&#34;Take the channel with the highest value and the interval containing that
     point
 
@@ -247,8 +246,7 @@ point</p>
     tuple of float
         interval centered around largest activity (width depends on P[&#39;
     &#34;&#34;&#34;
-    from .parameters import P
-    INTERVAL = P[&#39;spectrum&#39;][&#39;select&#39;][&#39;timeinterval&#39;]
+    INTERVAL = parameters[&#39;spectrum&#39;][&#39;select&#39;][&#39;timeinterval&#39;]
     ind = unravel_index(argmax(tf_cht.data[0], axis=None), tf_cht.data[0].shape)
     max_chan = tf_cht.chan[0][ind[0]]
     max_timeinterval = (

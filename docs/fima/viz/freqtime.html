@@ -49,7 +49,7 @@ def _get_region(regions, label):
             return chan.attr[&#39;region&#39;]
 
 
-def plot_conditions_per_chan(tf_cht, names, statistics=&#39;sem&#39;, fs=None, elec=None):
+def plot_conditions_per_chan(parameters, tf_cht, names, statistics=&#39;sem&#39;, fs=None, elec=None):
     &#34;&#34;&#34;Plot all the conditions for each channel
 
     Parameters
@@ -77,7 +77,7 @@ def plot_conditions_per_chan(tf_cht, names, statistics=&#39;sem&#39;, fs=None, e
     for chan in tf_cht.chan[0]:
         y = data_m(trial=0, chan=chan)
         s = data_sd(trial=0, chan=chan)
-        fig = plot_per_chan(y, s, chan, names)
+        fig = plot_per_chan(parameters, y, s, chan, names)
 
         if False and elec is not None and fs is not None:
             region = _get_region(regions, chan)
@@ -88,7 +88,7 @@ def plot_conditions_per_chan(tf_cht, names, statistics=&#39;sem&#39;, fs=None, e
     return divs
 
 
-def plot_per_chan(y, s, chan, names):
+def plot_per_chan(parameters, y, s, chan, names):
 
     LINE = {
         &#39;circle-open&#39;: 1,
@@ -148,7 +148,7 @@ def plot_per_chan(y, s, chan, names):
                 ),
             yaxis=dict(
                 title=&#39;change from baseline&#39;,
-                range=(-1 * P[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;], P[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;])
+                range=(-1 * parameters[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;], parameters[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;])
                 ),
             ),
     )
@@ -163,7 +163,7 @@ def plot_per_chan(y, s, chan, names):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="fima.viz.freqtime.plot_conditions_per_chan"><code class="name flex">
-<span>def <span class="ident">plot_conditions_per_chan</span></span>(<span>tf_cht, names, statistics='sem', fs=None, elec=None)</span>
+<span>def <span class="ident">plot_conditions_per_chan</span></span>(<span>parameters, tf_cht, names, statistics='sem', fs=None, elec=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Plot all the conditions for each channel</p>
@@ -185,7 +185,7 @@ def plot_per_chan(y, s, chan, names):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def plot_conditions_per_chan(tf_cht, names, statistics=&#39;sem&#39;, fs=None, elec=None):
+<pre><code class="python">def plot_conditions_per_chan(parameters, tf_cht, names, statistics=&#39;sem&#39;, fs=None, elec=None):
     &#34;&#34;&#34;Plot all the conditions for each channel
 
     Parameters
@@ -213,7 +213,7 @@ def plot_per_chan(y, s, chan, names):
     for chan in tf_cht.chan[0]:
         y = data_m(trial=0, chan=chan)
         s = data_sd(trial=0, chan=chan)
-        fig = plot_per_chan(y, s, chan, names)
+        fig = plot_per_chan(parameters, y, s, chan, names)
 
         if False and elec is not None and fs is not None:
             region = _get_region(regions, chan)
@@ -225,7 +225,7 @@ def plot_per_chan(y, s, chan, names):
 </details>
 </dd>
 <dt id="fima.viz.freqtime.plot_per_chan"><code class="name flex">
-<span>def <span class="ident">plot_per_chan</span></span>(<span>y, s, chan, names)</span>
+<span>def <span class="ident">plot_per_chan</span></span>(<span>parameters, y, s, chan, names)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -233,7 +233,7 @@ def plot_per_chan(y, s, chan, names):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def plot_per_chan(y, s, chan, names):
+<pre><code class="python">def plot_per_chan(parameters, y, s, chan, names):
 
     LINE = {
         &#39;circle-open&#39;: 1,
@@ -293,7 +293,7 @@ def plot_per_chan(y, s, chan, names):
                 ),
             yaxis=dict(
                 title=&#39;change from baseline&#39;,
-                range=(-1 * P[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;], P[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;])
+                range=(-1 * parameters[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;], parameters[&#39;viz&#39;][&#39;tfr&#39;][&#39;max&#39;])
                 ),
             ),
     )

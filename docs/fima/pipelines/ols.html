@@ -94,7 +94,7 @@ def pipeline_ols_all(parameters):
     to_html(divs, summary_dir / &#39;ols_movement_all_summary.html&#39;)
 
     df.to_csv(
-        name(parameters, &#39;ols_tsv&#39;) / f&#39;{ieeg_file.stem}.tsv&#39;,
+        name(parameters, &#39;ols_summary&#39;) / &#39;overview.tsv&#39;,
         sep=&#39;\t&#39;, index=False)
 
 
@@ -293,7 +293,7 @@ def pipeline_ols_prf(parameters, ieeg_file):
     to_html(divs, summary_dir / &#39;ols_movement_all_summary.html&#39;)
 
     df.to_csv(
-        name(parameters, &#39;ols_tsv&#39;) / f&#39;{ieeg_file.stem}.tsv&#39;,
+        name(parameters, &#39;ols_summary&#39;) / &#39;overview.tsv&#39;,
         sep=&#39;\t&#39;, index=False)</code></pre>
 </details>
 </dd>

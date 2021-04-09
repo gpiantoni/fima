@@ -21,8 +21,8 @@ def pipeline_continuous(parameters, ieeg):
 
     if parameters['spectrum']['baseline']['apply']:
         lg.info('Applying baseline to continuous')
-        tf_cht = apply_baseline_to_continuous(tf_cht, onsets)
+        tf_cht = apply_baseline_to_continuous(parameters, tf_cht, onsets)
     lg.info('Plotting continuous')
-    divs = plot_continuous(tf_cht, onsets, events)
+    divs = plot_continuous(parameters, tf_cht, onsets, events)
 
-    to_html(divs, name(parameters, ieeg, 'continuous'))
+    to_html(divs, name(parameters, 'continuous', ieeg))

@@ -38,9 +38,9 @@ AXIS = dict(
     )
 
 
-def plot_surf(data, elec, pial=None, info=&#39;activity&#39;, clim=None, colorscale=None):
+def plot_surf(parameters, data, elec, pial=None, info=&#39;activity&#39;, clim=None, colorscale=None):
     if colorscale is None:
-        colorscale = P[&#39;viz&#39;][&#39;colorscale&#39;]
+        colorscale = parameters[&#39;viz&#39;][&#39;colorscale&#39;]
 
     if info == &#39;finger&#39;:
         colorlim = (-1, 5)
@@ -75,8 +75,8 @@ def plot_surf(data, elec, pial=None, info=&#39;activity&#39;, clim=None, colorsc
 
         else:
             colorlim = (
-                P[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;] * -1,
-                P[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
+                parameters[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;] * -1,
+                parameters[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
                 )
 
     right_or_left = sign((elec[&#39;x&#39;] &gt; 0).sum() / elec.shape[0] - .5)
@@ -170,7 +170,7 @@ def plot_surf(data, elec, pial=None, info=&#39;activity&#39;, clim=None, colorsc
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="fima.viz.surf.plot_surf"><code class="name flex">
-<span>def <span class="ident">plot_surf</span></span>(<span>data, elec, pial=None, info='activity', clim=None, colorscale=None)</span>
+<span>def <span class="ident">plot_surf</span></span>(<span>parameters, data, elec, pial=None, info='activity', clim=None, colorscale=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -178,9 +178,9 @@ def plot_surf(data, elec, pial=None, info=&#39;activity&#39;, clim=None, colorsc
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def plot_surf(data, elec, pial=None, info=&#39;activity&#39;, clim=None, colorscale=None):
+<pre><code class="python">def plot_surf(parameters, data, elec, pial=None, info=&#39;activity&#39;, clim=None, colorscale=None):
     if colorscale is None:
-        colorscale = P[&#39;viz&#39;][&#39;colorscale&#39;]
+        colorscale = parameters[&#39;viz&#39;][&#39;colorscale&#39;]
 
     if info == &#39;finger&#39;:
         colorlim = (-1, 5)
@@ -215,8 +215,8 @@ def plot_surf(data, elec, pial=None, info=&#39;activity&#39;, clim=None, colorsc
 
         else:
             colorlim = (
-                P[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;] * -1,
-                P[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
+                parameters[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;] * -1,
+                parameters[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
                 )
 
     right_or_left = sign((elec[&#39;x&#39;] &gt; 0).sum() / elec.shape[0] - .5)

@@ -30,6 +30,8 @@ Information to store in `parameters.json` file.
       - onset_percent: float, value between 0 and 1 to calculate onset of the gaussian or gamma window
   - viz:
     - colorscale: str, 'Jet'
+    - continuous:
+      - yaxis: [float, float], amplitude range
     - tfr:
       - max: float
     - tfr_mean:

@@ -27,8 +27,7 @@
 <pre><code class="python">import plotly.graph_objects as go
 
 
-
-def plot_tfr_time(tf_time, highlight=None):
+def plot_tfr_time(parameters, tf_time, highlight=None):
     traces = []
     for chan in tf_time.chan[0]:
         traces.append(
@@ -51,10 +50,10 @@ def plot_tfr_time(tf_time, highlight=None):
                 title=&#39;time (s)&#39;,
             ),
             yaxis=dict(
-                title=&#39;change from baseline ({})&#39;.format(P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]),
+                title=&#39;change from baseline ({})&#39;.format(parameters[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]),
                 range=(
-                    -1 * P[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
-                    P[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
+                    -1 * parameters[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
+                    parameters[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
                     ),
                 )
             )
@@ -86,7 +85,7 @@ def plot_tfr_time(tf_time, highlight=None):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="fima.viz.tfr_time.plot_tfr_time"><code class="name flex">
-<span>def <span class="ident">plot_tfr_time</span></span>(<span>tf_time, highlight=None)</span>
+<span>def <span class="ident">plot_tfr_time</span></span>(<span>parameters, tf_time, highlight=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -94,7 +93,7 @@ def plot_tfr_time(tf_time, highlight=None):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def plot_tfr_time(tf_time, highlight=None):
+<pre><code class="python">def plot_tfr_time(parameters, tf_time, highlight=None):
     traces = []
     for chan in tf_time.chan[0]:
         traces.append(
@@ -117,10 +116,10 @@ def plot_tfr_time(tf_time, highlight=None):
                 title=&#39;time (s)&#39;,
             ),
             yaxis=dict(
-                title=&#39;change from baseline ({})&#39;.format(P[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]),
+                title=&#39;change from baseline ({})&#39;.format(parameters[&#39;spectrum&#39;][&#39;baseline&#39;][&#39;type&#39;]),
                 range=(
-                    -1 * P[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
-                    P[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
+                    -1 * parameters[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
+                    parameters[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
                     ),
                 )
             )

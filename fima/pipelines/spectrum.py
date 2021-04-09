@@ -33,10 +33,10 @@ def pipeline_spectrum(parameters, ieeg_file):
         fs = None
 
     tf = compute_timefreq(parameters, data, mean=False)
-    tf_m = math(tf, operator_name='mean', axis='trial_axis')
+    tf_m = math(tf, operator_name='nanmean', axis='trial_axis')
     tf_cht = get_chantime(parameters, tf_m)
     best_chan, best_time = find_max_point(parameters, tf_cht)
-    print(f'Best channel {best_chan}, best interval {best_time}s')
+    print(f'Best channel {best_chan}, best interval [{best_time[0]: .3f}-{best_time[1]: .3f}]s')
 
     tf_ch = get_chan(parameters, tf_m, time=best_time)
 
