@@ -12,9 +12,9 @@ AXIS = dict(
     )
 
 
-def plot_surf(data, elec, pial=None, info='activity', clim=None, colorscale=None):
+def plot_surf(parameters, data, elec, pial=None, info='activity', clim=None, colorscale=None):
     if colorscale is None:
-        colorscale = P['viz']['colorscale']
+        colorscale = parameters['viz']['colorscale']
 
     if info == 'finger':
         colorlim = (-1, 5)
@@ -49,8 +49,8 @@ def plot_surf(data, elec, pial=None, info='activity', clim=None, colorscale=None
 
         else:
             colorlim = (
-                P['viz']['tfr_mean']['max'] * -1,
-                P['viz']['tfr_mean']['max'],
+                parameters['viz']['tfr_mean']['max'] * -1,
+                parameters['viz']['tfr_mean']['max'],
                 )
 
     right_or_left = sign((elec['x'] > 0).sum() / elec.shape[0] - .5)

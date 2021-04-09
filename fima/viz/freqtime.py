@@ -23,7 +23,7 @@ def _get_region(regions, label):
             return chan.attr['region']
 
 
-def plot_conditions_per_chan(tf_cht, names, statistics='sem', fs=None, elec=None):
+def plot_conditions_per_chan(parameters, tf_cht, names, statistics='sem', fs=None, elec=None):
     """Plot all the conditions for each channel
 
     Parameters
@@ -51,7 +51,7 @@ def plot_conditions_per_chan(tf_cht, names, statistics='sem', fs=None, elec=None
     for chan in tf_cht.chan[0]:
         y = data_m(trial=0, chan=chan)
         s = data_sd(trial=0, chan=chan)
-        fig = plot_per_chan(y, s, chan, names)
+        fig = plot_per_chan(parameters, y, s, chan, names)
 
         if False and elec is not None and fs is not None:
             region = _get_region(regions, chan)
@@ -62,7 +62,7 @@ def plot_conditions_per_chan(tf_cht, names, statistics='sem', fs=None, elec=None
     return divs
 
 
-def plot_per_chan(y, s, chan, names):
+def plot_per_chan(parameters, y, s, chan, names):
 
     LINE = {
         'circle-open': 1,
@@ -122,7 +122,7 @@ def plot_per_chan(y, s, chan, names):
                 ),
             yaxis=dict(
                 title='change from baseline',
-                range=(-1 * P['viz']['tfr']['max'], P['viz']['tfr']['max'])
+                range=(-1 * parameters['viz']['tfr']['max'], parameters['viz']['tfr']['max'])
                 ),
             ),
     )

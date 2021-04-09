@@ -22,10 +22,15 @@ Information to store in `parameters.json` file.
       - type: "zscore", "dB"
     - select:
       - freq: [float, float], frequency range to include
-      - time: float, center of the time window
+      - timeinterval: float, center of the time window
   - ols:
     - threshold: float
     - window:
       - method: str, 'gaussian' or 'gamma'
       - onset_percent: float, value between 0 and 1 to calculate onset of the gaussian or gamma window
-
+  - viz:
+    - colorscale: str, 'Jet'
+    - tfr:
+      - max: float
+    - tfr_mean:
+      - max: float

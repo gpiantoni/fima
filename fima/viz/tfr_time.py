@@ -1,8 +1,7 @@
 import plotly.graph_objects as go
 
 
-
-def plot_tfr_time(tf_time, highlight=None):
+def plot_tfr_time(parameters, tf_time, highlight=None):
     traces = []
     for chan in tf_time.chan[0]:
         traces.append(
@@ -25,10 +24,10 @@ def plot_tfr_time(tf_time, highlight=None):
                 title='time (s)',
             ),
             yaxis=dict(
-                title='change from baseline ({})'.format(P['spectrum']['baseline']['type']),
+                title='change from baseline ({})'.format(parameters['spectrum']['baseline']['type']),
                 range=(
-                    -1 * P['viz']['tfr_mean']['max'],
-                    P['viz']['tfr_mean']['max'],
+                    -1 * parameters['viz']['tfr_mean']['max'],
+                    parameters['viz']['tfr_mean']['max'],
                     ),
                 )
             )

@@ -32,29 +32,29 @@ def pipeline_spectrum(parameters, ieeg_file):
         pial = None
         fs = None
 
-    tf = compute_timefreq(data, mean=False)
+    tf = compute_timefreq(parameters, data, mean=False)
     tf_m = math(tf, operator_name='mean', axis='trial_axis')
-    tf_cht = get_chantime(tf_m)
-    best_chan, best_time = find_max_point(tf_cht)
+    tf_cht = get_chantime(parameters, tf_m)
+    best_chan, best_time = find_max_point(parameters, tf_cht)
     print(f'Best channel {best_chan}, best interval {best_time}s')
 
-    tf_ch = get_chan(tf_m, time=best_time)
+    tf_ch = get_chan(parameters, tf_m, time=best_time)
 
     divs = []
-    fig = plot_tfr(tf_m, best_chan, time=best_time, freq=parameters['spectrum']['select']['freq'])
+    fig = plot_tfr(parameters, tf_m, best_chan, time=best_time)
     divs.append(to_div(fig))
-    fig = plot_tfr_time(tf_cht, highlight=best_time)
+    fig = plot_tfr_time(parameters, tf_cht, highlight=best_time)
     divs.append(to_div(fig))
 
     if elec is not None:
-        fig = plot_surf(tf_ch, elec, pial)
+        fig = plot_surf(parameters, tf_ch, elec, pial)
         divs.append(to_div(fig))
 
-    to_html(divs, name(parameters, ieeg_file, 'spectrum'))
+    to_html(divs, name(parameters, 'spectrum', ieeg_file))
 
-    tf_cht = get_chantime(tf)
-    divs = plot_conditions_per_chan(tf_cht, names, fs=fs, elec=elec)
-    to_html(divs, name(parameters, ieeg_file, 'spectrum_all'))
+    tf_cht = get_chantime(parameters, tf)
+    divs = plot_conditions_per_chan(parameters, tf_cht, names, fs=fs, elec=elec)
+    to_html(divs, name(parameters, 'spectrum_all', ieeg_file))
 
 
 def find_max_true(x):

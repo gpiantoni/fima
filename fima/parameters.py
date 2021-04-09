@@ -4,15 +4,6 @@ from .utils import get_color_for_val
 
 
 """
-P = dict(
-    data_quality=dict(
-        histogram=dict(
-            contamination=0.04,
-            ),
-        spectrum=dict(
-            n_neighbors=20,
-            ),
-        ),
     align=dict(
         time=(-1, 1.5),
         threshold=dict(
@@ -20,39 +11,6 @@ P = dict(
             high=3,
             ),
         ),
-    ols=dict(
-        window=dict(
-            method='gaussian',  # gaussian or gamma (for gamma, use a as well)
-            loc=[-.8, .3, 0.05],  # [-1, +1],
-            scale=[0.03, 0.5, .03],  # [0.1, 2, .1],
-            a=[1.5, 8.1, 0.5],
-            ),
-        ),
-    viz=dict(
-        colorscale='Jet',
-        tfr=dict(
-            max=3,
-            ),
-        tfr_mean=dict(
-            max=2,
-            ),
-        ),
-    spectrum=dict(
-        method='spectrogram',  # spectrogram or wavelet or hilbert
-        window_size=0.3,
-        taper='dpss',  # dpss or hanning (only for spectrogram)
-        baseline=dict(
-            time=(-1, -0.5),
-            common=True,  # use the same, common baseline for all the trials
-            type='zscore',  # dB or zscore or percent or relchange
-            ),
-        select=dict(
-            freq=(60, 150),  # (60, 200)
-            timeinterval=0.3,  # fima/utils.py
-            ),
-        ),
-    )
-
 """
 
 

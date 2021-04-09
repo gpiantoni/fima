@@ -68,7 +68,7 @@ def pipeline_ols_all(parameters):
     to_html(divs, summary_dir / 'ols_movement_all_summary.html')
 
     df.to_csv(
-        name(parameters, 'ols_tsv') / f'{ieeg_file.stem}.tsv',
+        name(parameters, 'ols_summary') / 'overview.tsv',
         sep='\t', index=False)
 
 

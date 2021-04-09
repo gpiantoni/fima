@@ -34,7 +34,7 @@ def make_name(filename, event_type, ext='.html'):
     return f'{f.subject}_run-{f.run}{acq}_{event_type}{ext}'
 
 
-def find_max_point(tf_cht):
+def find_max_point(parameters, tf_cht):
     """Take the channel with the highest value and the interval containing that
     point
 
@@ -49,8 +49,7 @@ def find_max_point(tf_cht):
     tuple of float
         interval centered around largest activity (width depends on P['
     """
-    from .parameters import P
-    INTERVAL = P['spectrum']['select']['timeinterval']
+    INTERVAL = parameters['spectrum']['select']['timeinterval']
     ind = unravel_index(argmax(tf_cht.data[0], axis=None), tf_cht.data[0].shape)
     max_chan = tf_cht.chan[0][ind[0]]
     max_timeinterval = (

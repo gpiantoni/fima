@@ -30,8 +30,8 @@ def apply_common_baseline(tf, time, baseline):
     X = moveaxis(tf_time.data[0], 1, 2)
     X = X.reshape((X.shape[0], X.shape[1], -1))
 
-    bline_mean = mean(X, axis=-1)
-    bline_std = std(X, axis=-1)
+    bline_mean = nanmean(X, axis=-1)
+    bline_std = nanstd(X, axis=-1)
 
     if len(tf.list_of_axes) == 4:
         bline_m = bline_mean[:, None, :, None]
