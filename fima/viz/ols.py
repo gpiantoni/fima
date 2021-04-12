@@ -62,9 +62,9 @@ def plot_coefficient(results):
     HIGH = results.conf_int()[1]
 
     if 'index open' in COEF.index.values:
-        COLS = 'const' + FINGERS_OPEN + FINGERS_CLOSED
+        COLS = ['const', ] + FINGERS_OPEN + FINGERS_CLOSED
     else:
-        COLS = 'const' + FINGERS_EXTENSION + FINGERS_FLEXION
+        COLS = ['const', ] + FINGERS_EXTENSION + FINGERS_FLEXION
 
     COLORS = ['grey', ] + list(FINGER_COLOR.values()) + list(FINGER_COLOR.values())
 

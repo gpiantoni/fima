@@ -54,6 +54,12 @@ def main():
     action.set_defaults(function='continuous')
 
     action = list_pipelines.add_parser(
+        'align',
+        help='Aligned trials based on the peak activity',
+        )
+    action.set_defaults(function='align')
+
+    action = list_pipelines.add_parser(
         'ols',
         help='Fit Ordinary Least Squares on the continuous data',
         )

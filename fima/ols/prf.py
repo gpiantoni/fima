@@ -6,18 +6,25 @@ from numpy import arange, array, corrcoef, argmax
 from json import load as json_load
 from json import dump
 
-from ..parameters import FINGERS_EXTENSION, FINGERS_FLEXION
+from ..parameters import FINGERS_EXTENSION, FINGERS_FLEXION, FINGERS_OPEN, FINGERS_CLOSED
 
 
 def add_prf_estimates(json_file):
     with json_file.open() as f:
         j = json_load(f)
 
-    compute_prf_from_parameters(j, FINGERS_EXTENSION)
-    compute_prf_from_parameters(j, FINGERS_FLEXION)
+    if 'index open' in j:
+        columns_open = FINGERS_OPEN
+        columns_closed = FINGERS_CLOSED
+    else:
+        columns_open = FINGERS_EXTENSION
+        columns_closed = FINGERS_FLEXION
 
-    y_ext = [j[k] for k in FINGERS_EXTENSION]
-    y_flex = [j[k] for k in FINGERS_FLEXION]
+    compute_prf_from_parameters(j, columns_open)
+    compute_prf_from_parameters(j, columns_closed)
+
+    y_ext = [j[k] for k in columns_open]
+    y_flex = [j[k] for k in columns_closed]
     j['params corr'] = corrcoef(y_ext, y_flex)[0, 1]
     j['params diff'] = (array(y_ext) - array(y_flex)).mean()
 

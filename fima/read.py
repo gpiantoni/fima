@@ -3,13 +3,15 @@ from numpy import genfromtxt, isin, empty, NaN
 from numpy.lib.recfunctions import append_fields
 from bidso.objects import Electrodes
 from bidso import Task
+from bidso.utils import replace_underscore
 from nibabel.freesurfer.io import read_annot
 from wonambi.attr import Freesurfer
 
 from .preproc import read_data
 from .dataglove.read_dataglove import read_physio
 from .preproc.elec import read_surf
-from .align.maxmin import main_func, CRITICAL_TIMEPOINTS
+from .align.maxmin import CRITICAL_TIMEPOINTS
+from .names import name
 from .parameters import (
     FINGERS_OPEN,
     FINGERS_CLOSED,
@@ -51,11 +53,14 @@ def load(what, parameters, ieeg_file, event_type=None):
       - movements : all actual movements (from dataglove)
       - extension : actual extension of all fingers
       - flexion : actual flexion of all fingers
+      - t_inflection
+      - t_midpoint
+      - t_peak
     """
     if event_type is None:
         event_type = parameters['read']['event_type']
 
-    if event_type not in ('cues', 'open', 'close', 'movements', 'extension', 'flexion'):
+    if event_type not in ['cues', 'open', 'close', 'movements', 'extension', 'flexion'] + list(CRITICAL_TIMEPOINTS):
         raise ValueError(f'"{event_type}" is not one of the possible event types')
 
     ieeg = Task(ieeg_file)
@@ -83,6 +88,9 @@ def load(what, parameters, ieeg_file, event_type=None):
         elif event_type in ('movements', 'extension', 'flexion'):
             pattern = f'sub-{ieeg.subject}_*_run-{ieeg.run}_dataglove.tsv'
             folder = parameters['paths']['movements']
+        elif event_type in CRITICAL_TIMEPOINTS:
+            pattern = replace_underscore(ieeg_file.name, event_type.replace('_', '') + '.tsv')
+            folder = name(parameters, 'realigned_dir')
 
     elif what == 'dataglove':
         pattern = f'sub-{ieeg.subject}_*_run-{ieeg.run}_recording-dataglove_physio.tsv.gz'
@@ -161,20 +169,6 @@ def load(what, parameters, ieeg_file, event_type=None):
         return Freesurfer(filename)
 
 
-def old():
-    if what in ('continuous', 'data') or what in CRITICAL_TIMEPOINTS:
-        pattern = f'sub-{subject}_*_acq-{acq}_run-{run}_ieeg.eeg'
-        folder = BIDS_DIR
-
-
-    if what in ('continuous', 'data') or what in CRITICAL_TIMEPOINTS:
-
-
-        if what in CRITICAL_TIMEPOINTS:
-            data = read_data(filename, event_onsets=onsets)
-            offsets = main_func(data, events)
-            onsets = onsets + offsets[what]
-
 def select_events(events, t):
     """Select events for one subject / run
 
@@ -193,34 +187,21 @@ def select_events(events, t):
     ndarray
         (N, ) vector of events (str)
     """
-    if t == 'cues':
+    if t in ['cues', ] + list(CRITICAL_TIMEPOINTS):
         trial_types = FINGERS_OPEN + FINGERS_CLOSED
-        to_load = 'events'
     elif t == 'open':
         trial_types = FINGERS_OPEN
-        to_load = 'events'
     elif t == 'close':
         trial_types = FINGERS_CLOSED
-        to_load = 'events'
     elif t == 'movements':
         trial_types = FINGERS_EXTENSION + FINGERS_FLEXION
-        to_load = 'movements'
     elif t == 'flexion':
         trial_types = FINGERS_FLEXION
-        to_load = 'movements'
     elif t == 'extension':
         trial_types = FINGERS_EXTENSION
-        to_load = 'movements'
     else:
         raise ValueError(f'Unknown event_type "{t}"')
 
-    if to_load == 'events':
-        # get rid of "palm open" etc
-        events['trial_type'] = [' '.join(x.split(' ')[:2]) for x in events['trial_type']]
-
+    events['trial_type'] = [' '.join(x.split(' ')[:2]) for x in events['trial_type']]
     i_evt = isin(events['trial_type'], trial_types)
-    """
-    event_onsets = events['onset'][i_evt]
-    event_types = events['trial_type'][i_evt]
-    """
     return events[i_evt]
