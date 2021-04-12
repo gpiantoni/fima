@@ -27,7 +27,7 @@ FS_LABELS = [
 timepoints = ', '.join(f"'{x}'" for x in CRITICAL_TIMEPOINTS)
 
 
-def load(what, parameters, ieeg_file):
+def load(what, parameters, ieeg_file, event_type=None):
     f"""
     WHAT:
       - 'continuous' returns: ChanTime, event_names, events_onsets
@@ -36,7 +36,6 @@ def load(what, parameters, ieeg_file):
       - 'events' returns: ndarray
       - 'dataglove' returns: ndarray
       - 'movements' returns: ndarray
-      (run is not necessary)
       - 'electrodes'
       - 'freesurfer'
       - 'surface'
@@ -53,11 +52,17 @@ def load(what, parameters, ieeg_file):
       - extension : actual extension of all fingers
       - flexion : actual flexion of all fingers
     """
+    if event_type is None:
+        event_type = parameters['read']['event_type']
+
+    if event_type not in ('cues', 'open', 'close', 'movements', 'extension', 'flexion'):
+        raise ValueError(f'"{event_type}" is not one of the possible event types')
+
     ieeg = Task(ieeg_file)
-    events_tsv = ieeg.events.tsv
 
     if what in ('continuous', 'data'):
-        events, onsets = select_events(events_tsv, parameters['read']['event_type'])
+        events_tsv = load('events', parameters, ieeg_file, event_type)
+        events, onsets = select_events(events_tsv, event_type)
 
         if what == 'continuous':
             data = read_data(parameters, ieeg_file, event_onsets=onsets, continuous=True)
@@ -71,16 +76,16 @@ def load(what, parameters, ieeg_file):
         folder = parameters['paths']['input']
 
     elif what == 'events':
-        pattern = f'sub-{ieeg.subject}_*_run-{ieeg.run}_events.tsv'
-        folder = parameters['paths']['input']
+        if event_type in ('cues', 'open', 'close'):
+            pattern = f'sub-{ieeg.subject}_*_run-{ieeg.run}_events.tsv'
+            folder = parameters['paths']['input']
+        elif event_type in ('movements', 'extension', 'flexion'):
+            pattern = f'sub-{ieeg.subject}_*_run-{ieeg.run}_dataglove.tsv'
+            folder = parameters['paths']['movements']
 
     elif what == 'dataglove':
         pattern = f'sub-{ieeg.subject}_*_run-{ieeg.run}_recording-dataglove_physio.tsv.gz'
         folder = parameters['paths']['input']
-
-    elif what == 'movements':
-        pattern = f'sub-{ieeg.subject}_*_run-{ieeg.run}_dataglove.tsv'
-        folder = parameters['paths']['movements']
 
     elif what in ['surface', 'freesurfer'] + FS_LABELS:
         pattern = 'sub-' + ieeg.subject
@@ -108,8 +113,9 @@ def load(what, parameters, ieeg_file):
             ('onset', 'float'),
             ('duration', 'float'),
             ('trial_type', 'U4096'),
-            ('value', 'int')
             ]
+        if n_columns >= 4:
+            dtypes.insert(3, ('value', 'int'))
         if n_columns == 5:
             dtypes.insert(3, ('response_time', 'float'))  # if -1, it means that we can reject trial
 
@@ -124,14 +130,6 @@ def load(what, parameters, ieeg_file):
 
     elif what == 'dataglove':
         return read_physio(filename)
-
-    elif what == 'movements':
-        dtypes = [
-            ('onset', 'float'),
-            ('duration', 'float'),
-            ('trial_type', 'U4096'),
-            ]
-        return genfromtxt(filename, delimiter='\t', skip_header=1, dtype=dtypes)
 
     elif what == 'surface':
         elec = load('electrodes', parameters, ieeg_file)
@@ -175,8 +173,6 @@ def old():
             data = read_data(filename, event_onsets=onsets)
             offsets = main_func(data, events)
             onsets = onsets + offsets[what]
-
-
 
 
 def select_events(events, t):

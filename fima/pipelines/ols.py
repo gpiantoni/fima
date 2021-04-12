@@ -78,11 +78,11 @@ def pipeline_ols_allchan(parameters, ieeg_file):
     t = tf_cht.time[0]
 
     try:
-        mov = load('movements', parameters, ieeg_file)
+        events = load('events', parameters, ieeg_file)
     except FileNotFoundError:
         return
 
-    indices = find_movement_indices(mov, tf_cht.time[0])
+    indices = find_movement_indices(events, tf_cht.time[0])
     for chan in tf_cht.chan[0][::-1]:
         lg.info(f'{ieeg_file.stem} Fitting OLS on {chan}')
         x = tf_cht(trial=0, chan=chan, trial_axis='trial000000')

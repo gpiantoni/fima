@@ -25,7 +25,7 @@ def pipeline_brainregions(parameters, ieeg_file):
     out_dir = parameters['paths']['output'] / 'brainregions'
     out_dir.mkdir(exist_ok=True, parents=True)
 
-    tsv_file = name(parameters, ieeg_file, 'brainregions')
+    tsv_file = name(parameters, 'brainregions', ieeg_file)
     with tsv_file.open('w') as f:
         f.write('chan\tx\ty\tz\ta2009s\tDKTatlas\tBA')
 
