@@ -17,16 +17,21 @@ USE_MAX_CHANNEL_ONLY = True
 CRITICAL_TIMEPOINTS = ('t_inflection', 't_midpoint', 't_peak')
 
 
-def main_func(data, names):
+def main_func(parameters, data, names):
+    """
+    TODO
+    ----
+    - use many channels, not only the best
+    - why NaNs?
+    """
+    tf = compute_timefreq(parameters, data, baseline=True, mean=False)
+    tf = get_chantime(parameters, tf)
+    tf = select(tf, time=parameters['align']['time'])
 
-    tf = compute_timefreq(data, baseline=True, mean=False)
-    tf = get_chantime(tf)
-    tf = select(tf, time=P['align']['time'])
-
-    return find_max_min(tf, names)
+    return find_max_min(parameters, tf, names)
 
 
-def find_max_min(data, names):
+def find_max_min(parameters, data, names):
 
     t = data.time[0]
     dat_cond = data(trial=0)
@@ -44,7 +49,7 @@ def find_max_min(data, names):
             bool_chan = zeros(m.shape[0], dtype=bool)
             bool_chan[argmax(m)] = True
         else:
-            bool_chan = max(dat_mean, axis=1) >= P['align']['threshold']['high']
+            bool_chan = max(dat_mean, axis=1) >= parameters['align']['threshold']['high']
 
         channels = ', '.join(f'"{x}"' for x in data.chan[0][bool_chan])
         print(f'For realign condition "{ev}", using channels {channels}')
@@ -63,7 +68,7 @@ def find_max_min(data, names):
         for i_chan in range(n_chan):
             for i_trl in range(n_trl):
                 i_max = indices_max[i_chan, i_trl]
-                bool_threshold = dat[i_chan, :i_max, i_trl] <= P['align']['threshold']['low']
+                bool_threshold = dat[i_chan, :i_max, i_trl] <= parameters['align']['threshold']['low']
                 if i_max == 0 or not bool_threshold.any():
                     timings['peak'][i_chan, i_trl] = NaN
                     indices_min[i_chan, i_trl] = 0

@@ -62,7 +62,8 @@ def load(what, parameters, ieeg_file, event_type=None):
 
     if what in ('continuous', 'data'):
         events_tsv = load('events', parameters, ieeg_file, event_type)
-        events, onsets = select_events(events_tsv, event_type)
+        events = events_tsv['trial_type']
+        onsets = events_tsv['onset']
 
         if what == 'continuous':
             data = read_data(parameters, ieeg_file, event_onsets=onsets, continuous=True)
@@ -126,7 +127,7 @@ def load(what, parameters, ieeg_file, event_type=None):
             x.fill(NaN)
             events = append_fields(events, 'response_time', x, usemask=False)
 
-        return events
+        return select_events(events, event_type)
 
     elif what == 'dataglove':
         return read_physio(filename)
@@ -174,7 +175,6 @@ def old():
             offsets = main_func(data, events)
             onsets = onsets + offsets[what]
 
-
 def select_events(events, t):
     """Select events for one subject / run
 
@@ -219,6 +219,8 @@ def select_events(events, t):
         events['trial_type'] = [' '.join(x.split(' ')[:2]) for x in events['trial_type']]
 
     i_evt = isin(events['trial_type'], trial_types)
+    """
     event_onsets = events['onset'][i_evt]
     event_types = events['trial_type'][i_evt]
-    return event_types, event_onsets
+    """
+    return events[i_evt]

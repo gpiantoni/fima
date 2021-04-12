@@ -13,6 +13,10 @@ def name(parameters, what, ieeg_file=None):
     elif what == 'brainregions':
         out = out_dir / 'brainregions' / f'sub-{ieeg.subject}_ses-{ieeg.session}_acq-{ieeg.acquisition}_brainregions.tsv'
 
+    elif what == 'realigned_dir':
+        out = out_dir / 'realigned'
+        out.mkdir(parents=True, exist_ok=True)
+
     elif what == 'continuous':
         out = out_dir / 'continuous' / f'{ieeg_file.stem}.html'
 

@@ -3,17 +3,6 @@
 from .utils import get_color_for_val
 
 
-"""
-    align=dict(
-        time=(-1, 1.5),
-        threshold=dict(
-            low=0.5,
-            high=3,
-            ),
-        ),
-"""
-
-
 COLORSCALE = 'Jet'
 
 MOVEMENT_SYMBOL_DATA = {
