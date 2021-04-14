@@ -7,6 +7,11 @@ Information to store in `parameters.json` file.
     - movements: str, path to movements (should have the same prefix as `_events.tsv` but ends with `_dataglove.tsv`)
     - freesurfer_subjects_dir: str, path to freesurfer folder,
     - output: str, path to output folder which will contain the results
+  - align:
+    - time: [float, float], interval to look for the max value
+    - threshold:
+      - high: float, when activity is above this threshold, consider it actual movement
+      - low: float, from the peak, look back until activity goes below this threshold
   - read:
     - event_type : str, one of 'cues', 'open', 'close', 'movements', 'extension', 'flexion'
     - pre: float, time in s to include before the events
@@ -25,6 +30,7 @@ Information to store in `parameters.json` file.
       - type: "zscore", "dB"
     - select:
       - freq: [float, float], frequency range to include
+      - peak: str, 'positive' or 'negative', look for the highest and lowest peak
       - timeinterval: float, center of the time window
   - ols:
     - threshold: float

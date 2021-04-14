@@ -47,10 +47,14 @@ def find_max_point(parameters, tf_cht):
     str
         channel with largest activity
     tuple of float
-        interval centered around largest activity (width depends on P['
+        interval centered around largest activity
     """
     INTERVAL = parameters['spectrum']['select']['timeinterval']
-    ind = unravel_index(argmax(tf_cht.data[0], axis=None), tf_cht.data[0].shape)
+    if parameters['spectrum']['select']['peak'] == 'positive':
+        gain = 1
+    elif parameters['spectrum']['select']['peak'] == 'negative':
+        gain = -1
+    ind = unravel_index(argmax(gain * tf_cht.data[0], axis=None), tf_cht.data[0].shape)
     max_chan = tf_cht.chan[0][ind[0]]
     max_timeinterval = (
         tf_cht.time[0][ind[1]] - INTERVAL / 2,
