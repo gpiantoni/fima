@@ -2,7 +2,8 @@
 
 from argparse import ArgumentParser, RawTextHelpFormatter
 from logging import getLogger, INFO, DEBUG, StreamHandler, Formatter
-from json import load
+from json import load, dump, JSONEncoder
+from datetime import datetime
 from pathlib import Path
 
 from ..pipelines import pipeline_fima
@@ -121,6 +122,12 @@ def main():
         parameters['ols']['skip_ols'] = args.skip_ols
         parameters['ols']['skip_prf'] = args.skip_prf
 
+    parameters['paths']['output'].mkdir(exist_ok=True, parents=True)
+    parameters['timestamp'] = datetime.now().isoformat()
+    parameters_json = parameters['paths']['output'] / 'parameters.json'
+    with parameters_json.open('w') as f:
+        dump(parameters, f, indent=2, cls=JSONEncoder_path)
+
     pipeline_fima(
         parameters,
         args.function,
@@ -136,6 +143,12 @@ def read_parameters(parameters_path):
         parameters['paths'][k] = Path(parameters['paths'][k]).resolve()
 
     return parameters
+
+
+class JSONEncoder_path(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Path):
+            return str(obj)
 
 
 if __name__ == '__main__':
