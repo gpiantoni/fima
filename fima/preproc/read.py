@@ -39,12 +39,14 @@ def read_data(parameters, filename, event_onsets, continuous=False):
 
 def hide_artifacts(parameters, data):
 
+    data_comparison = montage(data, ref_to_avg=True, method='median')
+
     count_samples = []
 
     bad_smp = int(data.s_freq * parameters['read']['artifacts']['window'] / 2)
 
     for i_trl in range(data.number_of('trial')):
-        i_bad = abs(data.data[i_trl]) > parameters['read']['artifacts']['threshold']
+        i_bad = abs(data_comparison.data[i_trl]) > parameters['read']['artifacts']['threshold']
 
         # before
         padded_bad = i_bad.copy()

@@ -14,7 +14,7 @@ from ..ols.summary import import_all_ols
 from ..viz import to_div, to_html
 from ..viz.surf import plot_surf
 from ..viz.ols import plot_coefficient, plot_data_prediction
-from ..viz.ols_summary import plot_ols_rsquared, plot_ols_params
+from ..viz.ols_summary import plot_ols_rsquared, plot_ols_params, plot_ols_flexext, plot_ols_prf, plot_fingerfriends
 from ..names import name
 
 lg = getLogger(__name__)
@@ -37,9 +37,12 @@ def pipeline_ols_all(parameters):
 
     summary_dir = name(parameters, 'ols_plot')
 
+    divs = plot_fingerfriends(parameters)
+    to_html(divs, summary_dir / 'ols_movement_all_fingerfriends.html')
+
     df = import_all_ols(parameters)
 
-    REGIONS = ['brainregion', 'BA']
+    REGIONS = ['brainregion', ]
     divs = []
     for region in REGIONS:
         fig = plot_ols_rsquared(df, region)
@@ -66,6 +69,15 @@ def pipeline_ols_all(parameters):
                 )
             divs.append(to_div(fig))
     to_html(divs, summary_dir / 'ols_movement_all_summary.html')
+
+    divs = plot_ols_flexext(df, 'brainregions')
+    to_html(divs, summary_dir / 'ols_movement_all_flexext.html')
+
+    divs = plot_ols_prf(df, 'brainregions', 'finger')
+    to_html(divs, summary_dir / 'ols_movement_all_prf_finger.html')
+
+    divs = plot_ols_prf(df, 'brainregions', 'spread')
+    to_html(divs, summary_dir / 'ols_movement_all_prf_spread.html')
 
     df.to_csv(
         name(parameters, 'ols_summary') / 'overview.tsv',
