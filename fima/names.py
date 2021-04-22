@@ -8,10 +8,16 @@ def name(parameters, what, ieeg_file=None):
         ieeg = Task(ieeg_file)
 
     if what == 'brainregions_dir':
-        out = out_dir / 'brainregions'
+        out = out_dir / 'brainregions' / 'tsv'
+        out.mkdir(parents=True, exist_ok=True)
+
+    elif what == 'brainregions_plot':
+        out = out_dir / 'brainregions' / 'plots' / f'sub-{ieeg.subject}_ses-{ieeg.session}_acq-{ieeg.acquisition}_brainregions.html'
 
     elif what == 'brainregions':
-        out = out_dir / 'brainregions' / f'sub-{ieeg.subject}_ses-{ieeg.session}_acq-{ieeg.acquisition}_brainregions.tsv'
+        tsv_dir = out_dir / 'brainregions' / 'tsv'
+        tsv_dir.mkdir(parents=True, exist_ok=True)
+        out = tsv_dir / f'sub-{ieeg.subject}_ses-{ieeg.session}_acq-{ieeg.acquisition}_brainregions.tsv'
 
     elif what == 'realigned_dir':
         out = out_dir / 'realigned'

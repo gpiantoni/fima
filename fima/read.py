@@ -9,7 +9,7 @@ from wonambi.attr import Freesurfer
 
 from .preproc import read_data
 from .dataglove.read_dataglove import read_physio
-from .preproc.elec import read_surf
+from .preproc.elec import read_surf, read_brainregion_colors, read_brainregion_colorscale
 from .align.maxmin import CRITICAL_TIMEPOINTS
 from .names import name
 from .parameters import (
@@ -20,10 +20,11 @@ from .parameters import (
     )
 
 FS_LABELS = [
-    'aparc',
+    'aparc',  # same as aparc.DKTatlas
     'aparc.a2009s',
     'aparc.DKTatlas',
     'BA_exvivo',
+    'BA_exvivo.thresh',
     ]
 
 timepoints = ', '.join(f"'{x}'" for x in CRITICAL_TIMEPOINTS)
@@ -151,7 +152,7 @@ def load(what, parameters, ieeg_file, event_type=None):
         hemi = pial.surf_file.stem
 
         aparc_file = fs.dir / 'label' / f'{hemi}.{what}.annot'
-        region_values, _, region_names = read_annot(aparc_file)
+        region_values, region_ctab, region_names = read_annot(aparc_file)
 
         out = {
             'aparc': what,
@@ -160,6 +161,8 @@ def load(what, parameters, ieeg_file, event_type=None):
             'regions': {
                 'values': region_values,
                 'names': [x.decode() for x in region_names],
+                'colors': read_brainregion_colors(region_names, region_ctab),
+                'colorscale': read_brainregion_colorscale(region_ctab),
                 }
             }
 

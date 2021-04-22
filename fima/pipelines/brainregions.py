@@ -2,8 +2,11 @@ from logging import getLogger
 from numpy import r_, argmin
 from numpy.linalg import norm
 
+from ..parameters import REGION_TYPES
 from ..names import name
 from ..read import load
+from ..viz.brainregions import plot_brain_regions
+from ..viz.utils import to_div, to_html
 
 lg = getLogger(__name__)
 
@@ -19,7 +22,7 @@ def pipeline_brainregions(parameters, ieeg_file):
     elec = load('electrodes', parameters, ieeg_file)
 
     aparc = {}
-    for template in ('aparc.a2009s', 'aparc.DKTatlas', 'BA_exvivo'):
+    for template in REGION_TYPES:
         aparc[template] = load(template, parameters, ieeg_file)
 
     out_dir = parameters['paths']['output'] / 'brainregions'
@@ -27,16 +30,24 @@ def pipeline_brainregions(parameters, ieeg_file):
 
     tsv_file = name(parameters, 'brainregions', ieeg_file)
     with tsv_file.open('w') as f:
-        f.write('chan\tx\ty\tz\ta2009s\tDKTatlas\tBA')
+        HDR = ['name', 'x', 'y', 'z'] + REGION_TYPES
+        f.write('\t'.join(HDR))
 
         for el in elec:
             pos = r_[el['x'], el['y'], el['z']]
-            pos_surf = pos - aparc['aparc.a2009s']['ras_shift']  # ras_shift depends on T1.mgz not on aparc
-            i_vert = argmin(norm(aparc['aparc.a2009s']['vert'] - pos_surf, axis=1))
+            i_vert = argmin(norm(aparc['aparc.a2009s']['vert'] - pos, axis=1))
 
             f.write(f"\n{el['name']}\t{el['x']}\t{el['y']}\t{el['z']}")
             for region_name, i_aparc in aparc.items():
                 region = i_aparc['regions']['names'][i_aparc['regions']['values'][i_vert]]
-                if region_name == 'BA_exvivo':
+                if region_name.startswith('BA_exvivo'):
                     region = region.split('_')[0]
                 f.write(f"\t{region}")
+
+    # not very efficient because we read the surf every time but the function call is much cleaner
+    divs = []
+    for region_type in REGION_TYPES:
+        fig = plot_brain_regions(parameters, ieeg_file, region_type)
+        divs.append(to_div(fig))
+
+    to_html(divs, name(parameters, 'brainregions_plot', ieeg_file))

@@ -3,6 +3,13 @@
 from .utils import get_color_for_val
 
 
+REGION_TYPES = [
+    'aparc.a2009s',
+    'aparc.DKTatlas',
+    'BA_exvivo',
+    'BA_exvivo.thresh',
+    ]
+
 COLORSCALE = 'Jet'
 
 MOVEMENT_SYMBOL_DATA = {
