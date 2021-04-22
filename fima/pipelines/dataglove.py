@@ -3,30 +3,31 @@ from logging import getLogger
 from ..viz.dataglove import plot_dataglove
 from ..read import load
 from ..viz import to_div, to_html
+from ..names import name
 
 lg = getLogger(__name__)
 
 
-def pipeline_dataglove(subject, run):
+def pipeline_dataglove(parameters, ieeg_file):
     try:
-        events = load('events', subject, run)
+        events = load('events', parameters, ieeg_file, 'cues')
     except FileNotFoundError:
-        lg.warning(f'{subject:<10}/ {run} No events')
+        lg.warning(f'{ieeg_file.stem} No events')
         return
 
     try:
-        tsv = load('dataglove', subject, run)
+        tsv = load('dataglove', parameters, ieeg_file)
     except FileNotFoundError:
-        lg.warning(f'{subject:<10}/ {run} No dataglove file')
+        lg.warning(f'{ieeg_file.stem} No dataglove file')
         return
 
     try:
-        mov = load('movements', subject, run)
+        mov = load('events', parameters, ieeg_file, 'movements')
     except FileNotFoundError:
         mov = None
-        lg.warning(f'{subject:<10}/ {run} You need to mark the movements')
+        lg.warning(f'{ieeg_file.stem} You need to mark the movements')
 
-    lg.info(f'{subject:<10}/ {run} Plotting dataglove data')
+    lg.info(f'{ieeg_file.stem} Plotting dataglove data')
     fig = plot_dataglove(tsv, events, mov)
-    html_file = RESULTS_DIR / 'dataglove' / f'{subject}_run-{run}_dataglove.html'
+    html_file = name(parameters, 'dataglove') / (ieeg_file.stem + '.html')
     to_html([to_div(fig), ], html_file)

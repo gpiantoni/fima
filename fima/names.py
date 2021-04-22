@@ -19,6 +19,10 @@ def name(parameters, what, ieeg_file=None):
         tsv_dir.mkdir(parents=True, exist_ok=True)
         out = tsv_dir / f'sub-{ieeg.subject}_ses-{ieeg.session}_acq-{ieeg.acquisition}_brainregions.tsv'
 
+    elif what == 'dataglove':
+        out = out_dir / 'dataglove'
+        out.mkdir(parents=True, exist_ok=True)
+
     elif what == 'realigned_dir':
         out = out_dir / 'realigned'
         out.mkdir(parents=True, exist_ok=True)
