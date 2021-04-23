@@ -38,7 +38,6 @@ def load(what, parameters, ieeg_file, event_type=None):
       -  {timepoints} returns: ChanTime, event_names
       - 'events' returns: ndarray
       - 'dataglove' returns: ndarray
-      - 'movements' returns: ndarray
       - 'electrodes'
       - 'freesurfer'
       - 'surface'

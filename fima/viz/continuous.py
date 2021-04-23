@@ -10,6 +10,7 @@ lg = getLogger(__name__)
 
 
 def plot_continuous(parameters, tf_cht, onsets, events):
+    raise NotImplementedError("this function is not used anymore. Data is exported directly")
 
     # chans = select_significant_channels(tf_cht, onsets)
 

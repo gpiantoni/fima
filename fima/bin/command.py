@@ -49,6 +49,12 @@ def main():
     action.set_defaults(function='dataglove')
 
     action = list_pipelines.add_parser(
+        'spectrum',
+        help='Compute Time-Frequency Analysis',
+        )
+    action.set_defaults(function='spectrum')
+
+    action = list_pipelines.add_parser(
         'continuous',
         help='Plot the time-course continuously in the high-frequency range',
         )
@@ -71,12 +77,6 @@ def main():
     action.add_argument(
         '--skip_prf', action='store_true',
         help='Skip PRF on parameters (time consuming). Use both options to jump to summary directly')
-
-    action = list_pipelines.add_parser(
-        'spectrum',
-        help='Compute Time-Frequency Analysis',
-        )
-    action.set_defaults(function='spectrum')
 
     action = list_pipelines.add_parser(
         'flex_ext',
