@@ -49,16 +49,16 @@ def main():
     action.set_defaults(function='dataglove')
 
     action = list_pipelines.add_parser(
-        'spectrum',
-        help='Compute Time-Frequency Analysis',
-        )
-    action.set_defaults(function='spectrum')
-
-    action = list_pipelines.add_parser(
         'continuous',
         help='Plot the time-course continuously in the high-frequency range',
         )
     action.set_defaults(function='continuous')
+
+    action = list_pipelines.add_parser(
+        'spectrum',
+        help='Compute Time-Frequency Analysis',
+        )
+    action.set_defaults(function='spectrum')
 
     action = list_pipelines.add_parser(
         'align',

@@ -54,18 +54,21 @@ def compute_timefreq(parameters, data, baseline=True, mean=True):
     if mean:
         tf = math(
             tf,
-            operator_name='mean',
+            operator_name='nanmean',
             axis='trial_axis')
 
     return tf
 
 
-def get_chantime(parameters, tf, freq=None, baseline=False):
+def get_chantime(parameters, tf, freq=None, baseline=False, freq_operator='nanmean'):
+    """
+    freq_operator : nanmean or nanmax
+    """
     if freq is None:
         freq = parameters['spectrum']['select']['freq']
     out = math(
         select(tf, freq=freq),
-        operator_name='mean',
+        operator_name=freq_operator,
         axis='freq')
 
     if baseline:
@@ -84,7 +87,7 @@ def get_chantime(parameters, tf, freq=None, baseline=False):
     return out
 
 
-def get_chan(parameters, tf, freq=None, baseline=False, time=None, operator_name='mean'):
+def get_chan(parameters, tf, freq=None, baseline=False, time=None, operator_name='nanmean'):
     if time is None:
         time = parameters['spectrum']['select']['time']
     tf = get_chantime(parameters, tf, freq=freq, baseline=baseline)
