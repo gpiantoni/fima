@@ -25,14 +25,19 @@ def pipeline_continuous(parameters, ieeg):
     # divs = plot_continuous(parameters, tf_cht, onsets, events)
 
     # prepare events for export
-    mov = load('events', parameters, ieeg, 'movements')
     mov_export = []
-    for m in mov:
-        mov_export.append({
-            'name': m['trial_type'],
-            'start': m['onset'] - tf_cht.time[0][0],
-            'end': m['onset'] + m['duration'] - tf_cht.time[0][0],
-        })
+
+    try:
+        mov = load('events', parameters, ieeg, 'movements')
+    except FileNotFoundError:  # when missing dataglove
+        return
+    else:
+        for m in mov:
+            mov_export.append({
+                'name': m['trial_type'],
+                'start': m['onset'] - tf_cht.time[0][0],
+                'end': m['onset'] + m['duration'] - tf_cht.time[0][0],
+            })
 
     tf_cht.s_freq = 1 / (tf_cht.time[0][1] - tf_cht.time[0][0])
     tf_cht.export(
