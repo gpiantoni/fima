@@ -34,6 +34,33 @@ def make_name(filename, event_type, ext='.html'):
     return f'{f.subject}_run-{f.run}{acq}_{event_type}{ext}'
 
 
+def get_events(names):
+    """Get events, but order by finger
+
+    Parameters
+    ----------
+    names : list of str
+        all the events in the dataset
+
+    Returns
+    -------
+    list of str
+        list of events (thumb, index etc)
+    """
+    from .parameters import FINGERS_CLOSED, FINGERS_OPEN, FINGERS_FLEXION, FINGERS_EXTENSION
+    events = []
+    if 'thumb close' in names:
+        events.extend(FINGERS_CLOSED)
+    if 'thumb open' in names:
+        events.extend(FINGERS_OPEN)
+    if 'thumb flexion' in names:
+        events.extend(FINGERS_FLEXION)
+    if 'thumb extension' in names:
+        events.extend(FINGERS_EXTENSION)
+
+    return events
+
+
 def find_max_point(parameters, tf_cht):
     """Take the channel with the highest value and the interval containing that
     point

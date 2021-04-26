@@ -86,7 +86,12 @@ def pipeline_ols_all(parameters):
 
 def pipeline_ols_allchan(parameters, ieeg_file):
 
-    tf_cht, events, onsets = get_continuous_cht(parameters, ieeg_file)
+    try:
+        tf_cht, events, onsets = get_continuous_cht(parameters, ieeg_file)
+    except FileNotFoundError as err:
+        lg.warning(err)
+        return
+
     t = tf_cht.time[0]
 
     try:

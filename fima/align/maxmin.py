@@ -11,7 +11,6 @@ from wonambi.trans import select
 
 from ..spectrum.compute import compute_timefreq, get_chantime
 from ..utils import create_bool
-from ..parameters import EVENTS
 
 USE_MAX_CHANNEL_ONLY = True
 CRITICAL_TIMEPOINTS = ('t_inflection', 't_midpoint', 't_peak')

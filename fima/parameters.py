@@ -47,5 +47,3 @@ for f in FINGERS:
     FINGERS_CLOSED.append(f + ' close')
     FINGERS_FLEXION.append(f + ' flexion')
     FINGERS_EXTENSION.append(f + ' extension')
-
-EVENTS = FINGERS_OPEN + FINGERS_CLOSED
