@@ -30,7 +30,7 @@ def pipeline_brainregions(parameters, ieeg_file):
 
     tsv_file = name(parameters, 'brainregions', ieeg_file)
     with tsv_file.open('w') as f:
-        HDR = ['name', 'x', 'y', 'z'] + REGION_TYPES
+        HDR = ['chan', 'x', 'y', 'z'] + REGION_TYPES
         f.write('\t'.join(HDR))
 
         for el in elec:
@@ -44,6 +44,7 @@ def pipeline_brainregions(parameters, ieeg_file):
                     region = region.split('_')[0]
                 f.write(f"\t{region}")
 
+    """
     # not very efficient because we read the surf every time but the function call is much cleaner
     divs = []
     for region_type in REGION_TYPES:
@@ -51,3 +52,4 @@ def pipeline_brainregions(parameters, ieeg_file):
         divs.append(to_div(fig))
 
     to_html(divs, name(parameters, 'brainregions_plot', ieeg_file))
+    """

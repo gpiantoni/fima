@@ -42,7 +42,7 @@ def pipeline_ols_all(parameters):
 
     df = import_all_ols(parameters)
 
-    REGIONS = ['brainregion', ]
+    REGIONS = ['a2009s', 'BA', 'DKTatlas']
     divs = []
     for region in REGIONS:
         fig = plot_ols_rsquared(df, region)

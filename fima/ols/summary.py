@@ -12,8 +12,9 @@ COLUMNS = {
     'recording/acquisition': 'acquisition',
     'recording/run': 'run',
     'channel/chan': 'chan',
-    'channel/brainregion': 'a2009s',
-    'channel/BA': 'BA',
+    'channel/a2009s': 'aparc.a2009s',
+    'channel/DKTatlas': 'aparc.DKTatlas',
+    'channel/BA': 'BA_exvivo.thresh',
     'estimate/rsquared': 'rsquared',
     'estimate/onset': 'onset',
     'estimate/skewness': 'a',
@@ -47,7 +48,8 @@ def import_all_ols(parameters):
     df1 = df[list(columns.values())]
     df1.columns = MultiIndex.from_tuples([tuple(k.split('/')) for k in columns.keys()])
 
-    df1.loc[isnull(df1['channel']['brainregion']), ('channel', 'brainregion')] = 'unknown'
+    df1.loc[isnull(df1['channel']['DKTatlas']), ('channel', 'DKTatlas')] = 'unknown'
+    df1.loc[isnull(df1['channel']['a2009s']), ('channel', 'a2009s')] = 'unknown'
     df1.loc[isnull(df1['channel']['BA']), ('channel', 'BA')] = 'unknown'
 
     return df1
