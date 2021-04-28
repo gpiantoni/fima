@@ -26,10 +26,21 @@
 </summary>
 <pre><code class="python">import plotly.graph_objects as go
 
-from numpy import arange, sqrt
+from numpy import arange, sqrt, abs, max, linspace, isnan, histogram, zeros, corrcoef
 
+from .utils import to_div
 
+from ..ols.summary import import_df_ols
 from ..utils import get_color_for_val
+from ..parameters import FINGERS
+
+
+REGIONS = (
+    &#39;G_precentral&#39;,
+    &#39;G_postcentral&#39;,
+    &#39;G_parietal_sup&#39;,
+    &#39;G_parietal_inf-Supramar&#39;,
+    )
 
 
 def plot_ols_params(df, param, region_type, yaxis_name=&#39;&#39;):
@@ -116,7 +127,114 @@ def plot_ols_rsquared(df, region_type):
                 ),
         ))
 
-    return fig</code></pre>
+    return fig
+
+
+def plot_ols_prf(df, region_type, param):
+
+    i = (df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1)
+    df1 = df[i]
+    region_type = &#39;brainregion&#39;
+
+    x = df1[&#39;flexext&#39;][&#39;diff&#39;]
+    absmax = max(abs(x))
+    bins = linspace(-absmax, absmax, 30)
+
+    divs = []
+    for region in REGIONS:
+        df_roi = df1.loc[df[&#39;channel&#39;][region_type] == region]
+        i_ext = (df_roi[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1) &amp; (df_roi[&#39;extension&#39;][&#39;rsquared&#39;] &gt;= 0.9)
+        i_flex = (df_roi[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1) &amp; (df_roi[&#39;flexion&#39;][&#39;rsquared&#39;] &gt;= 0.9)
+
+        if param == &#39;finger&#39;:
+            bins = linspace(-1.5, 5.5, 15)
+        elif param == &#39;spread&#39;:
+            bins = linspace(0, 5, 20)
+
+        fig = go.Figure(data=[
+            make_bars(df_roi[i_ext][&#39;extension&#39;][param], bins, &#39;extension&#39;),
+            make_bars(df_roi[i_flex][&#39;flexion&#39;][param], bins, &#39;flexion&#39;),
+            ],
+            layout=go.Layout(
+                title=dict(
+                    text=region),
+            ))
+        divs.append(to_div(fig))
+
+    return divs
+
+
+def plot_ols_flexext(df, region_type):
+
+    i = (df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1)
+    df1 = df[i]
+    region_type = &#39;brainregion&#39;
+
+    x = df1[&#39;flexext&#39;][&#39;diff&#39;]
+    absmax = max(abs(x))
+    bins = linspace(-absmax, absmax, 30)
+
+    divs = []
+    for region in REGIONS:
+        df_roi = df1.loc[df[&#39;channel&#39;][region_type] == region]
+        fig = go.Figure(
+            data=[
+                make_bars(df_roi[&#39;flexext&#39;][&#39;diff&#39;], bins),
+                ],
+            layout=go.Layout(
+                title=dict(
+                    text=region),
+                bargap=0,
+            ))
+        divs.append(to_div(fig))
+
+    return divs
+
+
+def make_bars(x, bins, name=&#39;&#39;):
+    x = x[~isnan(x)]
+    [hist, edges] = histogram(x, bins=bins)
+
+    trace = go.Bar(
+        x=edges[:-1] + (edges[1] - edges[0]) / 2,
+        y=hist,
+        name=name,
+        )
+    return trace
+
+
+def plot_fingerfriends(parameters):
+
+    df_ols = import_df_ols(parameters)
+    i = df_ols[&#39;rsquared&#39;] &gt; 0.2
+    df = df_ols[i]
+
+    divs = []
+    for region in REGIONS:
+        for MOVEMENT in (&#39;flexion&#39;, &#39;extension&#39;):
+
+            cc = zeros((5, 5))
+            for i0, f0 in enumerate(FINGERS):
+                for i1, f1 in enumerate(FINGERS):
+                    cc[i0, i1] = corrcoef(df[f&#39;{f0} {MOVEMENT}&#39;], df[f&#39;{f1} {MOVEMENT}&#39;])[0, 1]
+                    fig = go.Figure(
+                        data=[
+                            go.Heatmap(
+                                z=cc,
+                                zmin=0,
+                                zmax=1,
+                                colorscale=&#39;Hot&#39;,
+                            ),
+                        ],
+                        layout=go.Layout(
+                            title=dict(
+                                text=region + &#39; &#39; + MOVEMENT),
+                            yaxis=dict(
+                                autorange=&#39;reversed&#39;)))
+
+            divs.append(to_div(fig))
+
+    return divs</code></pre>
 </details>
 </section>
 <section>
@@ -126,6 +244,106 @@ def plot_ols_rsquared(df, region_type):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="fima.viz.ols_summary.make_bars"><code class="name flex">
+<span>def <span class="ident">make_bars</span></span>(<span>x, bins, name='')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def make_bars(x, bins, name=&#39;&#39;):
+    x = x[~isnan(x)]
+    [hist, edges] = histogram(x, bins=bins)
+
+    trace = go.Bar(
+        x=edges[:-1] + (edges[1] - edges[0]) / 2,
+        y=hist,
+        name=name,
+        )
+    return trace</code></pre>
+</details>
+</dd>
+<dt id="fima.viz.ols_summary.plot_fingerfriends"><code class="name flex">
+<span>def <span class="ident">plot_fingerfriends</span></span>(<span>parameters)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_fingerfriends(parameters):
+
+    df_ols = import_df_ols(parameters)
+    i = df_ols[&#39;rsquared&#39;] &gt; 0.2
+    df = df_ols[i]
+
+    divs = []
+    for region in REGIONS:
+        for MOVEMENT in (&#39;flexion&#39;, &#39;extension&#39;):
+
+            cc = zeros((5, 5))
+            for i0, f0 in enumerate(FINGERS):
+                for i1, f1 in enumerate(FINGERS):
+                    cc[i0, i1] = corrcoef(df[f&#39;{f0} {MOVEMENT}&#39;], df[f&#39;{f1} {MOVEMENT}&#39;])[0, 1]
+                    fig = go.Figure(
+                        data=[
+                            go.Heatmap(
+                                z=cc,
+                                zmin=0,
+                                zmax=1,
+                                colorscale=&#39;Hot&#39;,
+                            ),
+                        ],
+                        layout=go.Layout(
+                            title=dict(
+                                text=region + &#39; &#39; + MOVEMENT),
+                            yaxis=dict(
+                                autorange=&#39;reversed&#39;)))
+
+            divs.append(to_div(fig))
+
+    return divs</code></pre>
+</details>
+</dd>
+<dt id="fima.viz.ols_summary.plot_ols_flexext"><code class="name flex">
+<span>def <span class="ident">plot_ols_flexext</span></span>(<span>df, region_type)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_ols_flexext(df, region_type):
+
+    i = (df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1)
+    df1 = df[i]
+    region_type = &#39;brainregion&#39;
+
+    x = df1[&#39;flexext&#39;][&#39;diff&#39;]
+    absmax = max(abs(x))
+    bins = linspace(-absmax, absmax, 30)
+
+    divs = []
+    for region in REGIONS:
+        df_roi = df1.loc[df[&#39;channel&#39;][region_type] == region]
+        fig = go.Figure(
+            data=[
+                make_bars(df_roi[&#39;flexext&#39;][&#39;diff&#39;], bins),
+                ],
+            layout=go.Layout(
+                title=dict(
+                    text=region),
+                bargap=0,
+            ))
+        divs.append(to_div(fig))
+
+    return divs</code></pre>
+</details>
+</dd>
 <dt id="fima.viz.ols_summary.plot_ols_params"><code class="name flex">
 <span>def <span class="ident">plot_ols_params</span></span>(<span>df, param, region_type, yaxis_name='')</span>
 </code></dt>
@@ -175,6 +393,49 @@ def plot_ols_rsquared(df, region_type):
         )
 
     return fig</code></pre>
+</details>
+</dd>
+<dt id="fima.viz.ols_summary.plot_ols_prf"><code class="name flex">
+<span>def <span class="ident">plot_ols_prf</span></span>(<span>df, region_type, param)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_ols_prf(df, region_type, param):
+
+    i = (df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1)
+    df1 = df[i]
+    region_type = &#39;brainregion&#39;
+
+    x = df1[&#39;flexext&#39;][&#39;diff&#39;]
+    absmax = max(abs(x))
+    bins = linspace(-absmax, absmax, 30)
+
+    divs = []
+    for region in REGIONS:
+        df_roi = df1.loc[df[&#39;channel&#39;][region_type] == region]
+        i_ext = (df_roi[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1) &amp; (df_roi[&#39;extension&#39;][&#39;rsquared&#39;] &gt;= 0.9)
+        i_flex = (df_roi[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1) &amp; (df_roi[&#39;flexion&#39;][&#39;rsquared&#39;] &gt;= 0.9)
+
+        if param == &#39;finger&#39;:
+            bins = linspace(-1.5, 5.5, 15)
+        elif param == &#39;spread&#39;:
+            bins = linspace(0, 5, 20)
+
+        fig = go.Figure(data=[
+            make_bars(df_roi[i_ext][&#39;extension&#39;][param], bins, &#39;extension&#39;),
+            make_bars(df_roi[i_flex][&#39;flexion&#39;][param], bins, &#39;flexion&#39;),
+            ],
+            layout=go.Layout(
+                title=dict(
+                    text=region),
+            ))
+        divs.append(to_div(fig))
+
+    return divs</code></pre>
 </details>
 </dd>
 <dt id="fima.viz.ols_summary.plot_ols_rsquared"><code class="name flex">
@@ -249,8 +510,12 @@ def plot_ols_rsquared(df, region_type):
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
+<ul class="two-column">
+<li><code><a title="fima.viz.ols_summary.make_bars" href="#fima.viz.ols_summary.make_bars">make_bars</a></code></li>
+<li><code><a title="fima.viz.ols_summary.plot_fingerfriends" href="#fima.viz.ols_summary.plot_fingerfriends">plot_fingerfriends</a></code></li>
+<li><code><a title="fima.viz.ols_summary.plot_ols_flexext" href="#fima.viz.ols_summary.plot_ols_flexext">plot_ols_flexext</a></code></li>
 <li><code><a title="fima.viz.ols_summary.plot_ols_params" href="#fima.viz.ols_summary.plot_ols_params">plot_ols_params</a></code></li>
+<li><code><a title="fima.viz.ols_summary.plot_ols_prf" href="#fima.viz.ols_summary.plot_ols_prf">plot_ols_prf</a></code></li>
 <li><code><a title="fima.viz.ols_summary.plot_ols_rsquared" href="#fima.viz.ols_summary.plot_ols_rsquared">plot_ols_rsquared</a></code></li>
 </ul>
 </li>

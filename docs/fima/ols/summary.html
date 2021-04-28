@@ -38,8 +38,9 @@ COLUMNS = {
     &#39;recording/acquisition&#39;: &#39;acquisition&#39;,
     &#39;recording/run&#39;: &#39;run&#39;,
     &#39;channel/chan&#39;: &#39;chan&#39;,
-    &#39;channel/brainregion&#39;: &#39;a2009s&#39;,
-    &#39;channel/BA&#39;: &#39;BA&#39;,
+    &#39;channel/a2009s&#39;: &#39;aparc.a2009s&#39;,
+    &#39;channel/DKTatlas&#39;: &#39;aparc.DKTatlas&#39;,
+    &#39;channel/BA&#39;: &#39;BA_exvivo.thresh&#39;,
     &#39;estimate/rsquared&#39;: &#39;rsquared&#39;,
     &#39;estimate/onset&#39;: &#39;onset&#39;,
     &#39;estimate/skewness&#39;: &#39;a&#39;,
@@ -73,7 +74,8 @@ def import_all_ols(parameters):
     df1 = df[list(columns.values())]
     df1.columns = MultiIndex.from_tuples([tuple(k.split(&#39;/&#39;)) for k in columns.keys()])
 
-    df1.loc[isnull(df1[&#39;channel&#39;][&#39;brainregion&#39;]), (&#39;channel&#39;, &#39;brainregion&#39;)] = &#39;unknown&#39;
+    df1.loc[isnull(df1[&#39;channel&#39;][&#39;DKTatlas&#39;]), (&#39;channel&#39;, &#39;DKTatlas&#39;)] = &#39;unknown&#39;
+    df1.loc[isnull(df1[&#39;channel&#39;][&#39;a2009s&#39;]), (&#39;channel&#39;, &#39;a2009s&#39;)] = &#39;unknown&#39;
     df1.loc[isnull(df1[&#39;channel&#39;][&#39;BA&#39;]), (&#39;channel&#39;, &#39;BA&#39;)] = &#39;unknown&#39;
 
     return df1
@@ -236,7 +238,8 @@ certain threshold (percent of the max)</p>
     df1 = df[list(columns.values())]
     df1.columns = MultiIndex.from_tuples([tuple(k.split(&#39;/&#39;)) for k in columns.keys()])
 
-    df1.loc[isnull(df1[&#39;channel&#39;][&#39;brainregion&#39;]), (&#39;channel&#39;, &#39;brainregion&#39;)] = &#39;unknown&#39;
+    df1.loc[isnull(df1[&#39;channel&#39;][&#39;DKTatlas&#39;]), (&#39;channel&#39;, &#39;DKTatlas&#39;)] = &#39;unknown&#39;
+    df1.loc[isnull(df1[&#39;channel&#39;][&#39;a2009s&#39;]), (&#39;channel&#39;, &#39;a2009s&#39;)] = &#39;unknown&#39;
     df1.loc[isnull(df1[&#39;channel&#39;][&#39;BA&#39;]), (&#39;channel&#39;, &#39;BA&#39;)] = &#39;unknown&#39;
 
     return df1</code></pre>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.preproc.read API documentation</title>
+<title>fima.preproc.ieeg API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.preproc.read</code></h1>
+<h1 class="title">Module <code>fima.preproc.ieeg</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -65,12 +65,14 @@ def read_data(parameters, filename, event_onsets, continuous=False):
 
 def hide_artifacts(parameters, data):
 
+    data_comparison = montage(data, ref_to_avg=True, method=&#39;median&#39;)
+
     count_samples = []
 
     bad_smp = int(data.s_freq * parameters[&#39;read&#39;][&#39;artifacts&#39;][&#39;window&#39;] / 2)
 
     for i_trl in range(data.number_of(&#39;trial&#39;)):
-        i_bad = abs(data.data[i_trl]) &gt; parameters[&#39;read&#39;][&#39;artifacts&#39;][&#39;threshold&#39;]
+        i_bad = abs(data_comparison.data[i_trl]) &gt; parameters[&#39;read&#39;][&#39;artifacts&#39;][&#39;threshold&#39;]
 
         # before
         padded_bad = i_bad.copy()
@@ -97,7 +99,7 @@ def hide_artifacts(parameters, data):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="fima.preproc.read.hide_artifacts"><code class="name flex">
+<dt id="fima.preproc.ieeg.hide_artifacts"><code class="name flex">
 <span>def <span class="ident">hide_artifacts</span></span>(<span>parameters, data)</span>
 </code></dt>
 <dd>
@@ -108,12 +110,14 @@ def hide_artifacts(parameters, data):
 </summary>
 <pre><code class="python">def hide_artifacts(parameters, data):
 
+    data_comparison = montage(data, ref_to_avg=True, method=&#39;median&#39;)
+
     count_samples = []
 
     bad_smp = int(data.s_freq * parameters[&#39;read&#39;][&#39;artifacts&#39;][&#39;window&#39;] / 2)
 
     for i_trl in range(data.number_of(&#39;trial&#39;)):
-        i_bad = abs(data.data[i_trl]) &gt; parameters[&#39;read&#39;][&#39;artifacts&#39;][&#39;threshold&#39;]
+        i_bad = abs(data_comparison.data[i_trl]) &gt; parameters[&#39;read&#39;][&#39;artifacts&#39;][&#39;threshold&#39;]
 
         # before
         padded_bad = i_bad.copy()
@@ -133,7 +137,7 @@ def hide_artifacts(parameters, data):
     return data, bad_smp_per_chan</code></pre>
 </details>
 </dd>
-<dt id="fima.preproc.read.read_data"><code class="name flex">
+<dt id="fima.preproc.ieeg.read_data"><code class="name flex">
 <span>def <span class="ident">read_data</span></span>(<span>parameters, filename, event_onsets, continuous=False)</span>
 </code></dt>
 <dd>
@@ -189,8 +193,8 @@ def hide_artifacts(parameters, data):
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="fima.preproc.read.hide_artifacts" href="#fima.preproc.read.hide_artifacts">hide_artifacts</a></code></li>
-<li><code><a title="fima.preproc.read.read_data" href="#fima.preproc.read.read_data">read_data</a></code></li>
+<li><code><a title="fima.preproc.ieeg.hide_artifacts" href="#fima.preproc.ieeg.hide_artifacts">hide_artifacts</a></code></li>
+<li><code><a title="fima.preproc.ieeg.read_data" href="#fima.preproc.ieeg.read_data">read_data</a></code></li>
 </ul>
 </li>
 </ul>

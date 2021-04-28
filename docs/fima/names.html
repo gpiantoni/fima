@@ -34,19 +34,30 @@ def name(parameters, what, ieeg_file=None):
         ieeg = Task(ieeg_file)
 
     if what == &#39;brainregions_dir&#39;:
-        out = out_dir / &#39;brainregions&#39;
+        out = out_dir / &#39;brainregions&#39; / &#39;tsv&#39;
+        out.mkdir(parents=True, exist_ok=True)
+
+    elif what == &#39;brainregions_plot&#39;:
+        out = out_dir / &#39;brainregions&#39; / &#39;plots&#39; / f&#39;sub-{ieeg.subject}_ses-{ieeg.session}_acq-{ieeg.acquisition}_brainregions.html&#39;
 
     elif what == &#39;brainregions&#39;:
-        out = out_dir / &#39;brainregions&#39; / f&#39;sub-{ieeg.subject}_ses-{ieeg.session}_acq-{ieeg.acquisition}_brainregions.tsv&#39;
+        tsv_dir = out_dir / &#39;brainregions&#39; / &#39;tsv&#39;
+        tsv_dir.mkdir(parents=True, exist_ok=True)
+        out = tsv_dir / f&#39;sub-{ieeg.subject}_ses-{ieeg.session}_acq-{ieeg.acquisition}_brainregions.tsv&#39;
+
+    elif what == &#39;dataglove&#39;:
+        out = out_dir / &#39;dataglove&#39;
+        out.mkdir(parents=True, exist_ok=True)
+
+    elif what == &#39;realigned_dir&#39;:
+        out = out_dir / &#39;realigned&#39;
+        out.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;continuous&#39;:
         out = out_dir / &#39;continuous&#39; / f&#39;{ieeg_file.stem}.html&#39;
 
     elif what == &#39;spectrum&#39;:
         out = out_dir / &#39;spectrum&#39; / &#39;overview&#39; / f&#39;{ieeg_file.stem}.html&#39;
-
-    elif what == &#39;spectrum_all&#39;:
-        out = out_dir / &#39;spectrum&#39; / &#39;channels&#39; / f&#39;{ieeg_file.stem}.html&#39;
 
     elif what == &#39;ols_chan&#39;:
         out = out_dir / &#39;ols&#39; / ieeg_file.stem
@@ -89,19 +100,30 @@ def name(parameters, what, ieeg_file=None):
         ieeg = Task(ieeg_file)
 
     if what == &#39;brainregions_dir&#39;:
-        out = out_dir / &#39;brainregions&#39;
+        out = out_dir / &#39;brainregions&#39; / &#39;tsv&#39;
+        out.mkdir(parents=True, exist_ok=True)
+
+    elif what == &#39;brainregions_plot&#39;:
+        out = out_dir / &#39;brainregions&#39; / &#39;plots&#39; / f&#39;sub-{ieeg.subject}_ses-{ieeg.session}_acq-{ieeg.acquisition}_brainregions.html&#39;
 
     elif what == &#39;brainregions&#39;:
-        out = out_dir / &#39;brainregions&#39; / f&#39;sub-{ieeg.subject}_ses-{ieeg.session}_acq-{ieeg.acquisition}_brainregions.tsv&#39;
+        tsv_dir = out_dir / &#39;brainregions&#39; / &#39;tsv&#39;
+        tsv_dir.mkdir(parents=True, exist_ok=True)
+        out = tsv_dir / f&#39;sub-{ieeg.subject}_ses-{ieeg.session}_acq-{ieeg.acquisition}_brainregions.tsv&#39;
+
+    elif what == &#39;dataglove&#39;:
+        out = out_dir / &#39;dataglove&#39;
+        out.mkdir(parents=True, exist_ok=True)
+
+    elif what == &#39;realigned_dir&#39;:
+        out = out_dir / &#39;realigned&#39;
+        out.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;continuous&#39;:
         out = out_dir / &#39;continuous&#39; / f&#39;{ieeg_file.stem}.html&#39;
 
     elif what == &#39;spectrum&#39;:
         out = out_dir / &#39;spectrum&#39; / &#39;overview&#39; / f&#39;{ieeg_file.stem}.html&#39;
-
-    elif what == &#39;spectrum_all&#39;:
-        out = out_dir / &#39;spectrum&#39; / &#39;channels&#39; / f&#39;{ieeg_file.stem}.html&#39;
 
     elif what == &#39;ols_chan&#39;:
         out = out_dir / &#39;ols&#39; / ieeg_file.stem

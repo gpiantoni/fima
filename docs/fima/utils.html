@@ -61,6 +61,33 @@ def make_name(filename, event_type, ext=&#39;.html&#39;):
     return f&#39;{f.subject}_run-{f.run}{acq}_{event_type}{ext}&#39;
 
 
+def get_events(names):
+    &#34;&#34;&#34;Get events, but order by finger
+
+    Parameters
+    ----------
+    names : list of str
+        all the events in the dataset
+
+    Returns
+    -------
+    list of str
+        list of events (thumb, index etc)
+    &#34;&#34;&#34;
+    from .parameters import FINGERS_CLOSED, FINGERS_OPEN, FINGERS_FLEXION, FINGERS_EXTENSION
+    events = []
+    if &#39;thumb close&#39; in names:
+        events.extend(FINGERS_CLOSED)
+    if &#39;thumb open&#39; in names:
+        events.extend(FINGERS_OPEN)
+    if &#39;thumb flexion&#39; in names:
+        events.extend(FINGERS_FLEXION)
+    if &#39;thumb extension&#39; in names:
+        events.extend(FINGERS_EXTENSION)
+
+    return events
+
+
 def find_max_point(parameters, tf_cht):
     &#34;&#34;&#34;Take the channel with the highest value and the interval containing that
     point
@@ -74,10 +101,14 @@ def find_max_point(parameters, tf_cht):
     str
         channel with largest activity
     tuple of float
-        interval centered around largest activity (width depends on P[&#39;
+        interval centered around largest activity
     &#34;&#34;&#34;
     INTERVAL = parameters[&#39;spectrum&#39;][&#39;select&#39;][&#39;timeinterval&#39;]
-    ind = unravel_index(argmax(tf_cht.data[0], axis=None), tf_cht.data[0].shape)
+    if parameters[&#39;spectrum&#39;][&#39;select&#39;][&#39;peak&#39;] == &#39;positive&#39;:
+        gain = 1
+    elif parameters[&#39;spectrum&#39;][&#39;select&#39;][&#39;peak&#39;] == &#39;negative&#39;:
+        gain = -1
+    ind = unravel_index(argmax(gain * tf_cht.data[0], axis=None), tf_cht.data[0].shape)
     max_chan = tf_cht.chan[0][ind[0]]
     max_timeinterval = (
         tf_cht.time[0][ind[1]] - INTERVAL / 2,
@@ -225,7 +256,7 @@ point</p>
 <dt><code>str</code></dt>
 <dd>channel with largest activity</dd>
 <dt><code>tuple</code> of <code>float</code></dt>
-<dd>interval centered around largest activity (width depends on P['</dd>
+<dd>interval centered around largest activity</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -244,10 +275,14 @@ point</p>
     str
         channel with largest activity
     tuple of float
-        interval centered around largest activity (width depends on P[&#39;
+        interval centered around largest activity
     &#34;&#34;&#34;
     INTERVAL = parameters[&#39;spectrum&#39;][&#39;select&#39;][&#39;timeinterval&#39;]
-    ind = unravel_index(argmax(tf_cht.data[0], axis=None), tf_cht.data[0].shape)
+    if parameters[&#39;spectrum&#39;][&#39;select&#39;][&#39;peak&#39;] == &#39;positive&#39;:
+        gain = 1
+    elif parameters[&#39;spectrum&#39;][&#39;select&#39;][&#39;peak&#39;] == &#39;negative&#39;:
+        gain = -1
+    ind = unravel_index(argmax(gain * tf_cht.data[0], axis=None), tf_cht.data[0].shape)
     max_chan = tf_cht.chan[0][ind[0]]
     max_timeinterval = (
         tf_cht.time[0][ind[1]] - INTERVAL / 2,
@@ -326,6 +361,52 @@ point</p>
 
     val_color_0255 = (255 * val_color + 0.5).astype(int)
     return f&#39;rgb{str(tuple(val_color_0255))}&#39;</code></pre>
+</details>
+</dd>
+<dt id="fima.utils.get_events"><code class="name flex">
+<span>def <span class="ident">get_events</span></span>(<span>names)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get events, but order by finger</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>names</code></strong> :&ensp;<code>list</code> of <code>str</code></dt>
+<dd>all the events in the dataset</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code> of <code>str</code></dt>
+<dd>list of events (thumb, index etc)</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_events(names):
+    &#34;&#34;&#34;Get events, but order by finger
+
+    Parameters
+    ----------
+    names : list of str
+        all the events in the dataset
+
+    Returns
+    -------
+    list of str
+        list of events (thumb, index etc)
+    &#34;&#34;&#34;
+    from .parameters import FINGERS_CLOSED, FINGERS_OPEN, FINGERS_FLEXION, FINGERS_EXTENSION
+    events = []
+    if &#39;thumb close&#39; in names:
+        events.extend(FINGERS_CLOSED)
+    if &#39;thumb open&#39; in names:
+        events.extend(FINGERS_OPEN)
+    if &#39;thumb flexion&#39; in names:
+        events.extend(FINGERS_FLEXION)
+    if &#39;thumb extension&#39; in names:
+        events.extend(FINGERS_EXTENSION)
+
+    return events</code></pre>
 </details>
 </dd>
 <dt id="fima.utils.group_per_condition"><code class="name flex">
@@ -436,6 +517,7 @@ point</p>
 <li><code><a title="fima.utils.create_bool" href="#fima.utils.create_bool">create_bool</a></code></li>
 <li><code><a title="fima.utils.find_max_point" href="#fima.utils.find_max_point">find_max_point</a></code></li>
 <li><code><a title="fima.utils.get_color_for_val" href="#fima.utils.get_color_for_val">get_color_for_val</a></code></li>
+<li><code><a title="fima.utils.get_events" href="#fima.utils.get_events">get_events</a></code></li>
 <li><code><a title="fima.utils.group_per_condition" href="#fima.utils.group_per_condition">group_per_condition</a></code></li>
 <li><code><a title="fima.utils.make_name" href="#fima.utils.make_name">make_name</a></code></li>
 </ul>

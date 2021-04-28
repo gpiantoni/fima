@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.align API documentation</title>
+<title>fima.pipelines.align API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,22 +17,148 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.align</code></h1>
+<h1 class="title">Module <code>fima.pipelines.align</code></h1>
 </header>
 <section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from numpy import isnan
+from bidso.utils import replace_underscore
+
+from ..read import load
+from ..names import name
+
+
+def pipeline_align(parameters, ieeg_file):
+
+    event_type = &#39;cues&#39;
+
+    data, names = load(&#39;data&#39;, parameters, ieeg_file, event_type)
+
+    for critical_point in out.dtype.names:
+
+        realigned = events.copy()
+
+        realigned[&#39;onset&#39;] = events[&#39;onset&#39;] + out[critical_point]
+        good_events = ~isnan(realigned[&#39;onset&#39;])
+        realigned = realigned[good_events]
+        realigned[&#39;duration&#39;] = 0
+
+        realigned_dir = name(parameters, &#39;realigned_dir&#39;)
+        out_tsv = realigned_dir / replace_underscore(ieeg_file.name, critical_point.replace(&#39;_&#39;, &#39;&#39;) + &#39;.tsv&#39;)
+
+        with out_tsv.open(&#39;w&#39;) as f:
+            f.write(&#39;onset\tduration\ttrial_type\n&#39;)
+            for evt in realigned:
+                f.write(f&#39;{evt[&#34;onset&#34;]:.3f}\t{evt[&#34;duration&#34;]:.3f}\t{evt[&#34;trial_type&#34;]}\n&#39;)
+
+
+def find_min_max(t, dat, info, index=False):
+    i_t = (t &gt;= info[&#39;time&#39;][0]) &amp; (t &lt;= info[&#39;time&#39;][1])
+    t_offset = where(i_t)[0][0]
+
+    x = dat[i_t]
+    if isnan(x).any() or (max(x) &lt; info[&#39;threshold&#39;][&#39;high&#39;]):
+        return NaN, NaN
+
+    i_max = argmax(dat[i_t])
+
+    if i_max == 0:
+        return NaN, NaN
+
+    index_max = t_offset + i_max
+    bool_threshold = dat[:index_max] &lt;= info[&#39;threshold&#39;][&#39;low&#39;]
+
+    if bool_threshold.any():  # has to go below first threshold
+        index_min = where(bool_threshold)[0][-1] + 1
+    else:
+        index_min = NaN
+
+    if index:
+        return index_min, index_max
+    else:
+        return t[index_min], t[index_max]</code></pre>
+</details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="fima.align.maxmin" href="maxmin.html">fima.align.maxmin</a></code></dt>
+<dt id="fima.pipelines.align.find_min_max"><code class="name flex">
+<span>def <span class="ident">find_min_max</span></span>(<span>t, dat, info, index=False)</span>
+</code></dt>
 <dd>
 <div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find_min_max(t, dat, info, index=False):
+    i_t = (t &gt;= info[&#39;time&#39;][0]) &amp; (t &lt;= info[&#39;time&#39;][1])
+    t_offset = where(i_t)[0][0]
+
+    x = dat[i_t]
+    if isnan(x).any() or (max(x) &lt; info[&#39;threshold&#39;][&#39;high&#39;]):
+        return NaN, NaN
+
+    i_max = argmax(dat[i_t])
+
+    if i_max == 0:
+        return NaN, NaN
+
+    index_max = t_offset + i_max
+    bool_threshold = dat[:index_max] &lt;= info[&#39;threshold&#39;][&#39;low&#39;]
+
+    if bool_threshold.any():  # has to go below first threshold
+        index_min = where(bool_threshold)[0][-1] + 1
+    else:
+        index_min = NaN
+
+    if index:
+        return index_min, index_max
+    else:
+        return t[index_min], t[index_max]</code></pre>
+</details>
+</dd>
+<dt id="fima.pipelines.align.pipeline_align"><code class="name flex">
+<span>def <span class="ident">pipeline_align</span></span>(<span>parameters, ieeg_file)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pipeline_align(parameters, ieeg_file):
+
+    event_type = &#39;cues&#39;
+
+    data, names = load(&#39;data&#39;, parameters, ieeg_file, event_type)
+
+    for critical_point in out.dtype.names:
+
+        realigned = events.copy()
+
+        realigned[&#39;onset&#39;] = events[&#39;onset&#39;] + out[critical_point]
+        good_events = ~isnan(realigned[&#39;onset&#39;])
+        realigned = realigned[good_events]
+        realigned[&#39;duration&#39;] = 0
+
+        realigned_dir = name(parameters, &#39;realigned_dir&#39;)
+        out_tsv = realigned_dir / replace_underscore(ieeg_file.name, critical_point.replace(&#39;_&#39;, &#39;&#39;) + &#39;.tsv&#39;)
+
+        with out_tsv.open(&#39;w&#39;) as f:
+            f.write(&#39;onset\tduration\ttrial_type\n&#39;)
+            for evt in realigned:
+                f.write(f&#39;{evt[&#34;onset&#34;]:.3f}\t{evt[&#34;duration&#34;]:.3f}\t{evt[&#34;trial_type&#34;]}\n&#39;)</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -45,12 +171,13 @@
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="fima" href="../index.html">fima</a></code></li>
+<li><code><a title="fima.pipelines" href="index.html">fima.pipelines</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="fima.align.maxmin" href="maxmin.html">fima.align.maxmin</a></code></li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="fima.pipelines.align.find_min_max" href="#fima.pipelines.align.find_min_max">find_min_max</a></code></li>
+<li><code><a title="fima.pipelines.align.pipeline_align" href="#fima.pipelines.align.pipeline_align">pipeline_align</a></code></li>
 </ul>
 </li>
 </ul>

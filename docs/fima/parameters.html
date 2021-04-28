@@ -30,32 +30,27 @@
 from .utils import get_color_for_val
 
 
-&#34;&#34;&#34;
-    align=dict(
-        time=(-1, 1.5),
-        threshold=dict(
-            low=0.5,
-            high=3,
-            ),
-        ),
-&#34;&#34;&#34;
-
+REGION_TYPES = [
+    &#39;aparc.a2009s&#39;,
+    &#39;aparc.DKTatlas&#39;,
+    &#39;BA_exvivo&#39;,
+    &#39;BA_exvivo.thresh&#39;,
+    ]
 
 COLORSCALE = &#39;Jet&#39;
 
-MOVEMENT_SYMBOL_DATA = {
+MOVEMENT_SYMBOL = {
     &#39;open&#39;: &#39;circle-open&#39;,
+    &#39;extension&#39;: &#39;circle-open&#39;,
     &#39;close&#39;: &#39;circle&#39;,
-    }
-
-MOVEMENT_SYMBOL_MODEL = {
-    &#39;open&#39;: &#39;diamond-open&#39;,
-    &#39;close&#39;: &#39;diamond&#39;,
+    &#39;flexion&#39;: &#39;circle&#39;,
     }
 
 MOVEMENT_LINE = {
     &#39;open&#39;: &#39;dot&#39;,
+    &#39;extension&#39;: &#39;dot&#39;,
     &#39;close&#39;: &#39;solid&#39;,
+    &#39;flexion&#39;: &#39;solid&#39;,
     }
 
 FINGER_COLOR = {
@@ -68,7 +63,6 @@ FINGER_COLOR = {
 
 FINGERS = list(FINGER_COLOR)
 
-
 FINGERS_OPEN = []
 FINGERS_CLOSED = []
 FINGERS_FLEXION = []
@@ -79,7 +73,10 @@ for f in FINGERS:
     FINGERS_FLEXION.append(f + &#39; flexion&#39;)
     FINGERS_EXTENSION.append(f + &#39; extension&#39;)
 
-EVENTS = FINGERS_OPEN + FINGERS_CLOSED</code></pre>
+TIMEPOINTS = {
+    &#39;crossthresh&#39;: &#39;diamond-open&#39;,
+    &#39;peak&#39;: &#39;circle-open&#39;,
+    }</code></pre>
 </details>
 </section>
 <section>

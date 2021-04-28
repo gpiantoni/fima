@@ -28,8 +28,11 @@
 from numpy import r_, argmin
 from numpy.linalg import norm
 
+from ..parameters import REGION_TYPES
 from ..names import name
 from ..read import load
+from ..viz.brainregions import plot_brain_regions
+from ..viz.utils import to_div, to_html
 
 lg = getLogger(__name__)
 
@@ -45,27 +48,37 @@ def pipeline_brainregions(parameters, ieeg_file):
     elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
 
     aparc = {}
-    for template in (&#39;aparc.a2009s&#39;, &#39;aparc.DKTatlas&#39;, &#39;BA_exvivo&#39;):
+    for template in REGION_TYPES:
         aparc[template] = load(template, parameters, ieeg_file)
 
     out_dir = parameters[&#39;paths&#39;][&#39;output&#39;] / &#39;brainregions&#39;
     out_dir.mkdir(exist_ok=True, parents=True)
 
-    tsv_file = name(parameters, ieeg_file, &#39;brainregions&#39;)
+    tsv_file = name(parameters, &#39;brainregions&#39;, ieeg_file)
     with tsv_file.open(&#39;w&#39;) as f:
-        f.write(&#39;chan\tx\ty\tz\ta2009s\tDKTatlas\tBA&#39;)
+        HDR = [&#39;chan&#39;, &#39;x&#39;, &#39;y&#39;, &#39;z&#39;] + REGION_TYPES
+        f.write(&#39;\t&#39;.join(HDR))
 
         for el in elec:
             pos = r_[el[&#39;x&#39;], el[&#39;y&#39;], el[&#39;z&#39;]]
-            pos_surf = pos - aparc[&#39;aparc.a2009s&#39;][&#39;ras_shift&#39;]  # ras_shift depends on T1.mgz not on aparc
-            i_vert = argmin(norm(aparc[&#39;aparc.a2009s&#39;][&#39;vert&#39;] - pos_surf, axis=1))
+            i_vert = argmin(norm(aparc[&#39;aparc.a2009s&#39;][&#39;vert&#39;] - pos, axis=1))
 
             f.write(f&#34;\n{el[&#39;name&#39;]}\t{el[&#39;x&#39;]}\t{el[&#39;y&#39;]}\t{el[&#39;z&#39;]}&#34;)
             for region_name, i_aparc in aparc.items():
                 region = i_aparc[&#39;regions&#39;][&#39;names&#39;][i_aparc[&#39;regions&#39;][&#39;values&#39;][i_vert]]
-                if region_name == &#39;BA_exvivo&#39;:
+                if region_name.startswith(&#39;BA_exvivo&#39;):
                     region = region.split(&#39;_&#39;)[0]
-                f.write(f&#34;\t{region}&#34;)</code></pre>
+                f.write(f&#34;\t{region}&#34;)
+
+    &#34;&#34;&#34;
+    # not very efficient because we read the surf every time but the function call is much cleaner
+    divs = []
+    for region_type in REGION_TYPES:
+        fig = plot_brain_regions(parameters, ieeg_file, region_type)
+        divs.append(to_div(fig))
+
+    to_html(divs, name(parameters, &#39;brainregions_plot&#39;, ieeg_file))
+    &#34;&#34;&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -100,27 +113,37 @@ def pipeline_brainregions(parameters, ieeg_file):
     elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
 
     aparc = {}
-    for template in (&#39;aparc.a2009s&#39;, &#39;aparc.DKTatlas&#39;, &#39;BA_exvivo&#39;):
+    for template in REGION_TYPES:
         aparc[template] = load(template, parameters, ieeg_file)
 
     out_dir = parameters[&#39;paths&#39;][&#39;output&#39;] / &#39;brainregions&#39;
     out_dir.mkdir(exist_ok=True, parents=True)
 
-    tsv_file = name(parameters, ieeg_file, &#39;brainregions&#39;)
+    tsv_file = name(parameters, &#39;brainregions&#39;, ieeg_file)
     with tsv_file.open(&#39;w&#39;) as f:
-        f.write(&#39;chan\tx\ty\tz\ta2009s\tDKTatlas\tBA&#39;)
+        HDR = [&#39;chan&#39;, &#39;x&#39;, &#39;y&#39;, &#39;z&#39;] + REGION_TYPES
+        f.write(&#39;\t&#39;.join(HDR))
 
         for el in elec:
             pos = r_[el[&#39;x&#39;], el[&#39;y&#39;], el[&#39;z&#39;]]
-            pos_surf = pos - aparc[&#39;aparc.a2009s&#39;][&#39;ras_shift&#39;]  # ras_shift depends on T1.mgz not on aparc
-            i_vert = argmin(norm(aparc[&#39;aparc.a2009s&#39;][&#39;vert&#39;] - pos_surf, axis=1))
+            i_vert = argmin(norm(aparc[&#39;aparc.a2009s&#39;][&#39;vert&#39;] - pos, axis=1))
 
             f.write(f&#34;\n{el[&#39;name&#39;]}\t{el[&#39;x&#39;]}\t{el[&#39;y&#39;]}\t{el[&#39;z&#39;]}&#34;)
             for region_name, i_aparc in aparc.items():
                 region = i_aparc[&#39;regions&#39;][&#39;names&#39;][i_aparc[&#39;regions&#39;][&#39;values&#39;][i_vert]]
-                if region_name == &#39;BA_exvivo&#39;:
+                if region_name.startswith(&#39;BA_exvivo&#39;):
                     region = region.split(&#39;_&#39;)[0]
-                f.write(f&#34;\t{region}&#34;)</code></pre>
+                f.write(f&#34;\t{region}&#34;)
+
+    &#34;&#34;&#34;
+    # not very efficient because we read the surf every time but the function call is much cleaner
+    divs = []
+    for region_type in REGION_TYPES:
+        fig = plot_brain_regions(parameters, ieeg_file, region_type)
+        divs.append(to_div(fig))
+
+    to_html(divs, name(parameters, &#39;brainregions_plot&#39;, ieeg_file))
+    &#34;&#34;&#34;</code></pre>
 </details>
 </dd>
 </dl>

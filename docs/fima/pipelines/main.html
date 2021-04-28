@@ -38,6 +38,7 @@ from .dataglove import pipeline_dataglove
 from .ols import pipeline_ols, pipeline_ols_all
 from .brainregions import pipeline_brainregions
 from .spectrum import pipeline_spectrum
+from .align import pipeline_align
 from ..utils import be_nice
 
 
@@ -86,6 +87,9 @@ def sub_pipeline(ieeg, parameters, pipeline):
 
     elif pipeline == &#39;brainregions&#39;:
         pipeline_brainregions(parameters, ieeg)
+
+    elif pipeline == &#39;align&#39;:
+        pipeline_align(parameters, ieeg)
 
     elif pipeline == &#39;ols&#39;:
         pipeline_ols(parameters, ieeg)
@@ -185,6 +189,9 @@ def sub_pipeline(ieeg, parameters, pipeline):
 
     elif pipeline == &#39;brainregions&#39;:
         pipeline_brainregions(parameters, ieeg)
+
+    elif pipeline == &#39;align&#39;:
+        pipeline_align(parameters, ieeg)
 
     elif pipeline == &#39;ols&#39;:
         pipeline_ols(parameters, ieeg)

@@ -30,31 +30,34 @@ from numpy import genfromtxt, isin, empty, NaN
 from numpy.lib.recfunctions import append_fields
 from bidso.objects import Electrodes
 from bidso import Task
+from bidso.utils import replace_underscore
 from nibabel.freesurfer.io import read_annot
 from wonambi.attr import Freesurfer
 
 from .preproc import read_data
 from .dataglove.read_dataglove import read_physio
-from .preproc.elec import read_surf
-from .align.maxmin import main_func, CRITICAL_TIMEPOINTS
+from .preproc.elec import read_surf, read_brainregion_colors, read_brainregion_colorscale
+from .names import name
 from .parameters import (
     FINGERS_OPEN,
     FINGERS_CLOSED,
     FINGERS_FLEXION,
     FINGERS_EXTENSION,
+    TIMEPOINTS,
     )
 
 FS_LABELS = [
-    &#39;aparc&#39;,
+    &#39;aparc&#39;,  # same as aparc.DKTatlas
     &#39;aparc.a2009s&#39;,
     &#39;aparc.DKTatlas&#39;,
     &#39;BA_exvivo&#39;,
+    &#39;BA_exvivo.thresh&#39;,
     ]
 
-timepoints = &#39;, &#39;.join(f&#34;&#39;{x}&#39;&#34; for x in CRITICAL_TIMEPOINTS)
+timepoints = &#39;, &#39;.join(f&#34;&#39;{x}&#39;&#34; for x in TIMEPOINTS)
 
 
-def load(what, parameters, ieeg_file):
+def load(what, parameters, ieeg_file, event_type=None):
     f&#34;&#34;&#34;
     WHAT:
       - &#39;continuous&#39; returns: ChanTime, event_names, events_onsets
@@ -62,8 +65,6 @@ def load(what, parameters, ieeg_file):
       -  {timepoints} returns: ChanTime, event_names
       - &#39;events&#39; returns: ndarray
       - &#39;dataglove&#39; returns: ndarray
-      - &#39;movements&#39; returns: ndarray
-      (run is not necessary)
       - &#39;electrodes&#39;
       - &#39;freesurfer&#39;
       - &#39;surface&#39;
@@ -79,12 +80,22 @@ def load(what, parameters, ieeg_file):
       - movements : all actual movements (from dataglove)
       - extension : actual extension of all fingers
       - flexion : actual flexion of all fingers
+      - t_inflection
+      - t_midpoint
+      - t_peak
     &#34;&#34;&#34;
+    if event_type is None:
+        event_type = parameters[&#39;read&#39;][&#39;event_type&#39;]
+
+    if event_type not in [&#39;cues&#39;, &#39;open&#39;, &#39;close&#39;, &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;] + list(TIMEPOINTS):
+        raise ValueError(f&#39;&#34;{event_type}&#34; is not one of the possible event types&#39;)
+
     ieeg = Task(ieeg_file)
-    events_tsv = ieeg.events.tsv
 
     if what in (&#39;continuous&#39;, &#39;data&#39;):
-        events, onsets = select_events(events_tsv, parameters[&#39;read&#39;][&#39;event_type&#39;])
+        events_tsv = load(&#39;events&#39;, parameters, ieeg_file, event_type)
+        events = events_tsv[&#39;trial_type&#39;]
+        onsets = events_tsv[&#39;onset&#39;]
 
         if what == &#39;continuous&#39;:
             data = read_data(parameters, ieeg_file, event_onsets=onsets, continuous=True)
@@ -98,16 +109,19 @@ def load(what, parameters, ieeg_file):
         folder = parameters[&#39;paths&#39;][&#39;input&#39;]
 
     elif what == &#39;events&#39;:
-        pattern = f&#39;sub-{ieeg.subject}_*_run-{ieeg.run}_events.tsv&#39;
-        folder = parameters[&#39;paths&#39;][&#39;input&#39;]
+        if event_type in (&#39;cues&#39;, &#39;open&#39;, &#39;close&#39;):
+            pattern = f&#39;sub-{ieeg.subject}_*_run-{ieeg.run}_events.tsv&#39;
+            folder = parameters[&#39;paths&#39;][&#39;input&#39;]
+        elif event_type in (&#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;):
+            pattern = f&#39;sub-{ieeg.subject}_*_run-{ieeg.run}_dataglove.tsv&#39;
+            folder = parameters[&#39;paths&#39;][&#39;movements&#39;]
+        elif event_type in TIMEPOINTS:
+            pattern = replace_underscore(ieeg_file.name, event_type.replace(&#39;_&#39;, &#39;&#39;) + &#39;.tsv&#39;)
+            folder = name(parameters, &#39;realigned_dir&#39;)
 
     elif what == &#39;dataglove&#39;:
         pattern = f&#39;sub-{ieeg.subject}_*_run-{ieeg.run}_recording-dataglove_physio.tsv.gz&#39;
         folder = parameters[&#39;paths&#39;][&#39;input&#39;]
-
-    elif what == &#39;movements&#39;:
-        pattern = f&#39;sub-{ieeg.subject}_*_run-{ieeg.run}_dataglove.tsv&#39;
-        folder = parameters[&#39;paths&#39;][&#39;movements&#39;]
 
     elif what in [&#39;surface&#39;, &#39;freesurfer&#39;] + FS_LABELS:
         pattern = &#39;sub-&#39; + ieeg.subject
@@ -135,8 +149,9 @@ def load(what, parameters, ieeg_file):
             (&#39;onset&#39;, &#39;float&#39;),
             (&#39;duration&#39;, &#39;float&#39;),
             (&#39;trial_type&#39;, &#39;U4096&#39;),
-            (&#39;value&#39;, &#39;int&#39;)
             ]
+        if n_columns &gt;= 4:
+            dtypes.insert(3, (&#39;value&#39;, &#39;int&#39;))
         if n_columns == 5:
             dtypes.insert(3, (&#39;response_time&#39;, &#39;float&#39;))  # if -1, it means that we can reject trial
 
@@ -147,18 +162,10 @@ def load(what, parameters, ieeg_file):
             x.fill(NaN)
             events = append_fields(events, &#39;response_time&#39;, x, usemask=False)
 
-        return events
+        return select_events(events, event_type)
 
     elif what == &#39;dataglove&#39;:
         return read_physio(filename)
-
-    elif what == &#39;movements&#39;:
-        dtypes = [
-            (&#39;onset&#39;, &#39;float&#39;),
-            (&#39;duration&#39;, &#39;float&#39;),
-            (&#39;trial_type&#39;, &#39;U4096&#39;),
-            ]
-        return genfromtxt(filename, delimiter=&#39;\t&#39;, skip_header=1, dtype=dtypes)
 
     elif what == &#39;surface&#39;:
         elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
@@ -171,7 +178,7 @@ def load(what, parameters, ieeg_file):
         hemi = pial.surf_file.stem
 
         aparc_file = fs.dir / &#39;label&#39; / f&#39;{hemi}.{what}.annot&#39;
-        region_values, _, region_names = read_annot(aparc_file)
+        region_values, region_ctab, region_names = read_annot(aparc_file)
 
         out = {
             &#39;aparc&#39;: what,
@@ -180,6 +187,8 @@ def load(what, parameters, ieeg_file):
             &#39;regions&#39;: {
                 &#39;values&#39;: region_values,
                 &#39;names&#39;: [x.decode() for x in region_names],
+                &#39;colors&#39;: read_brainregion_colors(region_names, region_ctab),
+                &#39;colorscale&#39;: read_brainregion_colorscale(region_ctab),
                 }
             }
 
@@ -187,23 +196,6 @@ def load(what, parameters, ieeg_file):
 
     elif what == &#39;freesurfer&#39;:
         return Freesurfer(filename)
-
-
-def old():
-    if what in (&#39;continuous&#39;, &#39;data&#39;) or what in CRITICAL_TIMEPOINTS:
-        pattern = f&#39;sub-{subject}_*_acq-{acq}_run-{run}_ieeg.eeg&#39;
-        folder = BIDS_DIR
-
-
-    if what in (&#39;continuous&#39;, &#39;data&#39;) or what in CRITICAL_TIMEPOINTS:
-
-
-        if what in CRITICAL_TIMEPOINTS:
-            data = read_data(filename, event_onsets=onsets)
-            offsets = main_func(data, events)
-            onsets = onsets + offsets[what]
-
-
 
 
 def select_events(events, t):
@@ -224,35 +216,24 @@ def select_events(events, t):
     ndarray
         (N, ) vector of events (str)
     &#34;&#34;&#34;
-    if t == &#39;cues&#39;:
+    if t in [&#39;cues&#39;, ] + list(TIMEPOINTS):
         trial_types = FINGERS_OPEN + FINGERS_CLOSED
-        to_load = &#39;events&#39;
     elif t == &#39;open&#39;:
         trial_types = FINGERS_OPEN
-        to_load = &#39;events&#39;
     elif t == &#39;close&#39;:
         trial_types = FINGERS_CLOSED
-        to_load = &#39;events&#39;
     elif t == &#39;movements&#39;:
         trial_types = FINGERS_EXTENSION + FINGERS_FLEXION
-        to_load = &#39;movements&#39;
     elif t == &#39;flexion&#39;:
         trial_types = FINGERS_FLEXION
-        to_load = &#39;movements&#39;
     elif t == &#39;extension&#39;:
         trial_types = FINGERS_EXTENSION
-        to_load = &#39;movements&#39;
     else:
         raise ValueError(f&#39;Unknown event_type &#34;{t}&#34;&#39;)
 
-    if to_load == &#39;events&#39;:
-        # get rid of &#34;palm open&#34; etc
-        events[&#39;trial_type&#39;] = [&#39; &#39;.join(x.split(&#39; &#39;)[:2]) for x in events[&#39;trial_type&#39;]]
-
+    events[&#39;trial_type&#39;] = [&#39; &#39;.join(x.split(&#39; &#39;)[:2]) for x in events[&#39;trial_type&#39;]]
     i_evt = isin(events[&#39;trial_type&#39;], trial_types)
-    event_onsets = events[&#39;onset&#39;][i_evt]
-    event_types = events[&#39;trial_type&#39;][i_evt]
-    return event_types, event_onsets</code></pre>
+    return events[i_evt]</code></pre>
 </details>
 </section>
 <section>
@@ -263,7 +244,7 @@ def select_events(events, t):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="fima.read.load"><code class="name flex">
-<span>def <span class="ident">load</span></span>(<span>what, parameters, ieeg_file)</span>
+<span>def <span class="ident">load</span></span>(<span>what, parameters, ieeg_file, event_type=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -271,7 +252,7 @@ def select_events(events, t):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def load(what, parameters, ieeg_file):
+<pre><code class="python">def load(what, parameters, ieeg_file, event_type=None):
     f&#34;&#34;&#34;
     WHAT:
       - &#39;continuous&#39; returns: ChanTime, event_names, events_onsets
@@ -279,8 +260,6 @@ def select_events(events, t):
       -  {timepoints} returns: ChanTime, event_names
       - &#39;events&#39; returns: ndarray
       - &#39;dataglove&#39; returns: ndarray
-      - &#39;movements&#39; returns: ndarray
-      (run is not necessary)
       - &#39;electrodes&#39;
       - &#39;freesurfer&#39;
       - &#39;surface&#39;
@@ -296,12 +275,22 @@ def select_events(events, t):
       - movements : all actual movements (from dataglove)
       - extension : actual extension of all fingers
       - flexion : actual flexion of all fingers
+      - t_inflection
+      - t_midpoint
+      - t_peak
     &#34;&#34;&#34;
+    if event_type is None:
+        event_type = parameters[&#39;read&#39;][&#39;event_type&#39;]
+
+    if event_type not in [&#39;cues&#39;, &#39;open&#39;, &#39;close&#39;, &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;] + list(TIMEPOINTS):
+        raise ValueError(f&#39;&#34;{event_type}&#34; is not one of the possible event types&#39;)
+
     ieeg = Task(ieeg_file)
-    events_tsv = ieeg.events.tsv
 
     if what in (&#39;continuous&#39;, &#39;data&#39;):
-        events, onsets = select_events(events_tsv, parameters[&#39;read&#39;][&#39;event_type&#39;])
+        events_tsv = load(&#39;events&#39;, parameters, ieeg_file, event_type)
+        events = events_tsv[&#39;trial_type&#39;]
+        onsets = events_tsv[&#39;onset&#39;]
 
         if what == &#39;continuous&#39;:
             data = read_data(parameters, ieeg_file, event_onsets=onsets, continuous=True)
@@ -315,16 +304,19 @@ def select_events(events, t):
         folder = parameters[&#39;paths&#39;][&#39;input&#39;]
 
     elif what == &#39;events&#39;:
-        pattern = f&#39;sub-{ieeg.subject}_*_run-{ieeg.run}_events.tsv&#39;
-        folder = parameters[&#39;paths&#39;][&#39;input&#39;]
+        if event_type in (&#39;cues&#39;, &#39;open&#39;, &#39;close&#39;):
+            pattern = f&#39;sub-{ieeg.subject}_*_run-{ieeg.run}_events.tsv&#39;
+            folder = parameters[&#39;paths&#39;][&#39;input&#39;]
+        elif event_type in (&#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;):
+            pattern = f&#39;sub-{ieeg.subject}_*_run-{ieeg.run}_dataglove.tsv&#39;
+            folder = parameters[&#39;paths&#39;][&#39;movements&#39;]
+        elif event_type in TIMEPOINTS:
+            pattern = replace_underscore(ieeg_file.name, event_type.replace(&#39;_&#39;, &#39;&#39;) + &#39;.tsv&#39;)
+            folder = name(parameters, &#39;realigned_dir&#39;)
 
     elif what == &#39;dataglove&#39;:
         pattern = f&#39;sub-{ieeg.subject}_*_run-{ieeg.run}_recording-dataglove_physio.tsv.gz&#39;
         folder = parameters[&#39;paths&#39;][&#39;input&#39;]
-
-    elif what == &#39;movements&#39;:
-        pattern = f&#39;sub-{ieeg.subject}_*_run-{ieeg.run}_dataglove.tsv&#39;
-        folder = parameters[&#39;paths&#39;][&#39;movements&#39;]
 
     elif what in [&#39;surface&#39;, &#39;freesurfer&#39;] + FS_LABELS:
         pattern = &#39;sub-&#39; + ieeg.subject
@@ -352,8 +344,9 @@ def select_events(events, t):
             (&#39;onset&#39;, &#39;float&#39;),
             (&#39;duration&#39;, &#39;float&#39;),
             (&#39;trial_type&#39;, &#39;U4096&#39;),
-            (&#39;value&#39;, &#39;int&#39;)
             ]
+        if n_columns &gt;= 4:
+            dtypes.insert(3, (&#39;value&#39;, &#39;int&#39;))
         if n_columns == 5:
             dtypes.insert(3, (&#39;response_time&#39;, &#39;float&#39;))  # if -1, it means that we can reject trial
 
@@ -364,18 +357,10 @@ def select_events(events, t):
             x.fill(NaN)
             events = append_fields(events, &#39;response_time&#39;, x, usemask=False)
 
-        return events
+        return select_events(events, event_type)
 
     elif what == &#39;dataglove&#39;:
         return read_physio(filename)
-
-    elif what == &#39;movements&#39;:
-        dtypes = [
-            (&#39;onset&#39;, &#39;float&#39;),
-            (&#39;duration&#39;, &#39;float&#39;),
-            (&#39;trial_type&#39;, &#39;U4096&#39;),
-            ]
-        return genfromtxt(filename, delimiter=&#39;\t&#39;, skip_header=1, dtype=dtypes)
 
     elif what == &#39;surface&#39;:
         elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
@@ -388,7 +373,7 @@ def select_events(events, t):
         hemi = pial.surf_file.stem
 
         aparc_file = fs.dir / &#39;label&#39; / f&#39;{hemi}.{what}.annot&#39;
-        region_values, _, region_names = read_annot(aparc_file)
+        region_values, region_ctab, region_names = read_annot(aparc_file)
 
         out = {
             &#39;aparc&#39;: what,
@@ -397,6 +382,8 @@ def select_events(events, t):
             &#39;regions&#39;: {
                 &#39;values&#39;: region_values,
                 &#39;names&#39;: [x.decode() for x in region_names],
+                &#39;colors&#39;: read_brainregion_colors(region_names, region_ctab),
+                &#39;colorscale&#39;: read_brainregion_colorscale(region_ctab),
                 }
             }
 
@@ -404,30 +391,6 @@ def select_events(events, t):
 
     elif what == &#39;freesurfer&#39;:
         return Freesurfer(filename)</code></pre>
-</details>
-</dd>
-<dt id="fima.read.old"><code class="name flex">
-<span>def <span class="ident">old</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def old():
-    if what in (&#39;continuous&#39;, &#39;data&#39;) or what in CRITICAL_TIMEPOINTS:
-        pattern = f&#39;sub-{subject}_*_acq-{acq}_run-{run}_ieeg.eeg&#39;
-        folder = BIDS_DIR
-
-
-    if what in (&#39;continuous&#39;, &#39;data&#39;) or what in CRITICAL_TIMEPOINTS:
-
-
-        if what in CRITICAL_TIMEPOINTS:
-            data = read_data(filename, event_onsets=onsets)
-            offsets = main_func(data, events)
-            onsets = onsets + offsets[what]</code></pre>
 </details>
 </dd>
 <dt id="fima.read.select_events"><code class="name flex">
@@ -472,35 +435,24 @@ def select_events(events, t):
     ndarray
         (N, ) vector of events (str)
     &#34;&#34;&#34;
-    if t == &#39;cues&#39;:
+    if t in [&#39;cues&#39;, ] + list(TIMEPOINTS):
         trial_types = FINGERS_OPEN + FINGERS_CLOSED
-        to_load = &#39;events&#39;
     elif t == &#39;open&#39;:
         trial_types = FINGERS_OPEN
-        to_load = &#39;events&#39;
     elif t == &#39;close&#39;:
         trial_types = FINGERS_CLOSED
-        to_load = &#39;events&#39;
     elif t == &#39;movements&#39;:
         trial_types = FINGERS_EXTENSION + FINGERS_FLEXION
-        to_load = &#39;movements&#39;
     elif t == &#39;flexion&#39;:
         trial_types = FINGERS_FLEXION
-        to_load = &#39;movements&#39;
     elif t == &#39;extension&#39;:
         trial_types = FINGERS_EXTENSION
-        to_load = &#39;movements&#39;
     else:
         raise ValueError(f&#39;Unknown event_type &#34;{t}&#34;&#39;)
 
-    if to_load == &#39;events&#39;:
-        # get rid of &#34;palm open&#34; etc
-        events[&#39;trial_type&#39;] = [&#39; &#39;.join(x.split(&#39; &#39;)[:2]) for x in events[&#39;trial_type&#39;]]
-
+    events[&#39;trial_type&#39;] = [&#39; &#39;.join(x.split(&#39; &#39;)[:2]) for x in events[&#39;trial_type&#39;]]
     i_evt = isin(events[&#39;trial_type&#39;], trial_types)
-    event_onsets = events[&#39;onset&#39;][i_evt]
-    event_types = events[&#39;trial_type&#39;][i_evt]
-    return event_types, event_onsets</code></pre>
+    return events[i_evt]</code></pre>
 </details>
 </dd>
 </dl>
@@ -522,7 +474,6 @@ def select_events(events, t):
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="fima.read.load" href="#fima.read.load">load</a></code></li>
-<li><code><a title="fima.read.old" href="#fima.read.old">old</a></code></li>
 <li><code><a title="fima.read.select_events" href="#fima.read.select_events">select_events</a></code></li>
 </ul>
 </li>

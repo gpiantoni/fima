@@ -12,19 +12,18 @@ REGION_TYPES = [
 
 COLORSCALE = 'Jet'
 
-MOVEMENT_SYMBOL_DATA = {
+MOVEMENT_SYMBOL = {
     'open': 'circle-open',
+    'extension': 'circle-open',
     'close': 'circle',
-    }
-
-MOVEMENT_SYMBOL_MODEL = {
-    'open': 'diamond-open',
-    'close': 'diamond',
+    'flexion': 'circle',
     }
 
 MOVEMENT_LINE = {
     'open': 'dot',
+    'extension': 'dot',
     'close': 'solid',
+    'flexion': 'solid',
     }
 
 FINGER_COLOR = {
@@ -37,7 +36,6 @@ FINGER_COLOR = {
 
 FINGERS = list(FINGER_COLOR)
 
-
 FINGERS_OPEN = []
 FINGERS_CLOSED = []
 FINGERS_FLEXION = []
@@ -47,3 +45,8 @@ for f in FINGERS:
     FINGERS_CLOSED.append(f + ' close')
     FINGERS_FLEXION.append(f + ' flexion')
     FINGERS_EXTENSION.append(f + ' extension')
+
+TIMEPOINTS = {
+    'crossthresh': 'diamond-open',
+    'peak': 'circle-open',
+    }

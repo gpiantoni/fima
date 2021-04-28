@@ -10,13 +10,13 @@ from wonambi.attr import Freesurfer
 from .preproc import read_data
 from .dataglove.read_dataglove import read_physio
 from .preproc.elec import read_surf, read_brainregion_colors, read_brainregion_colorscale
-from .align.maxmin import CRITICAL_TIMEPOINTS
 from .names import name
 from .parameters import (
     FINGERS_OPEN,
     FINGERS_CLOSED,
     FINGERS_FLEXION,
     FINGERS_EXTENSION,
+    TIMEPOINTS,
     )
 
 FS_LABELS = [
@@ -27,7 +27,7 @@ FS_LABELS = [
     'BA_exvivo.thresh',
     ]
 
-timepoints = ', '.join(f"'{x}'" for x in CRITICAL_TIMEPOINTS)
+timepoints = ', '.join(f"'{x}'" for x in TIMEPOINTS)
 
 
 def load(what, parameters, ieeg_file, event_type=None):
@@ -60,7 +60,7 @@ def load(what, parameters, ieeg_file, event_type=None):
     if event_type is None:
         event_type = parameters['read']['event_type']
 
-    if event_type not in ['cues', 'open', 'close', 'movements', 'extension', 'flexion'] + list(CRITICAL_TIMEPOINTS):
+    if event_type not in ['cues', 'open', 'close', 'movements', 'extension', 'flexion'] + list(TIMEPOINTS):
         raise ValueError(f'"{event_type}" is not one of the possible event types')
 
     ieeg = Task(ieeg_file)
@@ -88,7 +88,7 @@ def load(what, parameters, ieeg_file, event_type=None):
         elif event_type in ('movements', 'extension', 'flexion'):
             pattern = f'sub-{ieeg.subject}_*_run-{ieeg.run}_dataglove.tsv'
             folder = parameters['paths']['movements']
-        elif event_type in CRITICAL_TIMEPOINTS:
+        elif event_type in TIMEPOINTS:
             pattern = replace_underscore(ieeg_file.name, event_type.replace('_', '') + '.tsv')
             folder = name(parameters, 'realigned_dir')
 
@@ -189,7 +189,7 @@ def select_events(events, t):
     ndarray
         (N, ) vector of events (str)
     """
-    if t in ['cues', ] + list(CRITICAL_TIMEPOINTS):
+    if t in ['cues', ] + list(TIMEPOINTS):
         trial_types = FINGERS_OPEN + FINGERS_CLOSED
     elif t == 'open':
         trial_types = FINGERS_OPEN

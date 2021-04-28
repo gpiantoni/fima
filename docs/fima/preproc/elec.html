@@ -43,7 +43,28 @@ def read_surf(filename, right_or_left):
         pial.vert[:, 1] += ras_shift[1]
         pial.vert[:, 2] += ras_shift[2]
 
-    return pial</code></pre>
+    return pial
+
+
+def read_brainregion_colors(annot_names, annot_ctab):
+    ctab = {}
+    for region_name, val in zip(annot_names, annot_ctab):
+        region_name = region_name.decode()
+        if region_name.endswith(&#39;_exvivo&#39;):
+            region_name = region_name[:-7]
+        ctab[region_name] = f&#39;rgb({val[0]}, {val[1]}, {val[2]})&#39;
+
+    return ctab
+
+
+def read_brainregion_colorscale(annot_ctab):
+    colorscale = []
+    for i, val in enumerate(annot_ctab):
+        colorscale.append(
+            [i , f&#39;rgb({val[0]}, {val[1]}, {val[2]})&#39;])
+    colorscale = [[i0 / i, i1] for i0, i1 in colorscale]
+
+    return colorscale</code></pre>
 </details>
 </section>
 <section>
@@ -53,6 +74,45 @@ def read_surf(filename, right_or_left):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="fima.preproc.elec.read_brainregion_colors"><code class="name flex">
+<span>def <span class="ident">read_brainregion_colors</span></span>(<span>annot_names, annot_ctab)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def read_brainregion_colors(annot_names, annot_ctab):
+    ctab = {}
+    for region_name, val in zip(annot_names, annot_ctab):
+        region_name = region_name.decode()
+        if region_name.endswith(&#39;_exvivo&#39;):
+            region_name = region_name[:-7]
+        ctab[region_name] = f&#39;rgb({val[0]}, {val[1]}, {val[2]})&#39;
+
+    return ctab</code></pre>
+</details>
+</dd>
+<dt id="fima.preproc.elec.read_brainregion_colorscale"><code class="name flex">
+<span>def <span class="ident">read_brainregion_colorscale</span></span>(<span>annot_ctab)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def read_brainregion_colorscale(annot_ctab):
+    colorscale = []
+    for i, val in enumerate(annot_ctab):
+        colorscale.append(
+            [i , f&#39;rgb({val[0]}, {val[1]}, {val[2]})&#39;])
+    colorscale = [[i0 / i, i1] for i0, i1 in colorscale]
+
+    return colorscale</code></pre>
+</details>
+</dd>
 <dt id="fima.preproc.elec.read_surf"><code class="name flex">
 <span>def <span class="ident">read_surf</span></span>(<span>filename, right_or_left)</span>
 </code></dt>
@@ -99,6 +159,8 @@ def read_surf(filename, right_or_left):
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="fima.preproc.elec.read_brainregion_colors" href="#fima.preproc.elec.read_brainregion_colors">read_brainregion_colors</a></code></li>
+<li><code><a title="fima.preproc.elec.read_brainregion_colorscale" href="#fima.preproc.elec.read_brainregion_colorscale">read_brainregion_colorscale</a></code></li>
 <li><code><a title="fima.preproc.elec.read_surf" href="#fima.preproc.elec.read_surf">read_surf</a></code></li>
 </ul>
 </li>

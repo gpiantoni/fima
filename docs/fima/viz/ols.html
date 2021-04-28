@@ -24,23 +24,14 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from fima.parameters import FINGER_COLOR
+<pre><code class="python">from ..parameters import (
+    FINGER_COLOR,
+    FINGERS_EXTENSION,
+    FINGERS_FLEXION,
+    FINGERS_OPEN,
+    FINGERS_CLOSED,
+    )
 import plotly.graph_objects as go
-
-# this should be in parameters
-COLS = [
-    &#39;const&#39;,
-    &#39;thumb extension&#39;,
-    &#39;index extension&#39;,
-    &#39;middle extension&#39;,
-    &#39;ring extension&#39;,
-    &#39;little extension&#39;,
-    &#39;thumb flexion&#39;,
-    &#39;index flexion&#39;,
-    &#39;middle flexion&#39;,
-    &#39;ring flexion&#39;,
-    &#39;little flexion&#39;,
-    ]
 
 
 def plot_sigma_delay_mat(MAT, SIGMAS, DELAYS):
@@ -96,6 +87,11 @@ def plot_coefficient(results):
     LOW = results.conf_int()[0]
     HIGH = results.conf_int()[1]
 
+    if &#39;index open&#39; in COEF.index.values:
+        COLS = [&#39;const&#39;, ] + FINGERS_OPEN + FINGERS_CLOSED
+    else:
+        COLS = [&#39;const&#39;, ] + FINGERS_EXTENSION + FINGERS_FLEXION
+
     COLORS = [&#39;grey&#39;, ] + list(FINGER_COLOR.values()) + list(FINGER_COLOR.values())
 
     fig = go.Figure(data=[
@@ -140,6 +136,11 @@ def plot_coefficient(results):
     COEF = results.params
     LOW = results.conf_int()[0]
     HIGH = results.conf_int()[1]
+
+    if &#39;index open&#39; in COEF.index.values:
+        COLS = [&#39;const&#39;, ] + FINGERS_OPEN + FINGERS_CLOSED
+    else:
+        COLS = [&#39;const&#39;, ] + FINGERS_EXTENSION + FINGERS_FLEXION
 
     COLORS = [&#39;grey&#39;, ] + list(FINGER_COLOR.values()) + list(FINGER_COLOR.values())
 

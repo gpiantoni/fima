@@ -40,7 +40,7 @@ from ..ols.summary import import_all_ols
 from ..viz import to_div, to_html
 from ..viz.surf import plot_surf
 from ..viz.ols import plot_coefficient, plot_data_prediction
-from ..viz.ols_summary import plot_ols_rsquared, plot_ols_params
+from ..viz.ols_summary import plot_ols_rsquared, plot_ols_params, plot_ols_flexext, plot_ols_prf, plot_fingerfriends
 from ..names import name
 
 lg = getLogger(__name__)
@@ -63,9 +63,12 @@ def pipeline_ols_all(parameters):
 
     summary_dir = name(parameters, &#39;ols_plot&#39;)
 
+    divs = plot_fingerfriends(parameters)
+    to_html(divs, summary_dir / &#39;ols_movement_all_fingerfriends.html&#39;)
+
     df = import_all_ols(parameters)
 
-    REGIONS = [&#39;brainregion&#39;, &#39;BA&#39;]
+    REGIONS = [&#39;a2009s&#39;, &#39;BA&#39;, &#39;DKTatlas&#39;]
     divs = []
     for region in REGIONS:
         fig = plot_ols_rsquared(df, region)
@@ -93,6 +96,15 @@ def pipeline_ols_all(parameters):
             divs.append(to_div(fig))
     to_html(divs, summary_dir / &#39;ols_movement_all_summary.html&#39;)
 
+    divs = plot_ols_flexext(df, &#39;brainregions&#39;)
+    to_html(divs, summary_dir / &#39;ols_movement_all_flexext.html&#39;)
+
+    divs = plot_ols_prf(df, &#39;brainregions&#39;, &#39;finger&#39;)
+    to_html(divs, summary_dir / &#39;ols_movement_all_prf_finger.html&#39;)
+
+    divs = plot_ols_prf(df, &#39;brainregions&#39;, &#39;spread&#39;)
+    to_html(divs, summary_dir / &#39;ols_movement_all_prf_spread.html&#39;)
+
     df.to_csv(
         name(parameters, &#39;ols_summary&#39;) / &#39;overview.tsv&#39;,
         sep=&#39;\t&#39;, index=False)
@@ -100,15 +112,20 @@ def pipeline_ols_all(parameters):
 
 def pipeline_ols_allchan(parameters, ieeg_file):
 
-    tf_cht, events, onsets = get_continuous_cht(parameters, ieeg_file)
+    try:
+        tf_cht, events, onsets = get_continuous_cht(parameters, ieeg_file)
+    except FileNotFoundError as err:
+        lg.warning(err)
+        return
+
     t = tf_cht.time[0]
 
     try:
-        mov = load(&#39;movements&#39;, parameters, ieeg_file)
+        events = load(&#39;events&#39;, parameters, ieeg_file)
     except FileNotFoundError:
         return
 
-    indices = find_movement_indices(mov, tf_cht.time[0])
+    indices = find_movement_indices(events, tf_cht.time[0])
     for chan in tf_cht.chan[0][::-1]:
         lg.info(f&#39;{ieeg_file.stem} Fitting OLS on {chan}&#39;)
         x = tf_cht(trial=0, chan=chan, trial_axis=&#39;trial000000&#39;)
@@ -152,7 +169,7 @@ def pipeline_ols_summary(parameters, ieeg_file):
         pial = None
 
     dat = Data(array(df[&#39;rsquared&#39;]), chan=array(df[&#39;chan&#39;]))
-    fig = plot_surf(dat, elec, pial=pial, clim=(0, nanmax(df[&#39;rsquared&#39;])), colorscale=&#39;Hot&#39;)
+    fig = plot_surf(parameters, dat, elec, pial=pial, clim=(0, nanmax(df[&#39;rsquared&#39;])), colorscale=&#39;Hot&#39;)
 
     plots_dir = name(parameters, &#39;ols_plot&#39;) / ieeg_file.stem
     to_html([to_div(fig), ], plots_dir / &#39;rsquared.html&#39;)
@@ -165,7 +182,7 @@ def pipeline_ols_summary(parameters, ieeg_file):
     params = set(df) - {&#39;rsquared&#39;, &#39;chan&#39;}
     for param in params:
         dat = Data(array(df[param]), chan=array(df[&#39;chan&#39;]))
-        fig = plot_surf(dat, elec, pial=pial, clim=(nanmin(df[param]), nanmax(df[param])), colorscale=&#39;Hot&#39;)
+        fig = plot_surf(parameters, dat, elec, pial=pial, clim=(nanmin(df[param]), nanmax(df[param])), colorscale=&#39;Hot&#39;)
         to_html([to_div(fig), ], plots_dir / f&#39;{param.replace(&#34; &#34;, &#34;_&#34;)}.html&#39;)
 
 
@@ -262,9 +279,12 @@ def pipeline_ols_prf(parameters, ieeg_file):
 
     summary_dir = name(parameters, &#39;ols_plot&#39;)
 
+    divs = plot_fingerfriends(parameters)
+    to_html(divs, summary_dir / &#39;ols_movement_all_fingerfriends.html&#39;)
+
     df = import_all_ols(parameters)
 
-    REGIONS = [&#39;brainregion&#39;, &#39;BA&#39;]
+    REGIONS = [&#39;a2009s&#39;, &#39;BA&#39;, &#39;DKTatlas&#39;]
     divs = []
     for region in REGIONS:
         fig = plot_ols_rsquared(df, region)
@@ -292,6 +312,15 @@ def pipeline_ols_prf(parameters, ieeg_file):
             divs.append(to_div(fig))
     to_html(divs, summary_dir / &#39;ols_movement_all_summary.html&#39;)
 
+    divs = plot_ols_flexext(df, &#39;brainregions&#39;)
+    to_html(divs, summary_dir / &#39;ols_movement_all_flexext.html&#39;)
+
+    divs = plot_ols_prf(df, &#39;brainregions&#39;, &#39;finger&#39;)
+    to_html(divs, summary_dir / &#39;ols_movement_all_prf_finger.html&#39;)
+
+    divs = plot_ols_prf(df, &#39;brainregions&#39;, &#39;spread&#39;)
+    to_html(divs, summary_dir / &#39;ols_movement_all_prf_spread.html&#39;)
+
     df.to_csv(
         name(parameters, &#39;ols_summary&#39;) / &#39;overview.tsv&#39;,
         sep=&#39;\t&#39;, index=False)</code></pre>
@@ -308,15 +337,20 @@ def pipeline_ols_prf(parameters, ieeg_file):
 </summary>
 <pre><code class="python">def pipeline_ols_allchan(parameters, ieeg_file):
 
-    tf_cht, events, onsets = get_continuous_cht(parameters, ieeg_file)
+    try:
+        tf_cht, events, onsets = get_continuous_cht(parameters, ieeg_file)
+    except FileNotFoundError as err:
+        lg.warning(err)
+        return
+
     t = tf_cht.time[0]
 
     try:
-        mov = load(&#39;movements&#39;, parameters, ieeg_file)
+        events = load(&#39;events&#39;, parameters, ieeg_file)
     except FileNotFoundError:
         return
 
-    indices = find_movement_indices(mov, tf_cht.time[0])
+    indices = find_movement_indices(events, tf_cht.time[0])
     for chan in tf_cht.chan[0][::-1]:
         lg.info(f&#39;{ieeg_file.stem} Fitting OLS on {chan}&#39;)
         x = tf_cht(trial=0, chan=chan, trial_axis=&#39;trial000000&#39;)
@@ -386,7 +420,7 @@ def pipeline_ols_prf(parameters, ieeg_file):
         pial = None
 
     dat = Data(array(df[&#39;rsquared&#39;]), chan=array(df[&#39;chan&#39;]))
-    fig = plot_surf(dat, elec, pial=pial, clim=(0, nanmax(df[&#39;rsquared&#39;])), colorscale=&#39;Hot&#39;)
+    fig = plot_surf(parameters, dat, elec, pial=pial, clim=(0, nanmax(df[&#39;rsquared&#39;])), colorscale=&#39;Hot&#39;)
 
     plots_dir = name(parameters, &#39;ols_plot&#39;) / ieeg_file.stem
     to_html([to_div(fig), ], plots_dir / &#39;rsquared.html&#39;)
@@ -399,7 +433,7 @@ def pipeline_ols_prf(parameters, ieeg_file):
     params = set(df) - {&#39;rsquared&#39;, &#39;chan&#39;}
     for param in params:
         dat = Data(array(df[param]), chan=array(df[&#39;chan&#39;]))
-        fig = plot_surf(dat, elec, pial=pial, clim=(nanmin(df[param]), nanmax(df[param])), colorscale=&#39;Hot&#39;)
+        fig = plot_surf(parameters, dat, elec, pial=pial, clim=(nanmin(df[param]), nanmax(df[param])), colorscale=&#39;Hot&#39;)
         to_html([to_div(fig), ], plots_dir / f&#39;{param.replace(&#34; &#34;, &#34;_&#34;)}.html&#39;)</code></pre>
 </details>
 </dd>

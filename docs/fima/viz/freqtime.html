@@ -35,21 +35,8 @@ from ..utils import group_per_condition
 from .utils import to_div
 
 
-def _compute_regions(fs, elec):
-    &#34;&#34;&#34;do not use this anymore, use brainregions&#34;&#34;&#34;
-    raise NotImplementedError
-    chans = Channels(elec[&#39;name&#39;], c_[elec[&#39;x&#39;], elec[&#39;y&#39;], elec[&#39;z&#39;]])
-    regions = assign_region_to_channels(chans, fs, parc_type=&#39;aparc.a2009s&#39;, exclude_regions=(&#39;White&#39;, &#39;WM&#39;, &#39;Unknown&#39;))
-    return regions
-
-
-def _get_region(regions, label):
-    for chan in regions.chan:
-        if chan.label == label:
-            return chan.attr[&#39;region&#39;]
-
-
 def plot_conditions_per_chan(parameters, tf_cht, names, statistics=&#39;sem&#39;, fs=None, elec=None):
+    assert NotImplementedError
     &#34;&#34;&#34;Plot all the conditions for each channel
 
     Parameters
@@ -166,26 +153,13 @@ def plot_per_chan(parameters, y, s, chan, names):
 <span>def <span class="ident">plot_conditions_per_chan</span></span>(<span>parameters, tf_cht, names, statistics='sem', fs=None, elec=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Plot all the conditions for each channel</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>tf_cht</code></strong> :&ensp;<code>wonambi.Data</code></dt>
-<dd>time-channel data</dd>
-<dt><strong><code>names</code></strong> :&ensp;<code>list</code> of <code>str</code></dt>
-<dd>list of all the events</dd>
-<dt><strong><code>statistics</code></strong> :&ensp;<code>str</code></dt>
-<dd>'sem' or 'std'</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>list</code> of <code>dict</code></dt>
-<dd>plotly images</dd>
-</dl></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def plot_conditions_per_chan(parameters, tf_cht, names, statistics=&#39;sem&#39;, fs=None, elec=None):
+    assert NotImplementedError
     &#34;&#34;&#34;Plot all the conditions for each channel
 
     Parameters

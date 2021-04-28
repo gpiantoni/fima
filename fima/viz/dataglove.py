@@ -1,8 +1,7 @@
 import plotly.graph_objects as go
 from numpy import argmin
 
-from ..parameters import MOVEMENT_SYMBOL_DATA, MOVEMENT_LINE
-from ..viz.utils import FINGER_COLOR
+from ..parameters import MOVEMENT_SYMBOL, MOVEMENT_LINE, FINGER_COLOR
 
 
 def plot_dataglove(tsv, events, mov=None):
@@ -89,9 +88,6 @@ def _plot_movements(mov, tsv):
         circle_color.append(
             FINGER_COLOR[finger]
         )
-        if action == 'flexion':
-            symbol.append(MOVEMENT_SYMBOL_DATA['close'])
-        else:
-            symbol.append(MOVEMENT_SYMBOL_DATA['open'])
+        symbol.append(MOVEMENT_SYMBOL[action])
 
     return y, circle_color, symbol

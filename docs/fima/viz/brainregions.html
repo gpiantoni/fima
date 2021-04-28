@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.viz.dataglove API documentation</title>
+<title>fima.viz.brainregions API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,106 +17,110 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.viz.dataglove</code></h1>
+<h1 class="title">Module <code>fima.viz.brainregions</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import plotly.graph_objects as go
-from numpy import argmin
+<pre><code class="python">from bidso.utils import read_tsv
+import plotly.graph_objects as go
+from numpy import sign
 
-from ..parameters import MOVEMENT_SYMBOL, MOVEMENT_LINE, FINGER_COLOR
+from ..names import name
+from ..read import load
+
+from .surf import AXIS
 
 
-def plot_dataglove(tsv, events, mov=None):
+def plot_brain_regions(parameters, ieeg_file, region_type):
+    &#34;&#34;&#34;
+    region_type can be one of:
+    &#39;aparc.a2009s&#39;,
+    &#39;aparc.DKTatlas&#39;,
+    &#39;BA_exvivo&#39;,
+    &#39;BA_exvivo.thresh&#39;,
+    &#34;&#34;&#34;
+    brainregions_file = name(parameters, &#39;brainregions&#39;, ieeg_file)
+    electrodes = read_tsv(brainregions_file)
+    pial = load(&#39;surface&#39;, parameters, ieeg_file)
+    annot = load(region_type, parameters, ieeg_file)
 
-    traces = []
-    i = 0
-    for finger, color in FINGER_COLOR.items():
+    colors = []
+    labels = []
+    for elec in electrodes:
+        region = elec[region_type]
+        labels.append(f&#39;{elec[&#34;name&#34;]} = {region}&#39;)
+        colors.append(annot[&#39;regions&#39;][&#39;colors&#39;][region])
 
-        traces.append(
-            go.Scatter(
-                x=tsv[&#39;time&#39;],
-                y=tsv[finger] - i,
-                name=finger,
-                line=dict(
-                    color=color,
-                    width=1,
+    # to normalize plotly
+    n_regions = len(annot[&#39;regions&#39;][&#39;names&#39;])
+
+    right_or_left = sign((electrodes[&#39;x&#39;] &gt; 0).sum() / electrodes.shape[0] - .5)
+
+    traces = [
+        go.Mesh3d(
+            x=pial.vert[:, 0],
+            y=pial.vert[:, 1],
+            z=pial.vert[:, 2],
+            i=pial.tri[:, 0],
+            j=pial.tri[:, 1],
+            k=pial.tri[:, 2],
+            intensity=annot[&#39;regions&#39;][&#39;values&#39;] / n_regions,
+            colorscale=annot[&#39;regions&#39;][&#39;colorscale&#39;],
+            hoverinfo=&#39;skip&#39;,
+            showscale=False,
+            flatshading=False,
+            lighting=dict(
+                ambient=0.18,
+                diffuse=1,
+                fresnel=0.1,
+                specular=1,
+                roughness=0.1,
                 ),
-            ))
-        i += 1
-
-    if mov is not None:
-        y, circle_color, symbol = _plot_movements(mov, tsv)
-        traces.append(
-            go.Scatter(
-                x=mov[&#39;onset&#39;],
-                y=y,
-                mode=&#39;markers&#39;,
-                marker=dict(
-                    color=circle_color,
-                    size=10,
-                    symbol=symbol,
-                    ),
-                ))
+            lightposition=dict(
+                x=0,
+                y=0,
+                z=-1,
+                ),
+            ),
+        go.Scatter3d(
+            x=electrodes[&#39;x&#39;],
+            y=electrodes[&#39;y&#39;],
+            z=electrodes[&#39;z&#39;],
+            text=labels,
+            mode=&#39;markers&#39;,
+            hoverinfo=&#39;text&#39;,
+            marker=dict(
+                size=5,
+                color=colors,
+            ),
+        )
+        ]
 
     fig = go.Figure(
-        traces,
+        data=traces,
         layout=go.Layout(
-            showlegend=False,
-            xaxis=dict(
-                title=&#39;time (s)&#39;,
+            scene=dict(
+                xaxis=AXIS,
+                yaxis=AXIS,
+                zaxis=AXIS,
+                camera=dict(
+                    eye=dict(
+                        x=right_or_left,
+                        y=0,
+                        z=0.5,
+                    ),
+                    projection=dict(
+                        type=&#39;orthographic&#39;,
+                    ),
+                    ),
+                ),
             ),
-            yaxis=dict(
-                tickvals=[.5, -.5, -1.5, -2.5, -3.5],
-                ticktext=list(FINGER_COLOR),
-            )
-        ))
-
-    for ev in events:
-        tt = ev[&#39;trial_type&#39;]
-        if tt == &#39;n/a&#39;:
-            continue
-        finger, movement = tt.split(&#39; &#39;)[:2]
-        if finger not in FINGER_COLOR:
-            continue
-
-        fig.add_shape(
-            dict(
-                type=&#34;line&#34;,
-                x0=ev[&#39;onset&#39;],
-                x1=ev[&#39;onset&#39;],
-                xref=&#34;x&#34;,
-                yref=&#34;paper&#34;,
-                y0=0,
-                y1=1,
-                line=dict(
-                    color=FINGER_COLOR[finger],
-                    width=1,
-                    dash=MOVEMENT_LINE[movement],
-                )
-            ))
-    return fig
-
-
-def _plot_movements(mov, tsv):
-    y = []
-    circle_color = []
-    symbol = []
-    for m in mov:
-        finger, action = m[&#39;trial_type&#39;].split()
-        i_min = argmin(abs(m[&#39;onset&#39;] - tsv[&#39;time&#39;]))
-        y.append(
-            (tsv[finger] - list(FINGER_COLOR).index(finger))[i_min]
         )
-        circle_color.append(
-            FINGER_COLOR[finger]
-        )
-        symbol.append(MOVEMENT_SYMBOL[action])
 
-    return y, circle_color, symbol</code></pre>
+    return fig</code></pre>
 </details>
 </section>
 <section>
@@ -126,83 +130,105 @@ def _plot_movements(mov, tsv):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="fima.viz.dataglove.plot_dataglove"><code class="name flex">
-<span>def <span class="ident">plot_dataglove</span></span>(<span>tsv, events, mov=None)</span>
+<dt id="fima.viz.brainregions.plot_brain_regions"><code class="name flex">
+<span>def <span class="ident">plot_brain_regions</span></span>(<span>parameters, ieeg_file, region_type)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>region_type can be one of:
+'aparc.a2009s',
+'aparc.DKTatlas',
+'BA_exvivo',
+'BA_exvivo.thresh',</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def plot_dataglove(tsv, events, mov=None):
+<pre><code class="python">def plot_brain_regions(parameters, ieeg_file, region_type):
+    &#34;&#34;&#34;
+    region_type can be one of:
+    &#39;aparc.a2009s&#39;,
+    &#39;aparc.DKTatlas&#39;,
+    &#39;BA_exvivo&#39;,
+    &#39;BA_exvivo.thresh&#39;,
+    &#34;&#34;&#34;
+    brainregions_file = name(parameters, &#39;brainregions&#39;, ieeg_file)
+    electrodes = read_tsv(brainregions_file)
+    pial = load(&#39;surface&#39;, parameters, ieeg_file)
+    annot = load(region_type, parameters, ieeg_file)
 
-    traces = []
-    i = 0
-    for finger, color in FINGER_COLOR.items():
+    colors = []
+    labels = []
+    for elec in electrodes:
+        region = elec[region_type]
+        labels.append(f&#39;{elec[&#34;name&#34;]} = {region}&#39;)
+        colors.append(annot[&#39;regions&#39;][&#39;colors&#39;][region])
 
-        traces.append(
-            go.Scatter(
-                x=tsv[&#39;time&#39;],
-                y=tsv[finger] - i,
-                name=finger,
-                line=dict(
-                    color=color,
-                    width=1,
+    # to normalize plotly
+    n_regions = len(annot[&#39;regions&#39;][&#39;names&#39;])
+
+    right_or_left = sign((electrodes[&#39;x&#39;] &gt; 0).sum() / electrodes.shape[0] - .5)
+
+    traces = [
+        go.Mesh3d(
+            x=pial.vert[:, 0],
+            y=pial.vert[:, 1],
+            z=pial.vert[:, 2],
+            i=pial.tri[:, 0],
+            j=pial.tri[:, 1],
+            k=pial.tri[:, 2],
+            intensity=annot[&#39;regions&#39;][&#39;values&#39;] / n_regions,
+            colorscale=annot[&#39;regions&#39;][&#39;colorscale&#39;],
+            hoverinfo=&#39;skip&#39;,
+            showscale=False,
+            flatshading=False,
+            lighting=dict(
+                ambient=0.18,
+                diffuse=1,
+                fresnel=0.1,
+                specular=1,
+                roughness=0.1,
                 ),
-            ))
-        i += 1
-
-    if mov is not None:
-        y, circle_color, symbol = _plot_movements(mov, tsv)
-        traces.append(
-            go.Scatter(
-                x=mov[&#39;onset&#39;],
-                y=y,
-                mode=&#39;markers&#39;,
-                marker=dict(
-                    color=circle_color,
-                    size=10,
-                    symbol=symbol,
-                    ),
-                ))
+            lightposition=dict(
+                x=0,
+                y=0,
+                z=-1,
+                ),
+            ),
+        go.Scatter3d(
+            x=electrodes[&#39;x&#39;],
+            y=electrodes[&#39;y&#39;],
+            z=electrodes[&#39;z&#39;],
+            text=labels,
+            mode=&#39;markers&#39;,
+            hoverinfo=&#39;text&#39;,
+            marker=dict(
+                size=5,
+                color=colors,
+            ),
+        )
+        ]
 
     fig = go.Figure(
-        traces,
+        data=traces,
         layout=go.Layout(
-            showlegend=False,
-            xaxis=dict(
-                title=&#39;time (s)&#39;,
+            scene=dict(
+                xaxis=AXIS,
+                yaxis=AXIS,
+                zaxis=AXIS,
+                camera=dict(
+                    eye=dict(
+                        x=right_or_left,
+                        y=0,
+                        z=0.5,
+                    ),
+                    projection=dict(
+                        type=&#39;orthographic&#39;,
+                    ),
+                    ),
+                ),
             ),
-            yaxis=dict(
-                tickvals=[.5, -.5, -1.5, -2.5, -3.5],
-                ticktext=list(FINGER_COLOR),
-            )
-        ))
+        )
 
-    for ev in events:
-        tt = ev[&#39;trial_type&#39;]
-        if tt == &#39;n/a&#39;:
-            continue
-        finger, movement = tt.split(&#39; &#39;)[:2]
-        if finger not in FINGER_COLOR:
-            continue
-
-        fig.add_shape(
-            dict(
-                type=&#34;line&#34;,
-                x0=ev[&#39;onset&#39;],
-                x1=ev[&#39;onset&#39;],
-                xref=&#34;x&#34;,
-                yref=&#34;paper&#34;,
-                y0=0,
-                y1=1,
-                line=dict(
-                    color=FINGER_COLOR[finger],
-                    width=1,
-                    dash=MOVEMENT_LINE[movement],
-                )
-            ))
     return fig</code></pre>
 </details>
 </dd>
@@ -224,7 +250,7 @@ def _plot_movements(mov, tsv):
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="fima.viz.dataglove.plot_dataglove" href="#fima.viz.dataglove.plot_dataglove">plot_dataglove</a></code></li>
+<li><code><a title="fima.viz.brainregions.plot_brain_regions" href="#fima.viz.brainregions.plot_brain_regions">plot_brain_regions</a></code></li>
 </ul>
 </li>
 </ul>

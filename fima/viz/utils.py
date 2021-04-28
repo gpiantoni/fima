@@ -5,12 +5,13 @@ from plotly.offline import plot
 from scipy.stats import ttest_rel
 from wonambi.trans import select
 
-from ..parameters import FINGER_COLOR, MOVEMENT_SYMBOL_DATA, MOVEMENT_SYMBOL_MODEL
+# from ..parameters import FINGER_COLOR, MOVEMENT_SYMBOL_DATA, MOVEMENT_SYMBOL_MODEL
 
 lg = getLogger(__name__)
 
 
 def get_color_symbol(names):
+    raise NotImplementedError
     """Get the appropriate color and symbol for each condition
 
     Parameters

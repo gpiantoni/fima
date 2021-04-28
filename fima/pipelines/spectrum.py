@@ -1,13 +1,16 @@
 """Compute the power spectrum"""
+from logging import getLogger
 from numpy import argmax, empty, asanyarray, array, not_equal, nonzero, diff, append
 
 from ..spectrum import compute_timefreq, get_chan, get_chantime
-from ..viz import plot_tfr, plot_tfr_time, to_div, to_html, plot_surf, plot_conditions_per_chan
+from ..viz import plot_tfr, plot_tfr_time, to_div, to_html, plot_surf
 from ..read import load
 from ..utils import find_max_point
 from ..names import name
 
 from wonambi.trans import math
+
+lg = getLogger(__name__)
 
 
 def pipeline_spectrum(parameters, ieeg_file):
@@ -21,22 +24,20 @@ def pipeline_spectrum(parameters, ieeg_file):
     try:
         elec = load('electrodes', parameters, ieeg_file)
     except Exception:
-        print(f'No electrodes for {ieeg_file.stem}')
+        lg.warning(f'No electrodes for {ieeg_file.stem}')
         elec = None
 
     try:
         pial = load('surface', parameters, ieeg_file)
-        fs = load('freesurfer', parameters, ieeg_file)
     except Exception:
-        print(f'No surfaces for {ieeg_file.stem}')
+        lg.warning(f'No surfaces for {ieeg_file.stem}')
         pial = None
-        fs = None
 
     tf = compute_timefreq(parameters, data, mean=False)
     tf_m = math(tf, operator_name='nanmean', axis='trial_axis')
     tf_cht = get_chantime(parameters, tf_m)
     best_chan, best_time = find_max_point(parameters, tf_cht)
-    print(f'Best channel {best_chan}, best interval [{best_time[0]: .3f}-{best_time[1]: .3f}]s')
+    lg.info(f'Best channel {best_chan}, best interval [{best_time[0]: .3f}-{best_time[1]: .3f}]s')
 
     tf_ch = get_chan(parameters, tf_m, time=best_time)
 
@@ -51,10 +52,6 @@ def pipeline_spectrum(parameters, ieeg_file):
         divs.append(to_div(fig))
 
     to_html(divs, name(parameters, 'spectrum', ieeg_file))
-
-    tf_cht = get_chantime(parameters, tf)
-    divs = plot_conditions_per_chan(parameters, tf_cht, names, fs=fs, elec=elec)
-    to_html(divs, name(parameters, 'spectrum_all', ieeg_file))
 
 
 def find_max_true(x):

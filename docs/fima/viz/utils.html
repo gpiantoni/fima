@@ -31,12 +31,13 @@ from plotly.offline import plot
 from scipy.stats import ttest_rel
 from wonambi.trans import select
 
-from ..parameters import FINGER_COLOR, MOVEMENT_SYMBOL_DATA, MOVEMENT_SYMBOL_MODEL
+# from ..parameters import FINGER_COLOR, MOVEMENT_SYMBOL_DATA, MOVEMENT_SYMBOL_MODEL
 
 lg = getLogger(__name__)
 
 
 def get_color_symbol(names):
+    raise NotImplementedError
     &#34;&#34;&#34;Get the appropriate color and symbol for each condition
 
     Parameters
@@ -189,26 +190,13 @@ def select_significant_channels(data, onsets, threshold=0.0005):
 <span>def <span class="ident">get_color_symbol</span></span>(<span>names)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Get the appropriate color and symbol for each condition</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>names</code></strong> :&ensp;<code>list</code> of <code>str</code></dt>
-<dd>list of conditions</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>list</code> of <code>str</code></dt>
-<dd>list of colors</dd>
-<dt><code>list</code> of <code>str</code></dt>
-<dd>list of symbols for the data</dd>
-<dt><code>list</code> of <code>str</code></dt>
-<dd>list of symbols for the model estimates</dd>
-</dl></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_color_symbol(names):
+    raise NotImplementedError
     &#34;&#34;&#34;Get the appropriate color and symbol for each condition
 
     Parameters

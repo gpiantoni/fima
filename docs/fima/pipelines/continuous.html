@@ -27,11 +27,10 @@
 <pre><code class="python">from logging import getLogger
 
 from ..spectrum.baseline import apply_baseline_to_continuous
-from ..viz import to_html
-from ..viz.continuous import plot_continuous
 from ..spectrum.continuous import get_continuous_cht
 
 from ..names import name
+from ..read import load
 
 lg = getLogger(__name__)
 
@@ -49,9 +48,28 @@ def pipeline_continuous(parameters, ieeg):
         lg.info(&#39;Applying baseline to continuous&#39;)
         tf_cht = apply_baseline_to_continuous(parameters, tf_cht, onsets)
     lg.info(&#39;Plotting continuous&#39;)
-    divs = plot_continuous(parameters, tf_cht, onsets, events)
+    # divs = plot_continuous(parameters, tf_cht, onsets, events)
 
-    to_html(divs, name(parameters, &#39;continuous&#39;, ieeg))</code></pre>
+    # prepare events for export
+    mov_export = []
+
+    try:
+        mov = load(&#39;events&#39;, parameters, ieeg, &#39;movements&#39;)
+    except FileNotFoundError:  # when missing dataglove
+        return
+    else:
+        for m in mov:
+            mov_export.append({
+                &#39;name&#39;: m[&#39;trial_type&#39;],
+                &#39;start&#39;: m[&#39;onset&#39;] - tf_cht.time[0][0],
+                &#39;end&#39;: m[&#39;onset&#39;] + m[&#39;duration&#39;] - tf_cht.time[0][0],
+            })
+
+    tf_cht.s_freq = 1 / (tf_cht.time[0][1] - tf_cht.time[0][0])
+    tf_cht.export(
+        name(parameters, &#39;continuous&#39;, ieeg),
+        &#39;brainvision&#39;,
+        markers=mov_export)</code></pre>
 </details>
 </section>
 <section>
@@ -88,9 +106,28 @@ def pipeline_continuous(parameters, ieeg):
         lg.info(&#39;Applying baseline to continuous&#39;)
         tf_cht = apply_baseline_to_continuous(parameters, tf_cht, onsets)
     lg.info(&#39;Plotting continuous&#39;)
-    divs = plot_continuous(parameters, tf_cht, onsets, events)
+    # divs = plot_continuous(parameters, tf_cht, onsets, events)
 
-    to_html(divs, name(parameters, &#39;continuous&#39;, ieeg))</code></pre>
+    # prepare events for export
+    mov_export = []
+
+    try:
+        mov = load(&#39;events&#39;, parameters, ieeg, &#39;movements&#39;)
+    except FileNotFoundError:  # when missing dataglove
+        return
+    else:
+        for m in mov:
+            mov_export.append({
+                &#39;name&#39;: m[&#39;trial_type&#39;],
+                &#39;start&#39;: m[&#39;onset&#39;] - tf_cht.time[0][0],
+                &#39;end&#39;: m[&#39;onset&#39;] + m[&#39;duration&#39;] - tf_cht.time[0][0],
+            })
+
+    tf_cht.s_freq = 1 / (tf_cht.time[0][1] - tf_cht.time[0][0])
+    tf_cht.export(
+        name(parameters, &#39;continuous&#39;, ieeg),
+        &#39;brainvision&#39;,
+        markers=mov_export)</code></pre>
 </details>
 </dd>
 </dl>

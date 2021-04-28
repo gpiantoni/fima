@@ -80,18 +80,21 @@ def compute_timefreq(parameters, data, baseline=True, mean=True):
     if mean:
         tf = math(
             tf,
-            operator_name=&#39;mean&#39;,
+            operator_name=&#39;nanmean&#39;,
             axis=&#39;trial_axis&#39;)
 
     return tf
 
 
-def get_chantime(parameters, tf, freq=None, baseline=False):
+def get_chantime(parameters, tf, freq=None, baseline=False, freq_operator=&#39;nanmean&#39;):
+    &#34;&#34;&#34;
+    freq_operator : nanmean or nanmax
+    &#34;&#34;&#34;
     if freq is None:
         freq = parameters[&#39;spectrum&#39;][&#39;select&#39;][&#39;freq&#39;]
     out = math(
         select(tf, freq=freq),
-        operator_name=&#39;mean&#39;,
+        operator_name=freq_operator,
         axis=&#39;freq&#39;)
 
     if baseline:
@@ -110,7 +113,7 @@ def get_chantime(parameters, tf, freq=None, baseline=False):
     return out
 
 
-def get_chan(parameters, tf, freq=None, baseline=False, time=None, operator_name=&#39;mean&#39;):
+def get_chan(parameters, tf, freq=None, baseline=False, time=None, operator_name=&#39;nanmean&#39;):
     if time is None:
         time = parameters[&#39;spectrum&#39;][&#39;select&#39;][&#39;time&#39;]
     tf = get_chantime(parameters, tf, freq=freq, baseline=baseline)
@@ -189,14 +192,14 @@ def get_chan(parameters, tf, freq=None, baseline=False, time=None, operator_name
     if mean:
         tf = math(
             tf,
-            operator_name=&#39;mean&#39;,
+            operator_name=&#39;nanmean&#39;,
             axis=&#39;trial_axis&#39;)
 
     return tf</code></pre>
 </details>
 </dd>
 <dt id="fima.spectrum.compute.get_chan"><code class="name flex">
-<span>def <span class="ident">get_chan</span></span>(<span>parameters, tf, freq=None, baseline=False, time=None, operator_name='mean')</span>
+<span>def <span class="ident">get_chan</span></span>(<span>parameters, tf, freq=None, baseline=False, time=None, operator_name='nanmean')</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -204,7 +207,7 @@ def get_chan(parameters, tf, freq=None, baseline=False, time=None, operator_name
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_chan(parameters, tf, freq=None, baseline=False, time=None, operator_name=&#39;mean&#39;):
+<pre><code class="python">def get_chan(parameters, tf, freq=None, baseline=False, time=None, operator_name=&#39;nanmean&#39;):
     if time is None:
         time = parameters[&#39;spectrum&#39;][&#39;select&#39;][&#39;time&#39;]
     tf = get_chantime(parameters, tf, freq=freq, baseline=baseline)
@@ -218,20 +221,23 @@ def get_chan(parameters, tf, freq=None, baseline=False, time=None, operator_name
 </details>
 </dd>
 <dt id="fima.spectrum.compute.get_chantime"><code class="name flex">
-<span>def <span class="ident">get_chantime</span></span>(<span>parameters, tf, freq=None, baseline=False)</span>
+<span>def <span class="ident">get_chantime</span></span>(<span>parameters, tf, freq=None, baseline=False, freq_operator='nanmean')</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>freq_operator : nanmean or nanmax</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_chantime(parameters, tf, freq=None, baseline=False):
+<pre><code class="python">def get_chantime(parameters, tf, freq=None, baseline=False, freq_operator=&#39;nanmean&#39;):
+    &#34;&#34;&#34;
+    freq_operator : nanmean or nanmax
+    &#34;&#34;&#34;
     if freq is None:
         freq = parameters[&#39;spectrum&#39;][&#39;select&#39;][&#39;freq&#39;]
     out = math(
         select(tf, freq=freq),
-        operator_name=&#39;mean&#39;,
+        operator_name=freq_operator,
         axis=&#39;freq&#39;)
 
     if baseline:
