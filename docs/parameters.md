@@ -7,7 +7,7 @@ Information to store in `parameters.json` file.
     - movements: str, path to movements (should have the same prefix as `_events.tsv` but ends with `_dataglove.tsv`)
     - freesurfer_subjects_dir: str, path to freesurfer folder,
     - output: str, path to output folder which will contain the results
-  - align:
+  - timepoints:
     - time: [float, float], interval to look for the max value
     - threshold:
       - high: float, when activity is above this threshold, consider it actual movement

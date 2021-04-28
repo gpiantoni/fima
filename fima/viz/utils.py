@@ -109,6 +109,7 @@ def to_png(fig, png_name):
 
 
 def select_significant_channels(data, onsets, threshold=0.0005):
+    assert NotImplementedError
     """Select channels that show a significant difference between the period
     before onset and the period after the onset.
 

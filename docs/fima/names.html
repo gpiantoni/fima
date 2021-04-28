@@ -49,9 +49,13 @@ def name(parameters, what, ieeg_file=None):
         out = out_dir / &#39;dataglove&#39;
         out.mkdir(parents=True, exist_ok=True)
 
-    elif what == &#39;realigned_dir&#39;:
-        out = out_dir / &#39;realigned&#39;
-        out.mkdir(parents=True, exist_ok=True)
+    elif what == &#39;timepoints&#39;:
+        out = out_dir / &#39;timepoints&#39; / &#39;timings&#39; / f&#39;{ieeg_file.stem}.npy&#39;
+        out.parent.mkdir(parents=True, exist_ok=True)
+
+    elif what == &#39;timepoints_plot&#39;:
+        out = out_dir / &#39;timepoints&#39; / &#39;plots&#39; / f&#39;{ieeg_file.stem}.html&#39;
+        out.parent.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;continuous&#39;:
         out = out_dir / &#39;continuous&#39; / f&#39;{ieeg_file.stem}.html&#39;
@@ -115,9 +119,13 @@ def name(parameters, what, ieeg_file=None):
         out = out_dir / &#39;dataglove&#39;
         out.mkdir(parents=True, exist_ok=True)
 
-    elif what == &#39;realigned_dir&#39;:
-        out = out_dir / &#39;realigned&#39;
-        out.mkdir(parents=True, exist_ok=True)
+    elif what == &#39;timepoints&#39;:
+        out = out_dir / &#39;timepoints&#39; / &#39;timings&#39; / f&#39;{ieeg_file.stem}.npy&#39;
+        out.parent.mkdir(parents=True, exist_ok=True)
+
+    elif what == &#39;timepoints_plot&#39;:
+        out = out_dir / &#39;timepoints&#39; / &#39;plots&#39; / f&#39;{ieeg_file.stem}.html&#39;
+        out.parent.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;continuous&#39;:
         out = out_dir / &#39;continuous&#39; / f&#39;{ieeg_file.stem}.html&#39;

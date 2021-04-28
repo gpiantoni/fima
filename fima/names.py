@@ -23,9 +23,13 @@ def name(parameters, what, ieeg_file=None):
         out = out_dir / 'dataglove'
         out.mkdir(parents=True, exist_ok=True)
 
-    elif what == 'realigned_dir':
-        out = out_dir / 'realigned'
-        out.mkdir(parents=True, exist_ok=True)
+    elif what == 'timepoints':
+        out = out_dir / 'timepoints' / 'timings' / f'{ieeg_file.stem}.npy'
+        out.parent.mkdir(parents=True, exist_ok=True)
+
+    elif what == 'timepoints_plot':
+        out = out_dir / 'timepoints' / 'plots' / f'{ieeg_file.stem}.html'
+        out.parent.mkdir(parents=True, exist_ok=True)
 
     elif what == 'continuous':
         out = out_dir / 'continuous' / f'{ieeg_file.stem}.html'

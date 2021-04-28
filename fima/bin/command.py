@@ -61,10 +61,10 @@ def main():
     action.set_defaults(function='spectrum')
 
     action = list_pipelines.add_parser(
-        'align',
-        help='Aligned trials based on the peak activity',
+        'timepoints',
+        help='Find important timepoints (peak and above threshold)',
         )
-    action.set_defaults(function='align')
+    action.set_defaults(function='timepoints')
 
     action = list_pipelines.add_parser(
         'ols',

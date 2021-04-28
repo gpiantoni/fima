@@ -135,6 +135,7 @@ def to_png(fig, png_name):
 
 
 def select_significant_channels(data, onsets, threshold=0.0005):
+    assert NotImplementedError
     &#34;&#34;&#34;Select channels that show a significant difference between the period
     before onset and the period after the onset.
 
@@ -230,27 +231,13 @@ def select_significant_channels(data, onsets, threshold=0.0005):
 <span>def <span class="ident">select_significant_channels</span></span>(<span>data, onsets, threshold=0.0005)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Select channels that show a significant difference between the period
-before onset and the period after the onset.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>data</code></strong> :&ensp;<code>instance</code> of <code>wonambi.data</code></dt>
-<dd>continuous data (already converted to z-score or dB)</dd>
-<dt><strong><code>onsets</code></strong> :&ensp;<code>array</code></dt>
-<dd>array of</dd>
-<dt><strong><code>threshold</code></strong> :&ensp;<code>float</code></dt>
-<dd>p-value to consider it significant</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>list</code> of <code>str</code></dt>
-<dd>list of significant array</dd>
-</dl></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def select_significant_channels(data, onsets, threshold=0.0005):
+    assert NotImplementedError
     &#34;&#34;&#34;Select channels that show a significant difference between the period
     before onset and the period after the onset.
 
