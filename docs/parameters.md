@@ -36,7 +36,9 @@ Information to store in `parameters.json` file.
     - threshold: float
     - window:
       - method: str, 'gaussian' or 'gamma'
+    - results:
       - onset_percent: float, value between 0 and 1 to calculate onset of the gaussian or gamma window
+      - atlas: str, atlas to use for the plots ('a2009s', 'BA', 'DKTatlas')
   - viz:
     - colorscale: str, 'Jet'
     - continuous:

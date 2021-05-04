@@ -20,12 +20,22 @@ COLUMNS = {
     'estimate/skewness': 'a',
     'estimate/spread': 'scale',
     'estimate/const': 'const',
-    'extension/rsquared': 'extension rsquared',
-    'extension/finger': 'extension loc',
-    'extension/spread': 'extension scale',
-    'flexion/rsquared': 'flexion rsquared',
-    'flexion/finger': 'flexion loc',
-    'flexion/spread': 'flexion scale',
+    'extension/thumb': 'thumb extension',
+    'extension/index': 'index extension',
+    'extension/middle': 'middle extension',
+    'extension/ring': 'ring extension',
+    'extension/little': 'little extension',
+    'flexion/thumb': 'thumb flexion',
+    'flexion/index': 'index flexion',
+    'flexion/middle': 'middle flexion',
+    'flexion/ring': 'ring flexion',
+    'flexion/little': 'little flexion',
+    'prf_ext/rsquared': 'extension rsquared',
+    'prf_ext/finger': 'extension loc',
+    'prf_ext/spread': 'extension scale',
+    'prf_flex/rsquared': 'flexion rsquared',
+    'prf_flex/finger': 'flexion loc',
+    'prf_flex/spread': 'flexion scale',
     'flexext/diff': 'params diff',
     'flexext/corr': 'params corr',
     }
@@ -111,8 +121,6 @@ def compute_onset(parameters, row):
     - tdiff should be in row (new version has it, but older version not)
 
     """
-    tdiff = 0.009765625  # this should be row.tdiff
-
     if parameters['ols']['window']['method'] == 'gaussian':
         params = [row.loc, row.scale]
     else:
@@ -120,10 +128,10 @@ def compute_onset(parameters, row):
 
     t, resp = compute_canonical(
         parameters,
-        [0, tdiff],
+        [0, row.tdiff],
         params
         )
-    thresh = resp.max() * parameters['ols']['window']['onset_percent']
+    thresh = resp.max() * parameters['ols']['results']['onset_percent']
 
     i_onset = where(resp >= thresh)[0][0]
     return t[i_onset]

@@ -4,17 +4,8 @@ from numpy import arange, sqrt, abs, max, linspace, isnan, histogram, zeros, cor
 
 from .utils import to_div
 
-from ..ols.summary import import_df_ols
 from ..utils import get_color_for_val
 from ..parameters import FINGERS
-
-
-REGIONS = (
-    'G_precentral',
-    'G_postcentral',
-    'G_parietal_sup',
-    'G_parietal_inf-Supramar',
-    )
 
 
 def plot_ols_params(df, param, region_type, yaxis_name=''):
@@ -108,14 +99,13 @@ def plot_ols_prf(df, region_type, param):
 
     i = (df['estimate']['rsquared'] >= 0.1)
     df1 = df[i]
-    region_type = 'brainregion'
 
     x = df1['flexext']['diff']
     absmax = max(abs(x))
     bins = linspace(-absmax, absmax, 30)
 
     divs = []
-    for region in REGIONS:
+    for region in df['channel'][region_type].unique():
         df_roi = df1.loc[df['channel'][region_type] == region]
         i_ext = (df_roi['estimate']['rsquared'] >= 0.1) & (df_roi['extension']['rsquared'] >= 0.9)
         i_flex = (df_roi['estimate']['rsquared'] >= 0.1) & (df_roi['flexion']['rsquared'] >= 0.9)
@@ -142,14 +132,13 @@ def plot_ols_flexext(df, region_type):
 
     i = (df['estimate']['rsquared'] >= 0.1)
     df1 = df[i]
-    region_type = 'brainregion'
 
     x = df1['flexext']['diff']
     absmax = max(abs(x))
     bins = linspace(-absmax, absmax, 30)
 
     divs = []
-    for region in REGIONS:
+    for region in df['channel'][region_type].unique():
         df_roi = df1.loc[df['channel'][region_type] == region]
         fig = go.Figure(
             data=[
@@ -177,14 +166,13 @@ def make_bars(x, bins, name=''):
     return trace
 
 
-def plot_fingerfriends(parameters):
+def plot_fingerfriends(parameters, region_type):
 
-    df_ols = import_df_ols(parameters)
     i = df_ols['rsquared'] > 0.2
     df = df_ols[i]
 
     divs = []
-    for region in REGIONS:
+    for region in df_ols['channel'][region_type].unique():
         for MOVEMENT in ('flexion', 'extension'):
 
             cc = zeros((5, 5))

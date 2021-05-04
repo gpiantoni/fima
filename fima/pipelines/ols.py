@@ -37,9 +37,6 @@ def pipeline_ols_all(parameters):
 
     summary_dir = name(parameters, 'ols_plot')
 
-    divs = plot_fingerfriends(parameters)
-    to_html(divs, summary_dir / 'ols_movement_all_fingerfriends.html')
-
     df = import_all_ols(parameters)
 
     REGIONS = ['a2009s', 'BA', 'DKTatlas']
@@ -70,13 +67,18 @@ def pipeline_ols_all(parameters):
             divs.append(to_div(fig))
     to_html(divs, summary_dir / 'ols_movement_all_summary.html')
 
-    divs = plot_ols_flexext(df, 'brainregions')
+    region_type = parameters['ols']['results']['atlas']
+
+    divs = plot_fingerfriends(df, region_type)
+    to_html(divs, summary_dir / 'ols_movement_all_fingerfriends.html')
+
+    divs = plot_ols_flexext(df, region_type)
     to_html(divs, summary_dir / 'ols_movement_all_flexext.html')
 
-    divs = plot_ols_prf(df, 'brainregions', 'finger')
+    divs = plot_ols_prf(df, region_type, 'finger')
     to_html(divs, summary_dir / 'ols_movement_all_prf_finger.html')
 
-    divs = plot_ols_prf(df, 'brainregions', 'spread')
+    divs = plot_ols_prf(df, region_type, 'spread')
     to_html(divs, summary_dir / 'ols_movement_all_prf_spread.html')
 
     df.to_csv(
