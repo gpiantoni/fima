@@ -5,7 +5,7 @@ from bidso.objects import Electrodes
 from bidso import Task
 from bidso.utils import replace_underscore
 from nibabel.freesurfer.io import read_annot
-from wonambi.attr import Freesurfer
+from wonambi.attr import Freesurfer, Surf
 
 from .preproc import read_data
 from .dataglove.read_dataglove import read_physio
@@ -40,7 +40,8 @@ def load(what, parameters, ieeg_file, event_type=None):
       - 'dataglove' returns: ndarray
       - 'electrodes'
       - 'freesurfer'
-      - 'surface'
+      - 'pial' returns original freesurfer pial mesh
+      - 'surface' returns full mesh which should better reflect brain size
       - 'aparc'
       - 'aparc.a2009s'
       - 'aparc.DKTatlas'
@@ -96,9 +97,19 @@ def load(what, parameters, ieeg_file, event_type=None):
         pattern = f'sub-{ieeg.subject}_*_run-{ieeg.run}_recording-dataglove_physio.tsv.gz'
         folder = parameters['paths']['input']
 
-    elif what in ['surface', 'freesurfer'] + FS_LABELS:
+    elif what in ['pial', 'freesurfer', ] + FS_LABELS:
         pattern = 'sub-' + ieeg.subject
         folder = parameters['paths']['freesurfer_subjects_dir']
+
+    elif what == 'surface':
+
+        elec = load('electrodes', parameters, ieeg_file)
+        right_or_left = (elec['x'] > 0).sum() / elec.shape[0]
+        if right_or_left > 0.5:
+            pattern = 'rh.pial'
+        else:
+            pattern = 'lh.pial'
+        folder = name(parameters, 'surface_dir', ieeg_file)
 
     else:
         raise ValueError(f'Unrecognize "{what}" selection')
@@ -140,14 +151,15 @@ def load(what, parameters, ieeg_file, event_type=None):
     elif what == 'dataglove':
         return read_physio(filename)
 
-    elif what == 'surface':
-        elec = load('electrodes', parameters, ieeg_file)
-        right_or_left = (elec['x'] > 0).sum() / elec.shape[0]
+    elif what == 'pial':
         return read_surf(filename, right_or_left)
+
+    elif what == 'surface':
+        return Surf(filename)
 
     elif what in FS_LABELS:
         fs = load('freesurfer', parameters, ieeg_file)
-        pial = load('surface', parameters, ieeg_file)
+        pial = load('pial', parameters, ieeg_file)
         hemi = pial.surf_file.stem
 
         aparc_file = fs.dir / 'label' / f'{hemi}.{what}.annot'
