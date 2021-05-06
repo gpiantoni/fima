@@ -30,17 +30,8 @@ from numpy import arange, sqrt, abs, max, linspace, isnan, histogram, zeros, cor
 
 from .utils import to_div
 
-from ..ols.summary import import_df_ols
 from ..utils import get_color_for_val
 from ..parameters import FINGERS
-
-
-REGIONS = (
-    &#39;G_precentral&#39;,
-    &#39;G_postcentral&#39;,
-    &#39;G_parietal_sup&#39;,
-    &#39;G_parietal_inf-Supramar&#39;,
-    )
 
 
 def plot_ols_params(df, param, region_type, yaxis_name=&#39;&#39;):
@@ -134,17 +125,16 @@ def plot_ols_prf(df, region_type, param):
 
     i = (df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1)
     df1 = df[i]
-    region_type = &#39;brainregion&#39;
 
     x = df1[&#39;flexext&#39;][&#39;diff&#39;]
     absmax = max(abs(x))
     bins = linspace(-absmax, absmax, 30)
 
     divs = []
-    for region in REGIONS:
+    for region in df[&#39;channel&#39;][region_type].unique():
         df_roi = df1.loc[df[&#39;channel&#39;][region_type] == region]
-        i_ext = (df_roi[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1) &amp; (df_roi[&#39;extension&#39;][&#39;rsquared&#39;] &gt;= 0.9)
-        i_flex = (df_roi[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1) &amp; (df_roi[&#39;flexion&#39;][&#39;rsquared&#39;] &gt;= 0.9)
+        i_ext = (df_roi[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1) &amp; (df_roi[&#39;prf_ext&#39;][&#39;rsquared&#39;] &gt;= 0.9)
+        i_flex = (df_roi[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1) &amp; (df_roi[&#39;prf_flex&#39;][&#39;rsquared&#39;] &gt;= 0.9)
 
         if param == &#39;finger&#39;:
             bins = linspace(-1.5, 5.5, 15)
@@ -152,8 +142,8 @@ def plot_ols_prf(df, region_type, param):
             bins = linspace(0, 5, 20)
 
         fig = go.Figure(data=[
-            make_bars(df_roi[i_ext][&#39;extension&#39;][param], bins, &#39;extension&#39;),
-            make_bars(df_roi[i_flex][&#39;flexion&#39;][param], bins, &#39;flexion&#39;),
+            make_bars(df_roi[i_ext][&#39;prf_ext&#39;][param], bins, &#39;extension&#39;),
+            make_bars(df_roi[i_flex][&#39;prf_flex&#39;][param], bins, &#39;flexion&#39;),
             ],
             layout=go.Layout(
                 title=dict(
@@ -168,14 +158,13 @@ def plot_ols_flexext(df, region_type):
 
     i = (df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1)
     df1 = df[i]
-    region_type = &#39;brainregion&#39;
 
     x = df1[&#39;flexext&#39;][&#39;diff&#39;]
     absmax = max(abs(x))
     bins = linspace(-absmax, absmax, 30)
 
     divs = []
-    for region in REGIONS:
+    for region in df[&#39;channel&#39;][region_type].unique():
         df_roi = df1.loc[df[&#39;channel&#39;][region_type] == region]
         fig = go.Figure(
             data=[
@@ -203,20 +192,24 @@ def make_bars(x, bins, name=&#39;&#39;):
     return trace
 
 
-def plot_fingerfriends(parameters):
+def plot_fingerfriends(df_ols, region_type):
 
-    df_ols = import_df_ols(parameters)
-    i = df_ols[&#39;rsquared&#39;] &gt; 0.2
-    df = df_ols[i]
+    i = df_ols[&#39;estimate&#39;][&#39;rsquared&#39;] &gt; 0.1
+    df_sign = df_ols[i]
 
     divs = []
-    for region in REGIONS:
+    for region in df_sign[&#39;channel&#39;][region_type].unique():
+        i_region = df_sign[&#39;channel&#39;][region_type] == region
+
+        if i_region.sum() &lt; 2:
+            continue
+
         for MOVEMENT in (&#39;flexion&#39;, &#39;extension&#39;):
 
             cc = zeros((5, 5))
             for i0, f0 in enumerate(FINGERS):
                 for i1, f1 in enumerate(FINGERS):
-                    cc[i0, i1] = corrcoef(df[f&#39;{f0} {MOVEMENT}&#39;], df[f&#39;{f1} {MOVEMENT}&#39;])[0, 1]
+                    cc[i0, i1] = corrcoef(df_sign[MOVEMENT][f0][i_region], df_sign[MOVEMENT][f1][i_region])[0, 1]
                     fig = go.Figure(
                         data=[
                             go.Heatmap(
@@ -266,7 +259,7 @@ def plot_fingerfriends(parameters):
 </details>
 </dd>
 <dt id="fima.viz.ols_summary.plot_fingerfriends"><code class="name flex">
-<span>def <span class="ident">plot_fingerfriends</span></span>(<span>parameters)</span>
+<span>def <span class="ident">plot_fingerfriends</span></span>(<span>df_ols, region_type)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -274,20 +267,24 @@ def plot_fingerfriends(parameters):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def plot_fingerfriends(parameters):
+<pre><code class="python">def plot_fingerfriends(df_ols, region_type):
 
-    df_ols = import_df_ols(parameters)
-    i = df_ols[&#39;rsquared&#39;] &gt; 0.2
-    df = df_ols[i]
+    i = df_ols[&#39;estimate&#39;][&#39;rsquared&#39;] &gt; 0.1
+    df_sign = df_ols[i]
 
     divs = []
-    for region in REGIONS:
+    for region in df_sign[&#39;channel&#39;][region_type].unique():
+        i_region = df_sign[&#39;channel&#39;][region_type] == region
+
+        if i_region.sum() &lt; 2:
+            continue
+
         for MOVEMENT in (&#39;flexion&#39;, &#39;extension&#39;):
 
             cc = zeros((5, 5))
             for i0, f0 in enumerate(FINGERS):
                 for i1, f1 in enumerate(FINGERS):
-                    cc[i0, i1] = corrcoef(df[f&#39;{f0} {MOVEMENT}&#39;], df[f&#39;{f1} {MOVEMENT}&#39;])[0, 1]
+                    cc[i0, i1] = corrcoef(df_sign[MOVEMENT][f0][i_region], df_sign[MOVEMENT][f1][i_region])[0, 1]
                     fig = go.Figure(
                         data=[
                             go.Heatmap(
@@ -321,14 +318,13 @@ def plot_fingerfriends(parameters):
 
     i = (df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1)
     df1 = df[i]
-    region_type = &#39;brainregion&#39;
 
     x = df1[&#39;flexext&#39;][&#39;diff&#39;]
     absmax = max(abs(x))
     bins = linspace(-absmax, absmax, 30)
 
     divs = []
-    for region in REGIONS:
+    for region in df[&#39;channel&#39;][region_type].unique():
         df_roi = df1.loc[df[&#39;channel&#39;][region_type] == region]
         fig = go.Figure(
             data=[
@@ -408,17 +404,16 @@ def plot_fingerfriends(parameters):
 
     i = (df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1)
     df1 = df[i]
-    region_type = &#39;brainregion&#39;
 
     x = df1[&#39;flexext&#39;][&#39;diff&#39;]
     absmax = max(abs(x))
     bins = linspace(-absmax, absmax, 30)
 
     divs = []
-    for region in REGIONS:
+    for region in df[&#39;channel&#39;][region_type].unique():
         df_roi = df1.loc[df[&#39;channel&#39;][region_type] == region]
-        i_ext = (df_roi[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1) &amp; (df_roi[&#39;extension&#39;][&#39;rsquared&#39;] &gt;= 0.9)
-        i_flex = (df_roi[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1) &amp; (df_roi[&#39;flexion&#39;][&#39;rsquared&#39;] &gt;= 0.9)
+        i_ext = (df_roi[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1) &amp; (df_roi[&#39;prf_ext&#39;][&#39;rsquared&#39;] &gt;= 0.9)
+        i_flex = (df_roi[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1) &amp; (df_roi[&#39;prf_flex&#39;][&#39;rsquared&#39;] &gt;= 0.9)
 
         if param == &#39;finger&#39;:
             bins = linspace(-1.5, 5.5, 15)
@@ -426,8 +421,8 @@ def plot_fingerfriends(parameters):
             bins = linspace(0, 5, 20)
 
         fig = go.Figure(data=[
-            make_bars(df_roi[i_ext][&#39;extension&#39;][param], bins, &#39;extension&#39;),
-            make_bars(df_roi[i_flex][&#39;flexion&#39;][param], bins, &#39;flexion&#39;),
+            make_bars(df_roi[i_ext][&#39;prf_ext&#39;][param], bins, &#39;extension&#39;),
+            make_bars(df_roi[i_flex][&#39;prf_flex&#39;][param], bins, &#39;flexion&#39;),
             ],
             layout=go.Layout(
                 title=dict(

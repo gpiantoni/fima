@@ -7,6 +7,10 @@ def name(parameters, what, ieeg_file=None):
     if ieeg_file is not None:
         ieeg = Task(ieeg_file)
 
+    if what == 'surface_dir':
+        out = out_dir / 'surfaces' / ieeg.subject
+        out.mkdir(parents=True, exist_ok=True)
+
     if what == 'brainregions_dir':
         out = out_dir / 'brainregions' / 'tsv'
         out.mkdir(parents=True, exist_ok=True)

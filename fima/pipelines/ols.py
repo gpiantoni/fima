@@ -51,8 +51,10 @@ def pipeline_ols_all(parameters):
         ('estimate', 'spread', 'Temporal Spread (ms, wider -> more spread over time)'),
         ('flexext', 'corr', 'Correlation between extension and flexion estimates'),
         ('flexext', 'diff', 'Extension estimates - flexion estimates'),
-        ('extension', 'spread', 'PRF spatial spread (extension)'),
-        ('flexion', 'spread', 'PRF spatial spread (flexion)'),
+        ('prf_ext', 'spread', 'PRF spatial spread (extension)'),
+        ('prf_flex', 'spread', 'PRF spatial spread (extension)'),
+        ('prf_ext', 'finger', 'PRF favorite finger (extension)'),
+        ('prf_flex', 'finger', 'PRF favorite finger (extension)'),
         )
 
     divs = []
@@ -156,9 +158,10 @@ def pipeline_ols_summary(parameters, ieeg_file):
         return
 
     params = set(df) - {'rsquared', 'chan'}
+    i = df['rsquared'] > 0.1
     for param in params:
-        dat = Data(array(df[param]), chan=array(df['chan']))
-        fig = plot_surf(parameters, dat, elec, pial=pial, clim=(nanmin(df[param]), nanmax(df[param])), colorscale='Hot')
+        dat = Data(array(df[i][param]), chan=array(df[i]['chan']))
+        fig = plot_surf(parameters, dat, elec, pial=pial, clim=(nanmin(df[i][param]), nanmax(df[i][param])), colorscale='Hot')
         to_html([to_div(fig), ], plots_dir / f'{param.replace(" ", "_")}.html')
 
 

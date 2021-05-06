@@ -7,6 +7,7 @@ from ..names import name
 from ..read import load
 from ..viz.brainregions import plot_brain_regions
 from ..viz.utils import to_div, to_html
+from ..matlab.pial import make_pial_thick
 
 lg = getLogger(__name__)
 
@@ -19,6 +20,8 @@ def pipeline_brainregions(parameters, ieeg_file):
     subject : str
         subject code
     """
+    make_pial_thick(parameters, ieeg_file)
+
     elec = load('electrodes', parameters, ieeg_file)
 
     aparc = {}

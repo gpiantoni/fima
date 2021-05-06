@@ -107,8 +107,8 @@ def plot_ols_prf(df, region_type, param):
     divs = []
     for region in df['channel'][region_type].unique():
         df_roi = df1.loc[df['channel'][region_type] == region]
-        i_ext = (df_roi['estimate']['rsquared'] >= 0.1) & (df_roi['extension']['rsquared'] >= 0.9)
-        i_flex = (df_roi['estimate']['rsquared'] >= 0.1) & (df_roi['flexion']['rsquared'] >= 0.9)
+        i_ext = (df_roi['estimate']['rsquared'] >= 0.1) & (df_roi['prf_ext']['rsquared'] >= 0.9)
+        i_flex = (df_roi['estimate']['rsquared'] >= 0.1) & (df_roi['prf_flex']['rsquared'] >= 0.9)
 
         if param == 'finger':
             bins = linspace(-1.5, 5.5, 15)
@@ -116,8 +116,8 @@ def plot_ols_prf(df, region_type, param):
             bins = linspace(0, 5, 20)
 
         fig = go.Figure(data=[
-            make_bars(df_roi[i_ext]['extension'][param], bins, 'extension'),
-            make_bars(df_roi[i_flex]['flexion'][param], bins, 'flexion'),
+            make_bars(df_roi[i_ext]['prf_ext'][param], bins, 'extension'),
+            make_bars(df_roi[i_flex]['prf_flex'][param], bins, 'flexion'),
             ],
             layout=go.Layout(
                 title=dict(
@@ -166,19 +166,24 @@ def make_bars(x, bins, name=''):
     return trace
 
 
-def plot_fingerfriends(parameters, region_type):
+def plot_fingerfriends(df_ols, region_type):
 
-    i = df_ols['rsquared'] > 0.2
-    df = df_ols[i]
+    i = df_ols['estimate']['rsquared'] > 0.1
+    df_sign = df_ols[i]
 
     divs = []
-    for region in df_ols['channel'][region_type].unique():
+    for region in df_sign['channel'][region_type].unique():
+        i_region = df_sign['channel'][region_type] == region
+
+        if i_region.sum() < 2:
+            continue
+
         for MOVEMENT in ('flexion', 'extension'):
 
             cc = zeros((5, 5))
             for i0, f0 in enumerate(FINGERS):
                 for i1, f1 in enumerate(FINGERS):
-                    cc[i0, i1] = corrcoef(df[f'{f0} {MOVEMENT}'], df[f'{f1} {MOVEMENT}'])[0, 1]
+                    cc[i0, i1] = corrcoef(df_sign[MOVEMENT][f0][i_region], df_sign[MOVEMENT][f1][i_region])[0, 1]
                     fig = go.Figure(
                         data=[
                             go.Heatmap(

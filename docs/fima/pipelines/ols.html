@@ -63,9 +63,6 @@ def pipeline_ols_all(parameters):
 
     summary_dir = name(parameters, &#39;ols_plot&#39;)
 
-    divs = plot_fingerfriends(parameters)
-    to_html(divs, summary_dir / &#39;ols_movement_all_fingerfriends.html&#39;)
-
     df = import_all_ols(parameters)
 
     REGIONS = [&#39;a2009s&#39;, &#39;BA&#39;, &#39;DKTatlas&#39;]
@@ -80,8 +77,10 @@ def pipeline_ols_all(parameters):
         (&#39;estimate&#39;, &#39;spread&#39;, &#39;Temporal Spread (ms, wider -&gt; more spread over time)&#39;),
         (&#39;flexext&#39;, &#39;corr&#39;, &#39;Correlation between extension and flexion estimates&#39;),
         (&#39;flexext&#39;, &#39;diff&#39;, &#39;Extension estimates - flexion estimates&#39;),
-        (&#39;extension&#39;, &#39;spread&#39;, &#39;PRF spatial spread (extension)&#39;),
-        (&#39;flexion&#39;, &#39;spread&#39;, &#39;PRF spatial spread (flexion)&#39;),
+        (&#39;prf_ext&#39;, &#39;spread&#39;, &#39;PRF spatial spread (extension)&#39;),
+        (&#39;prf_flex&#39;, &#39;spread&#39;, &#39;PRF spatial spread (extension)&#39;),
+        (&#39;prf_ext&#39;, &#39;finger&#39;, &#39;PRF favorite finger (extension)&#39;),
+        (&#39;prf_flex&#39;, &#39;finger&#39;, &#39;PRF favorite finger (extension)&#39;),
         )
 
     divs = []
@@ -96,13 +95,18 @@ def pipeline_ols_all(parameters):
             divs.append(to_div(fig))
     to_html(divs, summary_dir / &#39;ols_movement_all_summary.html&#39;)
 
-    divs = plot_ols_flexext(df, &#39;brainregions&#39;)
+    region_type = parameters[&#39;ols&#39;][&#39;results&#39;][&#39;atlas&#39;]
+
+    divs = plot_fingerfriends(df, region_type)
+    to_html(divs, summary_dir / &#39;ols_movement_all_fingerfriends.html&#39;)
+
+    divs = plot_ols_flexext(df, region_type)
     to_html(divs, summary_dir / &#39;ols_movement_all_flexext.html&#39;)
 
-    divs = plot_ols_prf(df, &#39;brainregions&#39;, &#39;finger&#39;)
+    divs = plot_ols_prf(df, region_type, &#39;finger&#39;)
     to_html(divs, summary_dir / &#39;ols_movement_all_prf_finger.html&#39;)
 
-    divs = plot_ols_prf(df, &#39;brainregions&#39;, &#39;spread&#39;)
+    divs = plot_ols_prf(df, region_type, &#39;spread&#39;)
     to_html(divs, summary_dir / &#39;ols_movement_all_prf_spread.html&#39;)
 
     df.to_csv(
@@ -180,9 +184,10 @@ def pipeline_ols_summary(parameters, ieeg_file):
         return
 
     params = set(df) - {&#39;rsquared&#39;, &#39;chan&#39;}
+    i = df[&#39;rsquared&#39;] &gt; 0.1
     for param in params:
-        dat = Data(array(df[param]), chan=array(df[&#39;chan&#39;]))
-        fig = plot_surf(parameters, dat, elec, pial=pial, clim=(nanmin(df[param]), nanmax(df[param])), colorscale=&#39;Hot&#39;)
+        dat = Data(array(df[i][param]), chan=array(df[i][&#39;chan&#39;]))
+        fig = plot_surf(parameters, dat, elec, pial=pial, clim=(nanmin(df[i][param]), nanmax(df[i][param])), colorscale=&#39;Hot&#39;)
         to_html([to_div(fig), ], plots_dir / f&#39;{param.replace(&#34; &#34;, &#34;_&#34;)}.html&#39;)
 
 
@@ -279,9 +284,6 @@ def pipeline_ols_prf(parameters, ieeg_file):
 
     summary_dir = name(parameters, &#39;ols_plot&#39;)
 
-    divs = plot_fingerfriends(parameters)
-    to_html(divs, summary_dir / &#39;ols_movement_all_fingerfriends.html&#39;)
-
     df = import_all_ols(parameters)
 
     REGIONS = [&#39;a2009s&#39;, &#39;BA&#39;, &#39;DKTatlas&#39;]
@@ -296,8 +298,10 @@ def pipeline_ols_prf(parameters, ieeg_file):
         (&#39;estimate&#39;, &#39;spread&#39;, &#39;Temporal Spread (ms, wider -&gt; more spread over time)&#39;),
         (&#39;flexext&#39;, &#39;corr&#39;, &#39;Correlation between extension and flexion estimates&#39;),
         (&#39;flexext&#39;, &#39;diff&#39;, &#39;Extension estimates - flexion estimates&#39;),
-        (&#39;extension&#39;, &#39;spread&#39;, &#39;PRF spatial spread (extension)&#39;),
-        (&#39;flexion&#39;, &#39;spread&#39;, &#39;PRF spatial spread (flexion)&#39;),
+        (&#39;prf_ext&#39;, &#39;spread&#39;, &#39;PRF spatial spread (extension)&#39;),
+        (&#39;prf_flex&#39;, &#39;spread&#39;, &#39;PRF spatial spread (extension)&#39;),
+        (&#39;prf_ext&#39;, &#39;finger&#39;, &#39;PRF favorite finger (extension)&#39;),
+        (&#39;prf_flex&#39;, &#39;finger&#39;, &#39;PRF favorite finger (extension)&#39;),
         )
 
     divs = []
@@ -312,13 +316,18 @@ def pipeline_ols_prf(parameters, ieeg_file):
             divs.append(to_div(fig))
     to_html(divs, summary_dir / &#39;ols_movement_all_summary.html&#39;)
 
-    divs = plot_ols_flexext(df, &#39;brainregions&#39;)
+    region_type = parameters[&#39;ols&#39;][&#39;results&#39;][&#39;atlas&#39;]
+
+    divs = plot_fingerfriends(df, region_type)
+    to_html(divs, summary_dir / &#39;ols_movement_all_fingerfriends.html&#39;)
+
+    divs = plot_ols_flexext(df, region_type)
     to_html(divs, summary_dir / &#39;ols_movement_all_flexext.html&#39;)
 
-    divs = plot_ols_prf(df, &#39;brainregions&#39;, &#39;finger&#39;)
+    divs = plot_ols_prf(df, region_type, &#39;finger&#39;)
     to_html(divs, summary_dir / &#39;ols_movement_all_prf_finger.html&#39;)
 
-    divs = plot_ols_prf(df, &#39;brainregions&#39;, &#39;spread&#39;)
+    divs = plot_ols_prf(df, region_type, &#39;spread&#39;)
     to_html(divs, summary_dir / &#39;ols_movement_all_prf_spread.html&#39;)
 
     df.to_csv(
@@ -431,9 +440,10 @@ def pipeline_ols_prf(parameters, ieeg_file):
         return
 
     params = set(df) - {&#39;rsquared&#39;, &#39;chan&#39;}
+    i = df[&#39;rsquared&#39;] &gt; 0.1
     for param in params:
-        dat = Data(array(df[param]), chan=array(df[&#39;chan&#39;]))
-        fig = plot_surf(parameters, dat, elec, pial=pial, clim=(nanmin(df[param]), nanmax(df[param])), colorscale=&#39;Hot&#39;)
+        dat = Data(array(df[i][param]), chan=array(df[i][&#39;chan&#39;]))
+        fig = plot_surf(parameters, dat, elec, pial=pial, clim=(nanmin(df[i][param]), nanmax(df[i][param])), colorscale=&#39;Hot&#39;)
         to_html([to_div(fig), ], plots_dir / f&#39;{param.replace(&#34; &#34;, &#34;_&#34;)}.html&#39;)</code></pre>
 </details>
 </dd>

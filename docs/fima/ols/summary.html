@@ -46,12 +46,22 @@ COLUMNS = {
     &#39;estimate/skewness&#39;: &#39;a&#39;,
     &#39;estimate/spread&#39;: &#39;scale&#39;,
     &#39;estimate/const&#39;: &#39;const&#39;,
-    &#39;extension/rsquared&#39;: &#39;extension rsquared&#39;,
-    &#39;extension/finger&#39;: &#39;extension loc&#39;,
-    &#39;extension/spread&#39;: &#39;extension scale&#39;,
-    &#39;flexion/rsquared&#39;: &#39;flexion rsquared&#39;,
-    &#39;flexion/finger&#39;: &#39;flexion loc&#39;,
-    &#39;flexion/spread&#39;: &#39;flexion scale&#39;,
+    &#39;extension/thumb&#39;: &#39;thumb extension&#39;,
+    &#39;extension/index&#39;: &#39;index extension&#39;,
+    &#39;extension/middle&#39;: &#39;middle extension&#39;,
+    &#39;extension/ring&#39;: &#39;ring extension&#39;,
+    &#39;extension/little&#39;: &#39;little extension&#39;,
+    &#39;flexion/thumb&#39;: &#39;thumb flexion&#39;,
+    &#39;flexion/index&#39;: &#39;index flexion&#39;,
+    &#39;flexion/middle&#39;: &#39;middle flexion&#39;,
+    &#39;flexion/ring&#39;: &#39;ring flexion&#39;,
+    &#39;flexion/little&#39;: &#39;little flexion&#39;,
+    &#39;prf_ext/rsquared&#39;: &#39;extension rsquared&#39;,
+    &#39;prf_ext/finger&#39;: &#39;extension loc&#39;,
+    &#39;prf_ext/spread&#39;: &#39;extension scale&#39;,
+    &#39;prf_flex/rsquared&#39;: &#39;flexion rsquared&#39;,
+    &#39;prf_flex/finger&#39;: &#39;flexion loc&#39;,
+    &#39;prf_flex/spread&#39;: &#39;flexion scale&#39;,
     &#39;flexext/diff&#39;: &#39;params diff&#39;,
     &#39;flexext/corr&#39;: &#39;params corr&#39;,
     }
@@ -137,8 +147,6 @@ def compute_onset(parameters, row):
     - tdiff should be in row (new version has it, but older version not)
 
     &#34;&#34;&#34;
-    tdiff = 0.009765625  # this should be row.tdiff
-
     if parameters[&#39;ols&#39;][&#39;window&#39;][&#39;method&#39;] == &#39;gaussian&#39;:
         params = [row.loc, row.scale]
     else:
@@ -146,10 +154,10 @@ def compute_onset(parameters, row):
 
     t, resp = compute_canonical(
         parameters,
-        [0, tdiff],
+        [0, row.tdiff],
         params
         )
-    thresh = resp.max() * parameters[&#39;ols&#39;][&#39;window&#39;][&#39;onset_percent&#39;]
+    thresh = resp.max() * parameters[&#39;ols&#39;][&#39;results&#39;][&#39;onset_percent&#39;]
 
     i_onset = where(resp &gt;= thresh)[0][0]
     return t[i_onset]</code></pre>
@@ -194,8 +202,6 @@ certain threshold (percent of the max)</p>
     - tdiff should be in row (new version has it, but older version not)
 
     &#34;&#34;&#34;
-    tdiff = 0.009765625  # this should be row.tdiff
-
     if parameters[&#39;ols&#39;][&#39;window&#39;][&#39;method&#39;] == &#39;gaussian&#39;:
         params = [row.loc, row.scale]
     else:
@@ -203,10 +209,10 @@ certain threshold (percent of the max)</p>
 
     t, resp = compute_canonical(
         parameters,
-        [0, tdiff],
+        [0, row.tdiff],
         params
         )
-    thresh = resp.max() * parameters[&#39;ols&#39;][&#39;window&#39;][&#39;onset_percent&#39;]
+    thresh = resp.max() * parameters[&#39;ols&#39;][&#39;results&#39;][&#39;onset_percent&#39;]
 
     i_onset = where(resp &gt;= thresh)[0][0]
     return t[i_onset]</code></pre>

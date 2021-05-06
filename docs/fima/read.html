@@ -58,7 +58,7 @@ timepoints = &#39;, &#39;.join(f&#34;&#39;{x}&#39;&#34; for x in TIMEPOINTS)
 
 
 def load(what, parameters, ieeg_file, event_type=None):
-    f&#34;&#34;&#34;
+    &#34;&#34;&#34;
     WHAT:
       - &#39;continuous&#39; returns: ChanTime, event_names, events_onsets
       - &#39;data&#39; returns: ChanTime, event_names
@@ -247,13 +247,39 @@ def select_events(events, t):
 <span>def <span class="ident">load</span></span>(<span>what, parameters, ieeg_file, event_type=None)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="what">What</h2>
+<ul>
+<li>'continuous' returns: ChanTime, event_names, events_onsets</li>
+<li>'data' returns: ChanTime, event_names</li>
+<li>{timepoints} returns: ChanTime, event_names</li>
+<li>'events' returns: ndarray</li>
+<li>'dataglove' returns: ndarray</li>
+<li>'electrodes'</li>
+<li>'freesurfer'</li>
+<li>'surface'</li>
+<li>'aparc'</li>
+<li>'aparc.a2009s'</li>
+<li>'aparc.DKTatlas'</li>
+<li>'BA_exvivo'</li>
+</ul>
+<h2 id="event_type">Event_Type</h2>
+<ul>
+<li>cues : all cues (to open and close)</li>
+<li>open : cues to open fingers</li>
+<li>close : cues to close fingers</li>
+<li>movements : all actual movements (from dataglove)</li>
+<li>extension : actual extension of all fingers</li>
+<li>flexion : actual flexion of all fingers</li>
+<li>t_inflection</li>
+<li>t_midpoint</li>
+<li>t_peak</li>
+</ul></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def load(what, parameters, ieeg_file, event_type=None):
-    f&#34;&#34;&#34;
+    &#34;&#34;&#34;
     WHAT:
       - &#39;continuous&#39; returns: ChanTime, event_names, events_onsets
       - &#39;data&#39; returns: ChanTime, event_names

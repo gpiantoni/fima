@@ -31,7 +31,7 @@ timepoints = ', '.join(f"'{x}'" for x in TIMEPOINTS)
 
 
 def load(what, parameters, ieeg_file, event_type=None):
-    f"""
+    """
     WHAT:
       - 'continuous' returns: ChanTime, event_names, events_onsets
       - 'data' returns: ChanTime, event_names

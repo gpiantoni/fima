@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.pipelines.brainregions API documentation</title>
+<title>fima.matlab.pial API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,71 +17,54 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.pipelines.brainregions</code></h1>
+<h1 class="title">Module <code>fima.matlab.pial</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from logging import getLogger
-from numpy import r_, argmin
-from numpy.linalg import norm
+<pre><code class="python">from tempfile import mkdtemp
+from subprocess import run
+from pathlib import Path
 
-from ..parameters import REGION_TYPES
-from ..names import name
 from ..read import load
-from ..viz.brainregions import plot_brain_regions
-from ..viz.utils import to_div, to_html
-from ..matlab.pial import make_pial_thick
-
-lg = getLogger(__name__)
+from ..names import name
 
 
-def pipeline_brainregions(parameters, ieeg_file):
-    &#34;&#34;&#34;Run pipeline to compute power spectrum on one participant, one run
+MATLAB_TEMPLATE = &#34;&#34;&#34;\
+addpath(&#39;/Fridge/users/giovanni/projects/finger_mapping/scripts/fima/matlab&#39;)
+thicken_pial(&#39;{ribbon}&#39;, &#39;l&#39;, [3, 3], 0.1)
+thicken_pial(&#39;{ribbon}&#39;, &#39;r&#39;, [3, 3], 0.1)
+&#34;&#34;&#34;
 
-    Parameters
-    ----------
-    subject : str
-        subject code
-    &#34;&#34;&#34;
-    make_pial_thick(parameters, ieeg_file)
+def make_pial_thick(parameters, ieeg_file):
+    fs = load(&#39;freesurfer&#39;, parameters, ieeg_file)
+    output_dir = name(parameters, &#39;surface_dir&#39;, ieeg_file)
 
-    elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
+    ribbon_mgz = fs.dir / &#39;mri&#39; / &#39;ribbon.mgz&#39;
+    ribbon_nii = Path(mkdtemp()) / &#39;ribbon.nii&#39;
 
-    aparc = {}
-    for template in REGION_TYPES:
-        aparc[template] = load(template, parameters, ieeg_file)
+    run([
+        &#39;mri_convert&#39;,
+        ribbon_mgz,
+        ribbon_nii
+    ])
 
-    out_dir = parameters[&#39;paths&#39;][&#39;output&#39;] / &#39;brainregions&#39;
-    out_dir.mkdir(exist_ok=True, parents=True)
+    script_file = (output_dir / &#39;temp.m&#39;)
+    with script_file.open(&#39;w&#39;) as f:
+        f.write(MATLAB_TEMPLATE.format(ribbon=str(ribbon_nii)))
 
-    tsv_file = name(parameters, &#39;brainregions&#39;, ieeg_file)
-    with tsv_file.open(&#39;w&#39;) as f:
-        HDR = [&#39;chan&#39;, &#39;x&#39;, &#39;y&#39;, &#39;z&#39;] + REGION_TYPES
-        f.write(&#39;\t&#39;.join(HDR))
+    run([
+        &#39;matlab&#39;,
+        &#39;-batch&#39;,
+        &#34;temp&#34;,
+        ],
+        cwd=output_dir
+        )
 
-        for el in elec:
-            pos = r_[el[&#39;x&#39;], el[&#39;y&#39;], el[&#39;z&#39;]]
-            i_vert = argmin(norm(aparc[&#39;aparc.a2009s&#39;][&#39;vert&#39;] - pos, axis=1))
-
-            f.write(f&#34;\n{el[&#39;name&#39;]}\t{el[&#39;x&#39;]}\t{el[&#39;y&#39;]}\t{el[&#39;z&#39;]}&#34;)
-            for region_name, i_aparc in aparc.items():
-                region = i_aparc[&#39;regions&#39;][&#39;names&#39;][i_aparc[&#39;regions&#39;][&#39;values&#39;][i_vert]]
-                if region_name.startswith(&#39;BA_exvivo&#39;):
-                    region = region.split(&#39;_&#39;)[0]
-                f.write(f&#34;\t{region}&#34;)
-
-    &#34;&#34;&#34;
-    # not very efficient because we read the surf every time but the function call is much cleaner
-    divs = []
-    for region_type in REGION_TYPES:
-        fig = plot_brain_regions(parameters, ieeg_file, region_type)
-        divs.append(to_div(fig))
-
-    to_html(divs, name(parameters, &#39;brainregions_plot&#39;, ieeg_file))
-    &#34;&#34;&#34;</code></pre>
+    ribbon_nii.unlink()
+    script_file.unlink()</code></pre>
 </details>
 </section>
 <section>
@@ -91,64 +74,42 @@ def pipeline_brainregions(parameters, ieeg_file):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="fima.pipelines.brainregions.pipeline_brainregions"><code class="name flex">
-<span>def <span class="ident">pipeline_brainregions</span></span>(<span>parameters, ieeg_file)</span>
+<dt id="fima.matlab.pial.make_pial_thick"><code class="name flex">
+<span>def <span class="ident">make_pial_thick</span></span>(<span>parameters, ieeg_file)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Run pipeline to compute power spectrum on one participant, one run</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>subject</code></strong> :&ensp;<code>str</code></dt>
-<dd>subject code</dd>
-</dl></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def pipeline_brainregions(parameters, ieeg_file):
-    &#34;&#34;&#34;Run pipeline to compute power spectrum on one participant, one run
+<pre><code class="python">def make_pial_thick(parameters, ieeg_file):
+    fs = load(&#39;freesurfer&#39;, parameters, ieeg_file)
+    output_dir = name(parameters, &#39;surface_dir&#39;, ieeg_file)
 
-    Parameters
-    ----------
-    subject : str
-        subject code
-    &#34;&#34;&#34;
-    make_pial_thick(parameters, ieeg_file)
+    ribbon_mgz = fs.dir / &#39;mri&#39; / &#39;ribbon.mgz&#39;
+    ribbon_nii = Path(mkdtemp()) / &#39;ribbon.nii&#39;
 
-    elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
+    run([
+        &#39;mri_convert&#39;,
+        ribbon_mgz,
+        ribbon_nii
+    ])
 
-    aparc = {}
-    for template in REGION_TYPES:
-        aparc[template] = load(template, parameters, ieeg_file)
+    script_file = (output_dir / &#39;temp.m&#39;)
+    with script_file.open(&#39;w&#39;) as f:
+        f.write(MATLAB_TEMPLATE.format(ribbon=str(ribbon_nii)))
 
-    out_dir = parameters[&#39;paths&#39;][&#39;output&#39;] / &#39;brainregions&#39;
-    out_dir.mkdir(exist_ok=True, parents=True)
+    run([
+        &#39;matlab&#39;,
+        &#39;-batch&#39;,
+        &#34;temp&#34;,
+        ],
+        cwd=output_dir
+        )
 
-    tsv_file = name(parameters, &#39;brainregions&#39;, ieeg_file)
-    with tsv_file.open(&#39;w&#39;) as f:
-        HDR = [&#39;chan&#39;, &#39;x&#39;, &#39;y&#39;, &#39;z&#39;] + REGION_TYPES
-        f.write(&#39;\t&#39;.join(HDR))
-
-        for el in elec:
-            pos = r_[el[&#39;x&#39;], el[&#39;y&#39;], el[&#39;z&#39;]]
-            i_vert = argmin(norm(aparc[&#39;aparc.a2009s&#39;][&#39;vert&#39;] - pos, axis=1))
-
-            f.write(f&#34;\n{el[&#39;name&#39;]}\t{el[&#39;x&#39;]}\t{el[&#39;y&#39;]}\t{el[&#39;z&#39;]}&#34;)
-            for region_name, i_aparc in aparc.items():
-                region = i_aparc[&#39;regions&#39;][&#39;names&#39;][i_aparc[&#39;regions&#39;][&#39;values&#39;][i_vert]]
-                if region_name.startswith(&#39;BA_exvivo&#39;):
-                    region = region.split(&#39;_&#39;)[0]
-                f.write(f&#34;\t{region}&#34;)
-
-    &#34;&#34;&#34;
-    # not very efficient because we read the surf every time but the function call is much cleaner
-    divs = []
-    for region_type in REGION_TYPES:
-        fig = plot_brain_regions(parameters, ieeg_file, region_type)
-        divs.append(to_div(fig))
-
-    to_html(divs, name(parameters, &#39;brainregions_plot&#39;, ieeg_file))
-    &#34;&#34;&#34;</code></pre>
+    ribbon_nii.unlink()
+    script_file.unlink()</code></pre>
 </details>
 </dd>
 </dl>
@@ -164,12 +125,12 @@ def pipeline_brainregions(parameters, ieeg_file):
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="fima.pipelines" href="index.html">fima.pipelines</a></code></li>
+<li><code><a title="fima.matlab" href="index.html">fima.matlab</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="fima.pipelines.brainregions.pipeline_brainregions" href="#fima.pipelines.brainregions.pipeline_brainregions">pipeline_brainregions</a></code></li>
+<li><code><a title="fima.matlab.pial.make_pial_thick" href="#fima.matlab.pial.make_pial_thick">make_pial_thick</a></code></li>
 </ul>
 </li>
 </ul>

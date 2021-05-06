@@ -33,6 +33,10 @@ def name(parameters, what, ieeg_file=None):
     if ieeg_file is not None:
         ieeg = Task(ieeg_file)
 
+    if what == &#39;surface_dir&#39;:
+        out = out_dir / &#39;surfaces&#39; / ieeg.subject
+        out.mkdir(parents=True, exist_ok=True)
+
     if what == &#39;brainregions_dir&#39;:
         out = out_dir / &#39;brainregions&#39; / &#39;tsv&#39;
         out.mkdir(parents=True, exist_ok=True)
@@ -102,6 +106,10 @@ def name(parameters, what, ieeg_file=None):
     out_dir = parameters[&#39;paths&#39;][&#39;output&#39;]
     if ieeg_file is not None:
         ieeg = Task(ieeg_file)
+
+    if what == &#39;surface_dir&#39;:
+        out = out_dir / &#39;surfaces&#39; / ieeg.subject
+        out.mkdir(parents=True, exist_ok=True)
 
     if what == &#39;brainregions_dir&#39;:
         out = out_dir / &#39;brainregions&#39; / &#39;tsv&#39;
