@@ -6,14 +6,13 @@ from pandas import DataFrame
 from numpy import nanmin, nanmax, array
 
 from ..read import load
-from ..spectrum.continuous import get_continuous_cht
-from ..ols.regressors import find_movement_indices
+from ..spectrum.compute import compute_timefreq, get_chantime
 from ..ols.fit import get_max, fit_one_channel
 from ..ols.prf import add_prf_estimates
 from ..ols.summary import import_all_ols
 from ..viz import to_div, to_html
 from ..viz.surf import plot_surf
-from ..viz.ols import plot_coefficient, plot_data_prediction
+# from ..viz.ols import plot_coefficient, plot_data_prediction
 from ..viz.ols_summary import plot_ols_rsquared, plot_ols_params, plot_ols_flexext, plot_ols_prf, plot_fingerfriends
 from ..names import name
 
@@ -91,27 +90,23 @@ def pipeline_ols_all(parameters):
 def pipeline_ols_allchan(parameters, ieeg_file):
 
     try:
-        tf_cht, events, onsets = get_continuous_cht(parameters, ieeg_file)
-    except FileNotFoundError as err:
-        lg.warning(err)
+        data, names = load('data', parameters, ieeg_file)
+    except IndexError:
         return
+    tf = compute_timefreq(parameters, data, baseline=True, mean=False)
+    tf = get_chantime(parameters, tf, freq_operator='nanmean')
 
-    t = tf_cht.time[0]
+    t = tf.time[0]
 
-    try:
-        events = load('events', parameters, ieeg_file)
-    except FileNotFoundError:
-        return
-
-    indices = find_movement_indices(events, tf_cht.time[0])
-    for chan in tf_cht.chan[0][::-1]:
+    for chan in tf.chan[0][::-1]:
         lg.info(f'{ieeg_file.stem} Fitting OLS on {chan}')
-        x = tf_cht(trial=0, chan=chan, trial_axis='trial000000')
+        x = tf(trial=0, chan=chan).flatten(order='F')
 
-        MAT = fit_one_channel(parameters, t, x, indices)
-        out, result = get_max(parameters, t, x, indices, MAT)
+        MAT = fit_one_channel(parameters, t, x, names)
+        out, result = get_max(parameters, t, x, names, MAT)
         out['chan'] = chan
 
+        """
         divs = []
 
         # fig = plot_sigma_delay_mat(MAT, SIGMAS * t_diff, DELAYS * t_diff)
@@ -120,11 +115,12 @@ def pipeline_ols_allchan(parameters, ieeg_file):
         fig = plot_coefficient(result)
         divs.append(to_div(fig))
 
-        fig = plot_data_prediction(tf_cht.time[0], result)
+        fig = plot_data_prediction(tf.time[0], result)
         divs.append(to_div(fig))
+        """
 
         html_file = name(parameters, 'ols_chan', ieeg_file) / f'{chan}.html'
-        to_html(divs, html_file)
+        # to_html(divs, html_file)
 
         json_file = html_file.with_suffix('.json')
         with json_file.open('w') as f:

@@ -7,6 +7,7 @@ from ..utils import get_events
 
 
 def find_movement_indices(mov, t):
+    raise NotImplementedError
     reg_idx = {}
 
     for event in unique(mov['trial_type']):
@@ -35,6 +36,7 @@ def make_regressors(parameters, names, t, params):
         canonical_resp = normal.pdf(t, loc=params[0], scale=params[1])
     else:
         canonical_resp = gamma.pdf(t, a=params[2], loc=params[0], scale=params[1])
+    canonical_resp /= canonical_resp.max()
 
     regressors = {}
     for ev in events:
@@ -46,6 +48,7 @@ def make_regressors(parameters, names, t, params):
 
 
 def make_regressors_from_indices(parameters, indices, t, params):
+    raise NotImplementedError
 
     canonical_resp = compute_canonical(parameters, t, params)[1]
     regressors = {}

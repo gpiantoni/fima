@@ -6,15 +6,15 @@ from functools import partial
 from multiprocessing import Pool
 from itertools import product
 
-from .regressors import make_regressors_from_indices
+from .regressors import make_regressors
 from ..utils import be_nice
 
 
-def fit_one_channel(parameters, t, x, indices):
+def fit_one_channel(parameters, t, x, names):
 
     matrix_values, out_dim = compute_param_matrix(parameters, t)
 
-    func = partial(get_rsquared, parameters=parameters, t=t, x=x, indices=indices)
+    func = partial(get_rsquared, parameters=parameters, t=t, x=x, names=names)
 
     with Pool(initializer=be_nice) as p:
         results = p.map(func, matrix_values)
@@ -22,12 +22,12 @@ def fit_one_channel(parameters, t, x, indices):
     return reshape(array(results), out_dim)
 
 
-def get_max(parameters, t, x, indices, MAT):
+def get_max(parameters, t, x, names, MAT):
 
     val_mat = compute_param_matrix(parameters, t)[0]
     max_values = list(val_mat)[argmax(MAT)]
 
-    regressors = make_regressors_from_indices(parameters, indices, t, max_values)
+    regressors = make_regressors(parameters, names, t, max_values)
     results = fit_ols(regressors, x)
 
     out = {
@@ -43,8 +43,8 @@ def get_max(parameters, t, x, indices, MAT):
     return out, results
 
 
-def get_rsquared(params, parameters, t, x, indices):
-    regressors = make_regressors_from_indices(parameters, indices, t, params)
+def get_rsquared(params, parameters, t, x, names):
+    regressors = make_regressors(parameters, names, t, params)
     results = fit_ols(regressors, x)
     return results.rsquared
 
