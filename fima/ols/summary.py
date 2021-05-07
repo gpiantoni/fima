@@ -16,6 +16,7 @@ COLUMNS = {
     'channel/DKTatlas': 'aparc.DKTatlas',
     'channel/BA': 'BA_exvivo.thresh',
     'estimate/rsquared': 'rsquared',
+    'estimate/peak': 'loc',
     'estimate/onset': 'onset',
     'estimate/skewness': 'a',
     'estimate/spread': 'scale',
