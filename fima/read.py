@@ -109,6 +109,7 @@ def load(what, parameters, ieeg_file, event_type=None):
             pattern = 'rh.pial'
         else:
             pattern = 'lh.pial'
+
         folder = name(parameters, 'surface_dir', ieeg_file)
 
     else:
@@ -152,6 +153,8 @@ def load(what, parameters, ieeg_file, event_type=None):
         return read_physio(filename)
 
     elif what == 'pial':
+        elec = load('electrodes', parameters, ieeg_file)
+        right_or_left = (elec['x'] > 0).sum() / elec.shape[0]
         return read_surf(filename, right_or_left)
 
     elif what == 'surface':

@@ -1,7 +1,9 @@
-from numpy import unique, where, abs, argmin, arange
+from numpy import unique, where, abs, argmin, arange, concatenate, zeros
 from scipy.signal import unit_impulse, convolve
 from scipy.stats import norm as normal
 from scipy.stats import gamma
+
+from ..utils import get_events
 
 
 def find_movement_indices(mov, t):
@@ -17,6 +19,30 @@ def find_movement_indices(mov, t):
         reg_idx[event] = indices
 
     return reg_idx
+
+
+def make_regressors(parameters, names, t, params):
+    """
+
+    Parameters
+    ----------
+    t : array
+        time for only one trial
+    """
+    events = get_events(names)
+
+    if parameters['ols']['window']['method'] == 'gaussian':
+        canonical_resp = normal.pdf(t, loc=params[0], scale=params[1])
+    else:
+        canonical_resp = gamma.pdf(t, a=params[2], loc=params[0], scale=params[1])
+
+    regressors = {}
+    for ev in events:
+        r = zeros((len(names), len(t)))
+        r[names == ev, :] = canonical_resp
+        regressors[ev] = concatenate(r)
+
+    return regressors
 
 
 def make_regressors_from_indices(parameters, indices, t, params):
