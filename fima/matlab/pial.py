@@ -8,8 +8,8 @@ from ..names import name
 
 MATLAB_TEMPLATE = """\
 addpath('/Fridge/users/giovanni/projects/finger_mapping/scripts/fima/matlab')
-thicken_pial('{ribbon}', 'l', [3, 3], 0.1)
-thicken_pial('{ribbon}', 'r', [3, 3], 0.1)
+thicken_pial('{ribbon}', 'l', [3, 3], 0.5)
+thicken_pial('{ribbon}', 'r', [3, 3], 0.5)
 """
 
 def make_pial_thick(parameters, ieeg_file):

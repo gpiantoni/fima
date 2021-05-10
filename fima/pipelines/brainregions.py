@@ -47,7 +47,7 @@ def pipeline_brainregions(parameters, ieeg_file):
                     region = region.split('_')[0]
                 f.write(f"\t{region}")
 
-    """
+    """ TODO: crashes
     # not very efficient because we read the surf every time but the function call is much cleaner
     divs = []
     for region_type in REGION_TYPES:

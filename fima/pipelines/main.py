@@ -13,6 +13,7 @@ from .ols import pipeline_ols, pipeline_ols_all
 from .brainregions import pipeline_brainregions
 from .spectrum import pipeline_spectrum
 from .timepoints import pipeline_timepoints
+from .realign import pipeline_realign
 from ..utils import be_nice
 
 
@@ -64,6 +65,9 @@ def sub_pipeline(ieeg, parameters, pipeline):
 
     elif pipeline == 'timepoints':
         pipeline_timepoints(parameters, ieeg)
+
+    elif pipeline == 'realign':
+        pipeline_realign(parameters, ieeg)
 
     elif pipeline == 'ols':
         pipeline_ols(parameters, ieeg)

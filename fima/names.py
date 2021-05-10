@@ -27,6 +27,10 @@ def name(parameters, what, ieeg_file=None):
         out = out_dir / 'dataglove'
         out.mkdir(parents=True, exist_ok=True)
 
+    elif what == 'realign':
+        out = out_dir / 'realigned' / f'{ieeg_file.stem}.tsv'
+        out.parent.mkdir(parents=True, exist_ok=True)
+
     elif what == 'timepoints':
         out = out_dir / 'timepoints' / 'timings' / f'{ieeg_file.stem}.npy'
         out.parent.mkdir(parents=True, exist_ok=True)
