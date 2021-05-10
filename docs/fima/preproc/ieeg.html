@@ -54,9 +54,9 @@ def read_data(parameters, filename, event_onsets, continuous=False):
             post=parameters[&#39;read&#39;][&#39;post&#39;],
             chan=list(chans[&#39;name&#39;]))
 
-    data, bad_smp_per_chan = hide_artifacts(parameters, data)
-
-    lg.info(f&#39;{filename.stem} bad points {mean(bad_smp_per_chan):.3f}s, s.d. {std(bad_smp_per_chan):.3f}s [{min(bad_smp_per_chan):.3f}-{max(bad_smp_per_chan):.3f}s]&#39;)
+    if parameters[&#39;read&#39;][&#39;artifacts&#39;][&#39;remove&#39;]:
+        data, bad_smp_per_chan = hide_artifacts(parameters, data)
+        lg.info(f&#39;{filename.stem} bad points {mean(bad_smp_per_chan):.3f}s, s.d. {std(bad_smp_per_chan):.3f}s [{min(bad_smp_per_chan):.3f}-{max(bad_smp_per_chan):.3f}s]&#39;)
 
     data = montage(data, ref_to_avg=True)
 
@@ -166,9 +166,9 @@ def hide_artifacts(parameters, data):
             post=parameters[&#39;read&#39;][&#39;post&#39;],
             chan=list(chans[&#39;name&#39;]))
 
-    data, bad_smp_per_chan = hide_artifacts(parameters, data)
-
-    lg.info(f&#39;{filename.stem} bad points {mean(bad_smp_per_chan):.3f}s, s.d. {std(bad_smp_per_chan):.3f}s [{min(bad_smp_per_chan):.3f}-{max(bad_smp_per_chan):.3f}s]&#39;)
+    if parameters[&#39;read&#39;][&#39;artifacts&#39;][&#39;remove&#39;]:
+        data, bad_smp_per_chan = hide_artifacts(parameters, data)
+        lg.info(f&#39;{filename.stem} bad points {mean(bad_smp_per_chan):.3f}s, s.d. {std(bad_smp_per_chan):.3f}s [{min(bad_smp_per_chan):.3f}-{max(bad_smp_per_chan):.3f}s]&#39;)
 
     data = montage(data, ref_to_avg=True)
 

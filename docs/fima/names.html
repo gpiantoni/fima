@@ -69,6 +69,7 @@ def name(parameters, what, ieeg_file=None):
 
     elif what == &#39;ols_chan&#39;:
         out = out_dir / &#39;ols&#39; / ieeg_file.stem
+        out.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;ols_tsv&#39;:
         out = out_dir / &#39;ols&#39; / &#39;tsv&#39;
@@ -143,6 +144,7 @@ def name(parameters, what, ieeg_file=None):
 
     elif what == &#39;ols_chan&#39;:
         out = out_dir / &#39;ols&#39; / ieeg_file.stem
+        out.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;ols_tsv&#39;:
         out = out_dir / &#39;ols&#39; / &#39;tsv&#39;

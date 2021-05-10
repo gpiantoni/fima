@@ -32,7 +32,7 @@ from bidso.objects import Electrodes
 from bidso import Task
 from bidso.utils import replace_underscore
 from nibabel.freesurfer.io import read_annot
-from wonambi.attr import Freesurfer
+from wonambi.attr import Freesurfer, Surf
 
 from .preproc import read_data
 from .dataglove.read_dataglove import read_physio
@@ -67,7 +67,8 @@ def load(what, parameters, ieeg_file, event_type=None):
       - &#39;dataglove&#39; returns: ndarray
       - &#39;electrodes&#39;
       - &#39;freesurfer&#39;
-      - &#39;surface&#39;
+      - &#39;pial&#39; returns original freesurfer pial mesh
+      - &#39;surface&#39; returns full mesh which should better reflect brain size
       - &#39;aparc&#39;
       - &#39;aparc.a2009s&#39;
       - &#39;aparc.DKTatlas&#39;
@@ -123,9 +124,20 @@ def load(what, parameters, ieeg_file, event_type=None):
         pattern = f&#39;sub-{ieeg.subject}_*_run-{ieeg.run}_recording-dataglove_physio.tsv.gz&#39;
         folder = parameters[&#39;paths&#39;][&#39;input&#39;]
 
-    elif what in [&#39;surface&#39;, &#39;freesurfer&#39;] + FS_LABELS:
+    elif what in [&#39;pial&#39;, &#39;freesurfer&#39;, ] + FS_LABELS:
         pattern = &#39;sub-&#39; + ieeg.subject
         folder = parameters[&#39;paths&#39;][&#39;freesurfer_subjects_dir&#39;]
+
+    elif what == &#39;surface&#39;:
+
+        elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
+        right_or_left = (elec[&#39;x&#39;] &gt; 0).sum() / elec.shape[0]
+        if right_or_left &gt; 0.5:
+            pattern = &#39;rh.pial&#39;
+        else:
+            pattern = &#39;lh.pial&#39;
+
+        folder = name(parameters, &#39;surface_dir&#39;, ieeg_file)
 
     else:
         raise ValueError(f&#39;Unrecognize &#34;{what}&#34; selection&#39;)
@@ -167,14 +179,17 @@ def load(what, parameters, ieeg_file, event_type=None):
     elif what == &#39;dataglove&#39;:
         return read_physio(filename)
 
-    elif what == &#39;surface&#39;:
+    elif what == &#39;pial&#39;:
         elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
         right_or_left = (elec[&#39;x&#39;] &gt; 0).sum() / elec.shape[0]
         return read_surf(filename, right_or_left)
 
+    elif what == &#39;surface&#39;:
+        return Surf(filename)
+
     elif what in FS_LABELS:
         fs = load(&#39;freesurfer&#39;, parameters, ieeg_file)
-        pial = load(&#39;surface&#39;, parameters, ieeg_file)
+        pial = load(&#39;pial&#39;, parameters, ieeg_file)
         hemi = pial.surf_file.stem
 
         aparc_file = fs.dir / &#39;label&#39; / f&#39;{hemi}.{what}.annot&#39;
@@ -256,7 +271,8 @@ def select_events(events, t):
 <li>'dataglove' returns: ndarray</li>
 <li>'electrodes'</li>
 <li>'freesurfer'</li>
-<li>'surface'</li>
+<li>'pial' returns original freesurfer pial mesh</li>
+<li>'surface' returns full mesh which should better reflect brain size</li>
 <li>'aparc'</li>
 <li>'aparc.a2009s'</li>
 <li>'aparc.DKTatlas'</li>
@@ -288,7 +304,8 @@ def select_events(events, t):
       - &#39;dataglove&#39; returns: ndarray
       - &#39;electrodes&#39;
       - &#39;freesurfer&#39;
-      - &#39;surface&#39;
+      - &#39;pial&#39; returns original freesurfer pial mesh
+      - &#39;surface&#39; returns full mesh which should better reflect brain size
       - &#39;aparc&#39;
       - &#39;aparc.a2009s&#39;
       - &#39;aparc.DKTatlas&#39;
@@ -344,9 +361,20 @@ def select_events(events, t):
         pattern = f&#39;sub-{ieeg.subject}_*_run-{ieeg.run}_recording-dataglove_physio.tsv.gz&#39;
         folder = parameters[&#39;paths&#39;][&#39;input&#39;]
 
-    elif what in [&#39;surface&#39;, &#39;freesurfer&#39;] + FS_LABELS:
+    elif what in [&#39;pial&#39;, &#39;freesurfer&#39;, ] + FS_LABELS:
         pattern = &#39;sub-&#39; + ieeg.subject
         folder = parameters[&#39;paths&#39;][&#39;freesurfer_subjects_dir&#39;]
+
+    elif what == &#39;surface&#39;:
+
+        elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
+        right_or_left = (elec[&#39;x&#39;] &gt; 0).sum() / elec.shape[0]
+        if right_or_left &gt; 0.5:
+            pattern = &#39;rh.pial&#39;
+        else:
+            pattern = &#39;lh.pial&#39;
+
+        folder = name(parameters, &#39;surface_dir&#39;, ieeg_file)
 
     else:
         raise ValueError(f&#39;Unrecognize &#34;{what}&#34; selection&#39;)
@@ -388,14 +416,17 @@ def select_events(events, t):
     elif what == &#39;dataglove&#39;:
         return read_physio(filename)
 
-    elif what == &#39;surface&#39;:
+    elif what == &#39;pial&#39;:
         elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
         right_or_left = (elec[&#39;x&#39;] &gt; 0).sum() / elec.shape[0]
         return read_surf(filename, right_or_left)
 
+    elif what == &#39;surface&#39;:
+        return Surf(filename)
+
     elif what in FS_LABELS:
         fs = load(&#39;freesurfer&#39;, parameters, ieeg_file)
-        pial = load(&#39;surface&#39;, parameters, ieeg_file)
+        pial = load(&#39;pial&#39;, parameters, ieeg_file)
         hemi = pial.surf_file.stem
 
         aparc_file = fs.dir / &#39;label&#39; / f&#39;{hemi}.{what}.annot&#39;
