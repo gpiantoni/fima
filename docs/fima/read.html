@@ -30,7 +30,6 @@ from numpy import genfromtxt, isin, empty, NaN
 from numpy.lib.recfunctions import append_fields
 from bidso.objects import Electrodes
 from bidso import Task
-from bidso.utils import replace_underscore
 from nibabel.freesurfer.io import read_annot
 from wonambi.attr import Freesurfer, Surf
 
@@ -43,7 +42,6 @@ from .parameters import (
     FINGERS_CLOSED,
     FINGERS_FLEXION,
     FINGERS_EXTENSION,
-    TIMEPOINTS,
     )
 
 FS_LABELS = [
@@ -54,15 +52,12 @@ FS_LABELS = [
     &#39;BA_exvivo.thresh&#39;,
     ]
 
-timepoints = &#39;, &#39;.join(f&#34;&#39;{x}&#39;&#34; for x in TIMEPOINTS)
-
 
 def load(what, parameters, ieeg_file, event_type=None):
     &#34;&#34;&#34;
     WHAT:
       - &#39;continuous&#39; returns: ChanTime, event_names, events_onsets
       - &#39;data&#39; returns: ChanTime, event_names
-      -  {timepoints} returns: ChanTime, event_names
       - &#39;events&#39; returns: ndarray
       - &#39;dataglove&#39; returns: ndarray
       - &#39;electrodes&#39;
@@ -81,14 +76,12 @@ def load(what, parameters, ieeg_file, event_type=None):
       - movements : all actual movements (from dataglove)
       - extension : actual extension of all fingers
       - flexion : actual flexion of all fingers
-      - t_inflection
-      - t_midpoint
-      - t_peak
+      - realigned : realigned movement
     &#34;&#34;&#34;
     if event_type is None:
         event_type = parameters[&#39;read&#39;][&#39;event_type&#39;]
 
-    if event_type not in [&#39;cues&#39;, &#39;open&#39;, &#39;close&#39;, &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;] + list(TIMEPOINTS):
+    if event_type not in [&#39;cues&#39;, &#39;open&#39;, &#39;close&#39;, &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;, &#39;realigned&#39;]:
         raise ValueError(f&#39;&#34;{event_type}&#34; is not one of the possible event types&#39;)
 
     ieeg = Task(ieeg_file)
@@ -116,9 +109,10 @@ def load(what, parameters, ieeg_file, event_type=None):
         elif event_type in (&#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;):
             pattern = f&#39;sub-{ieeg.subject}_*_run-{ieeg.run}_dataglove.tsv&#39;
             folder = parameters[&#39;paths&#39;][&#39;movements&#39;]
-        elif event_type in TIMEPOINTS:
-            pattern = replace_underscore(ieeg_file.name, event_type.replace(&#39;_&#39;, &#39;&#39;) + &#39;.tsv&#39;)
-            folder = name(parameters, &#39;realigned_dir&#39;)
+        elif event_type in (&#39;realigned&#39;, ):
+            event_path = name(parameters, &#39;realign&#39;, ieeg_file)
+            pattern = event_path.name
+            folder = event_path.parent
 
     elif what == &#39;dataglove&#39;:
         pattern = f&#39;sub-{ieeg.subject}_*_run-{ieeg.run}_recording-dataglove_physio.tsv.gz&#39;
@@ -231,7 +225,7 @@ def select_events(events, t):
     ndarray
         (N, ) vector of events (str)
     &#34;&#34;&#34;
-    if t in [&#39;cues&#39;, ] + list(TIMEPOINTS):
+    if t in [&#39;cues&#39;, &#39;realigned&#39;]:
         trial_types = FINGERS_OPEN + FINGERS_CLOSED
     elif t == &#39;open&#39;:
         trial_types = FINGERS_OPEN
@@ -266,7 +260,6 @@ def select_events(events, t):
 <ul>
 <li>'continuous' returns: ChanTime, event_names, events_onsets</li>
 <li>'data' returns: ChanTime, event_names</li>
-<li>{timepoints} returns: ChanTime, event_names</li>
 <li>'events' returns: ndarray</li>
 <li>'dataglove' returns: ndarray</li>
 <li>'electrodes'</li>
@@ -286,9 +279,7 @@ def select_events(events, t):
 <li>movements : all actual movements (from dataglove)</li>
 <li>extension : actual extension of all fingers</li>
 <li>flexion : actual flexion of all fingers</li>
-<li>t_inflection</li>
-<li>t_midpoint</li>
-<li>t_peak</li>
+<li>realigned : realigned movement</li>
 </ul></div>
 <details class="source">
 <summary>
@@ -299,7 +290,6 @@ def select_events(events, t):
     WHAT:
       - &#39;continuous&#39; returns: ChanTime, event_names, events_onsets
       - &#39;data&#39; returns: ChanTime, event_names
-      -  {timepoints} returns: ChanTime, event_names
       - &#39;events&#39; returns: ndarray
       - &#39;dataglove&#39; returns: ndarray
       - &#39;electrodes&#39;
@@ -318,14 +308,12 @@ def select_events(events, t):
       - movements : all actual movements (from dataglove)
       - extension : actual extension of all fingers
       - flexion : actual flexion of all fingers
-      - t_inflection
-      - t_midpoint
-      - t_peak
+      - realigned : realigned movement
     &#34;&#34;&#34;
     if event_type is None:
         event_type = parameters[&#39;read&#39;][&#39;event_type&#39;]
 
-    if event_type not in [&#39;cues&#39;, &#39;open&#39;, &#39;close&#39;, &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;] + list(TIMEPOINTS):
+    if event_type not in [&#39;cues&#39;, &#39;open&#39;, &#39;close&#39;, &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;, &#39;realigned&#39;]:
         raise ValueError(f&#39;&#34;{event_type}&#34; is not one of the possible event types&#39;)
 
     ieeg = Task(ieeg_file)
@@ -353,9 +341,10 @@ def select_events(events, t):
         elif event_type in (&#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;):
             pattern = f&#39;sub-{ieeg.subject}_*_run-{ieeg.run}_dataglove.tsv&#39;
             folder = parameters[&#39;paths&#39;][&#39;movements&#39;]
-        elif event_type in TIMEPOINTS:
-            pattern = replace_underscore(ieeg_file.name, event_type.replace(&#39;_&#39;, &#39;&#39;) + &#39;.tsv&#39;)
-            folder = name(parameters, &#39;realigned_dir&#39;)
+        elif event_type in (&#39;realigned&#39;, ):
+            event_path = name(parameters, &#39;realign&#39;, ieeg_file)
+            pattern = event_path.name
+            folder = event_path.parent
 
     elif what == &#39;dataglove&#39;:
         pattern = f&#39;sub-{ieeg.subject}_*_run-{ieeg.run}_recording-dataglove_physio.tsv.gz&#39;
@@ -492,7 +481,7 @@ def select_events(events, t):
     ndarray
         (N, ) vector of events (str)
     &#34;&#34;&#34;
-    if t in [&#39;cues&#39;, ] + list(TIMEPOINTS):
+    if t in [&#39;cues&#39;, &#39;realigned&#39;]:
         trial_types = FINGERS_OPEN + FINGERS_CLOSED
     elif t == &#39;open&#39;:
         trial_types = FINGERS_OPEN

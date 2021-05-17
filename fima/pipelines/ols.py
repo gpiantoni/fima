@@ -144,7 +144,7 @@ def pipeline_ols_summary(parameters, ieeg_file):
         pial = None
 
     dat = Data(array(df['rsquared']), chan=array(df['chan']))
-    fig = plot_surf(parameters, dat, elec, pial=pial, clim=(0, nanmax(df['rsquared'])), colorscale='Hot')
+    fig = plot_surf(parameters, dat, elec, pial=pial, clim=(0, 0.55), colorscale='Hot')
 
     plots_dir = name(parameters, 'ols_plot') / ieeg_file.stem
     to_html([to_div(fig), ], plots_dir / 'rsquared.html')

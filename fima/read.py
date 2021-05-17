@@ -3,7 +3,6 @@ from numpy import genfromtxt, isin, empty, NaN
 from numpy.lib.recfunctions import append_fields
 from bidso.objects import Electrodes
 from bidso import Task
-from bidso.utils import replace_underscore
 from nibabel.freesurfer.io import read_annot
 from wonambi.attr import Freesurfer, Surf
 
@@ -16,7 +15,6 @@ from .parameters import (
     FINGERS_CLOSED,
     FINGERS_FLEXION,
     FINGERS_EXTENSION,
-    TIMEPOINTS,
     )
 
 FS_LABELS = [
@@ -27,15 +25,12 @@ FS_LABELS = [
     'BA_exvivo.thresh',
     ]
 
-timepoints = ', '.join(f"'{x}'" for x in TIMEPOINTS)
-
 
 def load(what, parameters, ieeg_file, event_type=None):
     """
     WHAT:
       - 'continuous' returns: ChanTime, event_names, events_onsets
       - 'data' returns: ChanTime, event_names
-      -  {timepoints} returns: ChanTime, event_names
       - 'events' returns: ndarray
       - 'dataglove' returns: ndarray
       - 'electrodes'
@@ -54,14 +49,12 @@ def load(what, parameters, ieeg_file, event_type=None):
       - movements : all actual movements (from dataglove)
       - extension : actual extension of all fingers
       - flexion : actual flexion of all fingers
-      - t_inflection
-      - t_midpoint
-      - t_peak
+      - realigned : realigned movement
     """
     if event_type is None:
         event_type = parameters['read']['event_type']
 
-    if event_type not in ['cues', 'open', 'close', 'movements', 'extension', 'flexion'] + list(TIMEPOINTS):
+    if event_type not in ['cues', 'open', 'close', 'movements', 'extension', 'flexion', 'realigned']:
         raise ValueError(f'"{event_type}" is not one of the possible event types')
 
     ieeg = Task(ieeg_file)
@@ -89,9 +82,10 @@ def load(what, parameters, ieeg_file, event_type=None):
         elif event_type in ('movements', 'extension', 'flexion'):
             pattern = f'sub-{ieeg.subject}_*_run-{ieeg.run}_dataglove.tsv'
             folder = parameters['paths']['movements']
-        elif event_type in TIMEPOINTS:
-            pattern = replace_underscore(ieeg_file.name, event_type.replace('_', '') + '.tsv')
-            folder = name(parameters, 'realigned_dir')
+        elif event_type in ('realigned', ):
+            event_path = name(parameters, 'realign', ieeg_file)
+            pattern = event_path.name
+            folder = event_path.parent
 
     elif what == 'dataglove':
         pattern = f'sub-{ieeg.subject}_*_run-{ieeg.run}_recording-dataglove_physio.tsv.gz'
@@ -204,7 +198,7 @@ def select_events(events, t):
     ndarray
         (N, ) vector of events (str)
     """
-    if t in ['cues', ] + list(TIMEPOINTS):
+    if t in ['cues', 'realigned']:
         trial_types = FINGERS_OPEN + FINGERS_CLOSED
     elif t == 'open':
         trial_types = FINGERS_OPEN

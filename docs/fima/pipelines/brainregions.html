@@ -73,7 +73,7 @@ def pipeline_brainregions(parameters, ieeg_file):
                     region = region.split(&#39;_&#39;)[0]
                 f.write(f&#34;\t{region}&#34;)
 
-    &#34;&#34;&#34;
+    &#34;&#34;&#34; TODO: crashes
     # not very efficient because we read the surf every time but the function call is much cleaner
     divs = []
     for region_type in REGION_TYPES:
@@ -140,7 +140,7 @@ def pipeline_brainregions(parameters, ieeg_file):
                     region = region.split(&#39;_&#39;)[0]
                 f.write(f&#34;\t{region}&#34;)
 
-    &#34;&#34;&#34;
+    &#34;&#34;&#34; TODO: crashes
     # not very efficient because we read the surf every time but the function call is much cleaner
     divs = []
     for region_type in REGION_TYPES:

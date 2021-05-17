@@ -64,7 +64,7 @@ def pipeline_ols_all(parameters):
 
     df = import_all_ols(parameters)
 
-    REGIONS = [&#39;a2009s&#39;, &#39;BA&#39;, &#39;DKTatlas&#39;]
+    REGIONS = [&#39;DKTatlas&#39;]
     divs = []
     for region in REGIONS:
         fig = plot_ols_rsquared(df, region)
@@ -73,6 +73,7 @@ def pipeline_ols_all(parameters):
 
     PARAMS = (
         (&#39;estimate&#39;, &#39;onset&#39;, &#39;Onset time (ms, movement onset = 0)&#39;),
+        (&#39;estimate&#39;, &#39;peak&#39;, &#39;Peak time (ms, movement onset = 0)&#39;),
         (&#39;estimate&#39;, &#39;spread&#39;, &#39;Temporal Spread (ms, wider -&gt; more spread over time)&#39;),
         (&#39;flexext&#39;, &#39;corr&#39;, &#39;Correlation between extension and flexion estimates&#39;),
         (&#39;flexext&#39;, &#39;diff&#39;, &#39;Extension estimates - flexion estimates&#39;),
@@ -180,10 +181,9 @@ def pipeline_ols_summary(parameters, ieeg_file):
         return
 
     params = set(df) - {&#39;rsquared&#39;, &#39;chan&#39;}
-    i = df[&#39;rsquared&#39;] &gt; 0.1
     for param in params:
-        dat = Data(array(df[i][param]), chan=array(df[i][&#39;chan&#39;]))
-        fig = plot_surf(parameters, dat, elec, pial=pial, clim=(nanmin(df[i][param]), nanmax(df[i][param])), colorscale=&#39;Hot&#39;)
+        dat = Data(array(df[param]), chan=array(df[&#39;chan&#39;]))
+        fig = plot_surf(parameters, dat, elec, pial=pial, clim=(nanmin(df[param]), nanmax(df[param])), colorscale=&#39;Hot&#39;)
         to_html([to_div(fig), ], plots_dir / f&#39;{param.replace(&#34; &#34;, &#34;_&#34;)}.html&#39;)
 
 
@@ -282,7 +282,7 @@ def pipeline_ols_prf(parameters, ieeg_file):
 
     df = import_all_ols(parameters)
 
-    REGIONS = [&#39;a2009s&#39;, &#39;BA&#39;, &#39;DKTatlas&#39;]
+    REGIONS = [&#39;DKTatlas&#39;]
     divs = []
     for region in REGIONS:
         fig = plot_ols_rsquared(df, region)
@@ -291,6 +291,7 @@ def pipeline_ols_prf(parameters, ieeg_file):
 
     PARAMS = (
         (&#39;estimate&#39;, &#39;onset&#39;, &#39;Onset time (ms, movement onset = 0)&#39;),
+        (&#39;estimate&#39;, &#39;peak&#39;, &#39;Peak time (ms, movement onset = 0)&#39;),
         (&#39;estimate&#39;, &#39;spread&#39;, &#39;Temporal Spread (ms, wider -&gt; more spread over time)&#39;),
         (&#39;flexext&#39;, &#39;corr&#39;, &#39;Correlation between extension and flexion estimates&#39;),
         (&#39;flexext&#39;, &#39;diff&#39;, &#39;Extension estimates - flexion estimates&#39;),
@@ -433,10 +434,9 @@ def pipeline_ols_prf(parameters, ieeg_file):
         return
 
     params = set(df) - {&#39;rsquared&#39;, &#39;chan&#39;}
-    i = df[&#39;rsquared&#39;] &gt; 0.1
     for param in params:
-        dat = Data(array(df[i][param]), chan=array(df[i][&#39;chan&#39;]))
-        fig = plot_surf(parameters, dat, elec, pial=pial, clim=(nanmin(df[i][param]), nanmax(df[i][param])), colorscale=&#39;Hot&#39;)
+        dat = Data(array(df[param]), chan=array(df[&#39;chan&#39;]))
+        fig = plot_surf(parameters, dat, elec, pial=pial, clim=(nanmin(df[param]), nanmax(df[param])), colorscale=&#39;Hot&#39;)
         to_html([to_div(fig), ], plots_dir / f&#39;{param.replace(&#34; &#34;, &#34;_&#34;)}.html&#39;)</code></pre>
 </details>
 </dd>

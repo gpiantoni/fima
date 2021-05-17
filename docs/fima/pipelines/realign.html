@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.names API documentation</title>
+<title>fima.pipelines.realign API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,77 +17,84 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.names</code></h1>
+<h1 class="title">Module <code>fima.pipelines.realign</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from bidso import Task
+<pre><code class="python">from logging import getLogger
+from numpy import isnan, max, mean, NaN, ones, stack, argmin
+
+from ..read import load
+from ..spectrum.compute import compute_timefreq, get_chantime
+from ..utils import get_events, create_bool
+from ..names import name
+
+lg = getLogger(__name__)
 
 
-def name(parameters, what, ieeg_file=None):
+def pipeline_realign(parameters, ieeg_file):
 
-    out_dir = parameters[&#39;paths&#39;][&#39;output&#39;]
-    if ieeg_file is not None:
-        ieeg = Task(ieeg_file)
+    event_type = &#39;cues&#39;
 
-    if what == &#39;surface_dir&#39;:
-        out = out_dir / &#39;surfaces&#39; / ieeg.subject
-        out.mkdir(parents=True, exist_ok=True)
+    events = load(&#39;events&#39;, parameters, ieeg_file, event_type)
 
-    if what == &#39;brainregions_dir&#39;:
-        out = out_dir / &#39;brainregions&#39; / &#39;tsv&#39;
-        out.mkdir(parents=True, exist_ok=True)
+    data, names = load(&#39;data&#39;, parameters, ieeg_file, event_type)
+    tf = compute_timefreq(parameters, data, baseline=True, mean=False)
+    tf = get_chantime(parameters, tf, freq_operator=&#39;nanmean&#39;)
 
-    elif what == &#39;brainregions_plot&#39;:
-        out = out_dir / &#39;brainregions&#39; / &#39;plots&#39; / f&#39;sub-{ieeg.subject}_ses-{ieeg.session}_acq-{ieeg.acquisition}_brainregions.html&#39;
+    t = tf.time[0]
+    n_time = t.shape[0]
+    dur = 200  # this in parameters
+    range_min = 0
+    range_max = n_time - dur
+    offset = range_max // 2
 
-    elif what == &#39;brainregions&#39;:
-        tsv_dir = out_dir / &#39;brainregions&#39; / &#39;tsv&#39;
-        tsv_dir.mkdir(parents=True, exist_ok=True)
-        out = tsv_dir / f&#39;sub-{ieeg.subject}_ses-{ieeg.session}_acq-{ieeg.acquisition}_brainregions.tsv&#39;
+    for event in get_events(names):
 
-    elif what == &#39;dataglove&#39;:
-        out = out_dir / &#39;dataglove&#39;
-        out.mkdir(parents=True, exist_ok=True)
+        i_events = create_bool(names, event)
+        X = tf(trial=0)
+        X = X[:, :, i_events]
 
-    elif what == &#39;realign&#39;:
-        out = out_dir / &#39;realigned&#39; / f&#39;{ieeg_file.stem}.tsv&#39;
-        out.parent.mkdir(parents=True, exist_ok=True)
+        max_per_chan = max(mean(X, axis=2), axis=1)
 
-    elif what == &#39;timepoints&#39;:
-        out = out_dir / &#39;timepoints&#39; / &#39;timings&#39; / f&#39;{ieeg_file.stem}.npy&#39;
-        out.parent.mkdir(parents=True, exist_ok=True)
+        # channels above threshold
+        i_chan = max_per_chan &gt;= 2.5  # this in parameters
+        if i_chan.sum() == 0:
+            lg.info(f&#39;No channel was significant for {event}. This event will be deleted&#39;)
+            events[&#39;onset&#39;][i_events] = NaN
+            continue
 
-    elif what == &#39;timepoints_plot&#39;:
-        out = out_dir / &#39;timepoints&#39; / &#39;plots&#39; / f&#39;{ieeg_file.stem}.html&#39;
-        out.parent.mkdir(parents=True, exist_ok=True)
+        lg.info(f&#39;{i_chan.sum()} channels will be used to realigned {event}&#39;)
 
-    elif what == &#39;continuous&#39;:
-        out = out_dir / &#39;continuous&#39; / f&#39;{ieeg_file.stem}.html&#39;
+        X = X[i_chan, :, :]
+        n_trl = X.shape[2]
 
-    elif what == &#39;spectrum&#39;:
-        out = out_dir / &#39;spectrum&#39; / &#39;overview&#39; / f&#39;{ieeg_file.stem}.html&#39;
+        i_start = (offset * ones(n_trl)).astype(&#39;int&#39;)
 
-    elif what == &#39;ols_chan&#39;:
-        out = out_dir / &#39;ols&#39; / ieeg_file.stem
-        out.mkdir(parents=True, exist_ok=True)
+        for i_trl in range(n_trl):
+            X_prime = [X[:, i_start[i]:(i_start[i] + dur), i] for i in range(n_trl) if i != i_trl]
+            X_prime_mean = mean(stack(X_prime, axis=2), axis=2)
 
-    elif what == &#39;ols_tsv&#39;:
-        out = out_dir / &#39;ols&#39; / &#39;tsv&#39;
-        out.mkdir(parents=True, exist_ok=True)
+            r2_to_mean = []
+            for shift in range(range_min, range_max):
+                X_onetrl = X[:, shift:(shift + dur), i_trl]
+                d = X_prime_mean - X_onetrl
+                r2_to_mean.append(mean(d ** 2))
 
-    elif what == &#39;ols_summary&#39;:
-        out = out_dir / &#39;ols&#39; / &#39;summary&#39;
-        out.mkdir(parents=True, exist_ok=True)
+            i_start[i_trl] = argmin(r2_to_mean)
 
-    elif what == &#39;ols_plot&#39;:
-        out = out_dir / &#39;ols&#39; / &#39;plots&#39;
-        out.mkdir(parents=True, exist_ok=True)
+        offset_per_trl = t[i_start] - t[offset]
+        events[&#39;onset&#39;][i_events] = events[&#39;onset&#39;][i_events] + offset_per_trl
 
-    return out</code></pre>
+    realigned_tsv = name(parameters, &#39;realign&#39;, ieeg_file)
+    with realigned_tsv.open(&#39;w&#39;) as f:
+        f.write(&#39;onset\tduration\ttrial_type\n&#39;)
+        for ev in events:
+            if not isnan(ev[&#39;onset&#39;]):
+                f.write(f&#39;{ev[&#34;onset&#34;]:.3f}\t{ev[&#34;duration&#34;]:.3f}\t{ev[&#34;trial_type&#34;]}\n&#39;)</code></pre>
 </details>
 </section>
 <section>
@@ -97,8 +104,8 @@ def name(parameters, what, ieeg_file=None):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="fima.names.name"><code class="name flex">
-<span>def <span class="ident">name</span></span>(<span>parameters, what, ieeg_file=None)</span>
+<dt id="fima.pipelines.realign.pipeline_realign"><code class="name flex">
+<span>def <span class="ident">pipeline_realign</span></span>(<span>parameters, ieeg_file)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -106,67 +113,66 @@ def name(parameters, what, ieeg_file=None):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def name(parameters, what, ieeg_file=None):
+<pre><code class="python">def pipeline_realign(parameters, ieeg_file):
 
-    out_dir = parameters[&#39;paths&#39;][&#39;output&#39;]
-    if ieeg_file is not None:
-        ieeg = Task(ieeg_file)
+    event_type = &#39;cues&#39;
 
-    if what == &#39;surface_dir&#39;:
-        out = out_dir / &#39;surfaces&#39; / ieeg.subject
-        out.mkdir(parents=True, exist_ok=True)
+    events = load(&#39;events&#39;, parameters, ieeg_file, event_type)
 
-    if what == &#39;brainregions_dir&#39;:
-        out = out_dir / &#39;brainregions&#39; / &#39;tsv&#39;
-        out.mkdir(parents=True, exist_ok=True)
+    data, names = load(&#39;data&#39;, parameters, ieeg_file, event_type)
+    tf = compute_timefreq(parameters, data, baseline=True, mean=False)
+    tf = get_chantime(parameters, tf, freq_operator=&#39;nanmean&#39;)
 
-    elif what == &#39;brainregions_plot&#39;:
-        out = out_dir / &#39;brainregions&#39; / &#39;plots&#39; / f&#39;sub-{ieeg.subject}_ses-{ieeg.session}_acq-{ieeg.acquisition}_brainregions.html&#39;
+    t = tf.time[0]
+    n_time = t.shape[0]
+    dur = 200  # this in parameters
+    range_min = 0
+    range_max = n_time - dur
+    offset = range_max // 2
 
-    elif what == &#39;brainregions&#39;:
-        tsv_dir = out_dir / &#39;brainregions&#39; / &#39;tsv&#39;
-        tsv_dir.mkdir(parents=True, exist_ok=True)
-        out = tsv_dir / f&#39;sub-{ieeg.subject}_ses-{ieeg.session}_acq-{ieeg.acquisition}_brainregions.tsv&#39;
+    for event in get_events(names):
 
-    elif what == &#39;dataglove&#39;:
-        out = out_dir / &#39;dataglove&#39;
-        out.mkdir(parents=True, exist_ok=True)
+        i_events = create_bool(names, event)
+        X = tf(trial=0)
+        X = X[:, :, i_events]
 
-    elif what == &#39;realign&#39;:
-        out = out_dir / &#39;realigned&#39; / f&#39;{ieeg_file.stem}.tsv&#39;
-        out.parent.mkdir(parents=True, exist_ok=True)
+        max_per_chan = max(mean(X, axis=2), axis=1)
 
-    elif what == &#39;timepoints&#39;:
-        out = out_dir / &#39;timepoints&#39; / &#39;timings&#39; / f&#39;{ieeg_file.stem}.npy&#39;
-        out.parent.mkdir(parents=True, exist_ok=True)
+        # channels above threshold
+        i_chan = max_per_chan &gt;= 2.5  # this in parameters
+        if i_chan.sum() == 0:
+            lg.info(f&#39;No channel was significant for {event}. This event will be deleted&#39;)
+            events[&#39;onset&#39;][i_events] = NaN
+            continue
 
-    elif what == &#39;timepoints_plot&#39;:
-        out = out_dir / &#39;timepoints&#39; / &#39;plots&#39; / f&#39;{ieeg_file.stem}.html&#39;
-        out.parent.mkdir(parents=True, exist_ok=True)
+        lg.info(f&#39;{i_chan.sum()} channels will be used to realigned {event}&#39;)
 
-    elif what == &#39;continuous&#39;:
-        out = out_dir / &#39;continuous&#39; / f&#39;{ieeg_file.stem}.html&#39;
+        X = X[i_chan, :, :]
+        n_trl = X.shape[2]
 
-    elif what == &#39;spectrum&#39;:
-        out = out_dir / &#39;spectrum&#39; / &#39;overview&#39; / f&#39;{ieeg_file.stem}.html&#39;
+        i_start = (offset * ones(n_trl)).astype(&#39;int&#39;)
 
-    elif what == &#39;ols_chan&#39;:
-        out = out_dir / &#39;ols&#39; / ieeg_file.stem
-        out.mkdir(parents=True, exist_ok=True)
+        for i_trl in range(n_trl):
+            X_prime = [X[:, i_start[i]:(i_start[i] + dur), i] for i in range(n_trl) if i != i_trl]
+            X_prime_mean = mean(stack(X_prime, axis=2), axis=2)
 
-    elif what == &#39;ols_tsv&#39;:
-        out = out_dir / &#39;ols&#39; / &#39;tsv&#39;
-        out.mkdir(parents=True, exist_ok=True)
+            r2_to_mean = []
+            for shift in range(range_min, range_max):
+                X_onetrl = X[:, shift:(shift + dur), i_trl]
+                d = X_prime_mean - X_onetrl
+                r2_to_mean.append(mean(d ** 2))
 
-    elif what == &#39;ols_summary&#39;:
-        out = out_dir / &#39;ols&#39; / &#39;summary&#39;
-        out.mkdir(parents=True, exist_ok=True)
+            i_start[i_trl] = argmin(r2_to_mean)
 
-    elif what == &#39;ols_plot&#39;:
-        out = out_dir / &#39;ols&#39; / &#39;plots&#39;
-        out.mkdir(parents=True, exist_ok=True)
+        offset_per_trl = t[i_start] - t[offset]
+        events[&#39;onset&#39;][i_events] = events[&#39;onset&#39;][i_events] + offset_per_trl
 
-    return out</code></pre>
+    realigned_tsv = name(parameters, &#39;realign&#39;, ieeg_file)
+    with realigned_tsv.open(&#39;w&#39;) as f:
+        f.write(&#39;onset\tduration\ttrial_type\n&#39;)
+        for ev in events:
+            if not isnan(ev[&#39;onset&#39;]):
+                f.write(f&#39;{ev[&#34;onset&#34;]:.3f}\t{ev[&#34;duration&#34;]:.3f}\t{ev[&#34;trial_type&#34;]}\n&#39;)</code></pre>
 </details>
 </dd>
 </dl>
@@ -182,12 +188,12 @@ def name(parameters, what, ieeg_file=None):
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="fima" href="index.html">fima</a></code></li>
+<li><code><a title="fima.pipelines" href="index.html">fima.pipelines</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="fima.names.name" href="#fima.names.name">name</a></code></li>
+<li><code><a title="fima.pipelines.realign.pipeline_realign" href="#fima.pipelines.realign.pipeline_realign">pipeline_realign</a></code></li>
 </ul>
 </li>
 </ul>

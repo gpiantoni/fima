@@ -157,6 +157,7 @@ def plot_ols_flexext(df, region_type):
 def make_bars(x, bins, name=''):
     x = x[~isnan(x)]
     [hist, edges] = histogram(x, bins=bins)
+    hist = hist / sum(hist)
 
     trace = go.Bar(
         x=edges[:-1] + (edges[1] - edges[0]) / 2,

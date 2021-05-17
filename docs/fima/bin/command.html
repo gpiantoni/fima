@@ -81,6 +81,13 @@ def main():
     action.set_defaults(function=&#39;continuous&#39;)
 
     action = list_pipelines.add_parser(
+        &#39;realign&#39;,
+        help=&#39;Realign based on mean waveform&#39;,
+        )
+    action.set_defaults(function=&#39;realign&#39;)
+
+
+    action = list_pipelines.add_parser(
         &#39;spectrum&#39;,
         help=&#39;Compute Time-Frequency Analysis&#39;,
         )
@@ -238,6 +245,13 @@ if __name__ == &#39;__main__&#39;:
         help=&#39;Plot the time-course continuously in the high-frequency range&#39;,
         )
     action.set_defaults(function=&#39;continuous&#39;)
+
+    action = list_pipelines.add_parser(
+        &#39;realign&#39;,
+        help=&#39;Realign based on mean waveform&#39;,
+        )
+    action.set_defaults(function=&#39;realign&#39;)
+
 
     action = list_pipelines.add_parser(
         &#39;spectrum&#39;,
