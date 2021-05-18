@@ -183,6 +183,7 @@ def plot_ols_flexext(df, region_type):
 def make_bars(x, bins, name=&#39;&#39;):
     x = x[~isnan(x)]
     [hist, edges] = histogram(x, bins=bins)
+    hist = hist / sum(hist)
 
     trace = go.Bar(
         x=edges[:-1] + (edges[1] - edges[0]) / 2,
@@ -249,6 +250,7 @@ def plot_fingerfriends(df_ols, region_type):
 <pre><code class="python">def make_bars(x, bins, name=&#39;&#39;):
     x = x[~isnan(x)]
     [hist, edges] = histogram(x, bins=bins)
+    hist = hist / sum(hist)
 
     trace = go.Bar(
         x=edges[:-1] + (edges[1] - edges[0]) / 2,
