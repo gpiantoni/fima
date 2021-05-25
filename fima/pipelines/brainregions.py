@@ -20,9 +20,12 @@ def pipeline_brainregions(parameters, ieeg_file):
     subject : str
         subject code
     """
-    make_pial_thick(parameters, ieeg_file)
+    # make_pial_thick(parameters, ieeg_file)
 
-    elec = load('electrodes', parameters, ieeg_file)
+    try:
+        elec = load('electrodes', parameters, ieeg_file)
+    except FileNotFoundError:
+        return
 
     aparc = {}
     for template in REGION_TYPES:
@@ -47,7 +50,6 @@ def pipeline_brainregions(parameters, ieeg_file):
                     region = region.split('_')[0]
                 f.write(f"\t{region}")
 
-    """ TODO: crashes
     # not very efficient because we read the surf every time but the function call is much cleaner
     divs = []
     for region_type in REGION_TYPES:
@@ -55,4 +57,3 @@ def pipeline_brainregions(parameters, ieeg_file):
         divs.append(to_div(fig))
 
     to_html(divs, name(parameters, 'brainregions_plot', ieeg_file))
-    """

@@ -7,19 +7,20 @@ Information to store in `parameters.json` file.
     - movements: str, path to movements (should have the same prefix as `_events.tsv` but ends with `_dataglove.tsv`)
     - freesurfer_subjects_dir: str, path to freesurfer folder,
     - output: str, path to output folder which will contain the results
-  - timepoints:
-    - time: [float, float], interval to look for the max value
-    - threshold:
-      - high: float, when activity is above this threshold, consider it actual movement
-      - low: float, from the peak, look back until activity goes below this threshold
   - read:
-    - event_type : str, one of 'cues', 'open', 'close', 'movements', 'extension', 'flexion'
     - pre: float, time in s to include before the events
     - post: float, time in s to include after the event
     - artifacts:
         - remove: bool, whether to actually remove artifacts or not
         - threshold: float, threshold in units of the original data to consider it an artifact (done separately for each channel)
         - window: float, window in s to hide when one point is above the threshold
+  - realign:
+    - event_type : str, one of 'cues', 'open', 'close', 'movements', 'extension', 'flexion'
+  - timepoints:
+    - time: [float, float], interval to look for the max value
+    - threshold:
+      - high: float, when activity is above this threshold, consider it actual movement
+      - low: float, from the peak, look back until activity goes below this threshold
   - spectrum:
     - method: str, "spectrogram" or "morlet" or "hilbert"
     - window_size: float

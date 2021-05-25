@@ -13,7 +13,11 @@ thicken_pial('{ribbon}', 'r', [5, 5], 0.5)
 """
 
 def make_pial_thick(parameters, ieeg_file):
-    fs = load('freesurfer', parameters, ieeg_file)
+    try:
+        fs = load('freesurfer', parameters, ieeg_file)
+    except FileNotFoundError:
+        return
+
     output_dir = name(parameters, 'surface_dir', ieeg_file)
 
     ribbon_mgz = fs.dir / 'mri' / 'ribbon.mgz'

@@ -25,7 +25,7 @@ def plot_brain_regions(parameters, ieeg_file, region_type):
     labels = []
     for elec in electrodes:
         region = elec[region_type]
-        labels.append(f'{elec["name"]} = {region}')
+        labels.append(f'{elec["chan"]} = {region}')
         colors.append(annot['regions']['colors'][region])
 
     # to normalize plotly

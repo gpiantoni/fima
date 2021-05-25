@@ -60,7 +60,6 @@ def main():
         )
     action.set_defaults(function='realign')
 
-
     action = list_pipelines.add_parser(
         'spectrum',
         help='Compute Time-Frequency Analysis',
