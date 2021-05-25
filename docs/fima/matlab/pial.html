@@ -39,7 +39,11 @@ thicken_pial(&#39;{ribbon}&#39;, &#39;r&#39;, [5, 5], 0.5)
 &#34;&#34;&#34;
 
 def make_pial_thick(parameters, ieeg_file):
-    fs = load(&#39;freesurfer&#39;, parameters, ieeg_file)
+    try:
+        fs = load(&#39;freesurfer&#39;, parameters, ieeg_file)
+    except FileNotFoundError:
+        return
+
     output_dir = name(parameters, &#39;surface_dir&#39;, ieeg_file)
 
     ribbon_mgz = fs.dir / &#39;mri&#39; / &#39;ribbon.mgz&#39;
@@ -84,7 +88,11 @@ def make_pial_thick(parameters, ieeg_file):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def make_pial_thick(parameters, ieeg_file):
-    fs = load(&#39;freesurfer&#39;, parameters, ieeg_file)
+    try:
+        fs = load(&#39;freesurfer&#39;, parameters, ieeg_file)
+    except FileNotFoundError:
+        return
+
     output_dir = name(parameters, &#39;surface_dir&#39;, ieeg_file)
 
     ribbon_mgz = fs.dir / &#39;mri&#39; / &#39;ribbon.mgz&#39;

@@ -18,7 +18,7 @@ def plot_brain_regions(parameters, ieeg_file, region_type):
     """
     brainregions_file = name(parameters, 'brainregions', ieeg_file)
     electrodes = read_tsv(brainregions_file)
-    pial = load('surface', parameters, ieeg_file)
+    pial = load('pial', parameters, ieeg_file)
     annot = load(region_type, parameters, ieeg_file)
 
     colors = []

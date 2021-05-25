@@ -46,9 +46,12 @@ def pipeline_brainregions(parameters, ieeg_file):
     subject : str
         subject code
     &#34;&#34;&#34;
-    make_pial_thick(parameters, ieeg_file)
+    # make_pial_thick(parameters, ieeg_file)
 
-    elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
+    try:
+        elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
+    except FileNotFoundError:
+        return
 
     aparc = {}
     for template in REGION_TYPES:
@@ -73,15 +76,13 @@ def pipeline_brainregions(parameters, ieeg_file):
                     region = region.split(&#39;_&#39;)[0]
                 f.write(f&#34;\t{region}&#34;)
 
-    &#34;&#34;&#34; TODO: crashes
     # not very efficient because we read the surf every time but the function call is much cleaner
     divs = []
     for region_type in REGION_TYPES:
         fig = plot_brain_regions(parameters, ieeg_file, region_type)
         divs.append(to_div(fig))
 
-    to_html(divs, name(parameters, &#39;brainregions_plot&#39;, ieeg_file))
-    &#34;&#34;&#34;</code></pre>
+    to_html(divs, name(parameters, &#39;brainregions_plot&#39;, ieeg_file))</code></pre>
 </details>
 </section>
 <section>
@@ -113,9 +114,12 @@ def pipeline_brainregions(parameters, ieeg_file):
     subject : str
         subject code
     &#34;&#34;&#34;
-    make_pial_thick(parameters, ieeg_file)
+    # make_pial_thick(parameters, ieeg_file)
 
-    elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
+    try:
+        elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
+    except FileNotFoundError:
+        return
 
     aparc = {}
     for template in REGION_TYPES:
@@ -140,15 +144,13 @@ def pipeline_brainregions(parameters, ieeg_file):
                     region = region.split(&#39;_&#39;)[0]
                 f.write(f&#34;\t{region}&#34;)
 
-    &#34;&#34;&#34; TODO: crashes
     # not very efficient because we read the surf every time but the function call is much cleaner
     divs = []
     for region_type in REGION_TYPES:
         fig = plot_brain_regions(parameters, ieeg_file, region_type)
         divs.append(to_div(fig))
 
-    to_html(divs, name(parameters, &#39;brainregions_plot&#39;, ieeg_file))
-    &#34;&#34;&#34;</code></pre>
+    to_html(divs, name(parameters, &#39;brainregions_plot&#39;, ieeg_file))</code></pre>
 </details>
 </dd>
 </dl>

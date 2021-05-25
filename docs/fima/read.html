@@ -78,10 +78,7 @@ def load(what, parameters, ieeg_file, event_type=None):
       - flexion : actual flexion of all fingers
       - realigned : realigned movement
     &#34;&#34;&#34;
-    if event_type is None:
-        event_type = parameters[&#39;read&#39;][&#39;event_type&#39;]
-
-    if event_type not in [&#39;cues&#39;, &#39;open&#39;, &#39;close&#39;, &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;, &#39;realigned&#39;]:
+    if False and event_type not in [&#39;cues&#39;, &#39;open&#39;, &#39;close&#39;, &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;, &#39;realigned&#39;]:
         raise ValueError(f&#39;&#34;{event_type}&#34; is not one of the possible event types&#39;)
 
     ieeg = Task(ieeg_file)
@@ -310,10 +307,7 @@ def select_events(events, t):
       - flexion : actual flexion of all fingers
       - realigned : realigned movement
     &#34;&#34;&#34;
-    if event_type is None:
-        event_type = parameters[&#39;read&#39;][&#39;event_type&#39;]
-
-    if event_type not in [&#39;cues&#39;, &#39;open&#39;, &#39;close&#39;, &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;, &#39;realigned&#39;]:
+    if False and event_type not in [&#39;cues&#39;, &#39;open&#39;, &#39;close&#39;, &#39;movements&#39;, &#39;extension&#39;, &#39;flexion&#39;, &#39;realigned&#39;]:
         raise ValueError(f&#39;&#34;{event_type}&#34; is not one of the possible event types&#39;)
 
     ieeg = Task(ieeg_file)
