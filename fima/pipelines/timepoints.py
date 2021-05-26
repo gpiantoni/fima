@@ -16,7 +16,7 @@ from ..viz.utils import to_html
 
 def pipeline_timepoints(parameters, ieeg_file):
 
-    data, names = load('data', parameters, ieeg_file)
+    data, names = load('data', parameters, ieeg_file, parameters['timepoints']['read'])
     tf = compute_timefreq(parameters, data, baseline=True, mean=False)
     tf = get_chantime(parameters, tf, freq_operator='nanmean')
 

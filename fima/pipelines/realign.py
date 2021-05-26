@@ -11,11 +11,9 @@ lg = getLogger(__name__)
 
 def pipeline_realign(parameters, ieeg_file):
 
-    event_type = 'cues'
+    events = load('events', parameters, ieeg_file, parameters['realign']['read']['event_type'])
 
-    events = load('events', parameters, ieeg_file, event_type)
-
-    data, names = load('data', parameters, ieeg_file, event_type)
+    data, names = load('data', parameters, ieeg_file, parameters['realign']['read'])
     tf = compute_timefreq(parameters, data, baseline=True, mean=False)
     tf = get_chantime(parameters, tf, freq_operator='nanmean')
 

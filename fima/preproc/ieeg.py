@@ -8,7 +8,7 @@ from wonambi.trans import montage
 lg = getLogger(__name__)
 
 
-def read_data(parameters, filename, event_onsets, continuous=False):
+def read_data(parameters, filename, event_onsets, opts, continuous=False):
 
     d = BIDSEEG(filename)
     chans = d.channels[
@@ -18,14 +18,14 @@ def read_data(parameters, filename, event_onsets, continuous=False):
 
     if continuous:
         data = d.read_data(
-            begtime=event_onsets[0] - parameters['continuous']['read']['pre'],
-            endtime=event_onsets[-1] + parameters['continuous']['read']['post'],
+            begtime=event_onsets[0] - opts['pre'],
+            endtime=event_onsets[-1] + opts['post'],
             chan=list(chans['name']))
     else:
         data = d.read_data(
             events=event_onsets,
-            pre=parameters['read']['pre'],
-            post=parameters['read']['post'],
+            pre=opts['pre'],
+            post=opts['post'],
             chan=list(chans['name']))
 
     if parameters['artifacts']['remove']:

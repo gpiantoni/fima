@@ -26,7 +26,7 @@ FS_LABELS = [
     ]
 
 
-def load(what, parameters, ieeg_file, event_type=None):
+def load(what, parameters, ieeg_file, opts=None):
     """
     WHAT:
       - 'continuous' returns: ChanTime, event_names, events_onsets
@@ -51,24 +51,28 @@ def load(what, parameters, ieeg_file, event_type=None):
       - flexion : actual flexion of all fingers
       - realigned : realigned movement
     """
-    if what in ('events', 'data', 'continuous'):
-        if event_type is None:
+    if opts in ('data', 'continuous'):
+        if opts is None:
             raise ValueError('You need to specify event_type')
-        if event_type not in ['cues', 'open', 'close', 'movements', 'extension', 'flexion', 'realigned']:
-            raise ValueError(f'"{event_type}" is not one of the possible event types')
+        if opts not in ['cues', 'open', 'close', 'movements', 'extension', 'flexion', 'realigned']:
+            raise ValueError(f'"{opts}" is not one of the possible event types')
+
+    if what in ('data', 'continuous'):
+        if opts is None:
+            raise ValueError('You need to specify opts which is a dict with event_type, pre, post')
 
     ieeg = Task(ieeg_file)
 
     if what in ('continuous', 'data'):
-        events_tsv = load('events', parameters, ieeg_file, event_type)
+        events_tsv = load('events', parameters, ieeg_file, opts['event_type'])
         events = events_tsv['trial_type']
         onsets = events_tsv['onset']
 
         if what == 'continuous':
-            data = read_data(parameters, ieeg_file, event_onsets=onsets, continuous=True)
+            data = read_data(parameters, ieeg_file, event_onsets=onsets, opts=opts, continuous=True)
             return data, events, onsets
         elif what == 'data':
-            data = read_data(parameters, ieeg_file, event_onsets=onsets, continuous=False)
+            data = read_data(parameters, ieeg_file, event_onsets=onsets, opts=opts, continuous=False)
             return data, events
 
     if what == 'electrodes':
@@ -76,13 +80,13 @@ def load(what, parameters, ieeg_file, event_type=None):
         folder = parameters['paths']['input']
 
     elif what == 'events':
-        if event_type in ('cues', 'open', 'close'):
+        if opts in ('cues', 'open', 'close'):
             pattern = f'sub-{ieeg.subject}_*_run-{ieeg.run}_events.tsv'
             folder = parameters['paths']['input']
-        elif event_type in ('movements', 'extension', 'flexion'):
+        elif opts in ('movements', 'extension', 'flexion'):
             pattern = f'sub-{ieeg.subject}_*_run-{ieeg.run}_dataglove.tsv'
             folder = parameters['paths']['movements']
-        elif event_type in ('realigned', ):
+        elif opts in ('realigned', ):
             event_path = name(parameters, 'realign', ieeg_file)
             pattern = event_path.name
             folder = event_path.parent
@@ -141,7 +145,7 @@ def load(what, parameters, ieeg_file, event_type=None):
             x.fill(NaN)
             events = append_fields(events, 'response_time', x, usemask=False)
 
-        return select_events(events, event_type)
+        return select_events(events, opts)
 
     elif what == 'dataglove':
         return read_physio(filename)
