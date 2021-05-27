@@ -20,7 +20,7 @@ def pipeline_brainregions(parameters, ieeg_file):
     subject : str
         subject code
     """
-    # make_pial_thick(parameters, ieeg_file)
+    make_pial_thick(parameters, ieeg_file)
 
     try:
         elec = load('electrodes', parameters, ieeg_file)

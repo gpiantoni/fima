@@ -91,7 +91,7 @@ def pipeline_ols_all(parameters):
 def pipeline_ols_allchan(parameters, ieeg_file):
 
     try:
-        data, names = load('data', parameters, ieeg_file)
+        data, names = load('data', parameters, ieeg_file, parameters['ols']['read'])
     except IndexError:
         return
     tf = compute_timefreq(parameters, data, baseline=True, mean=False)
@@ -137,7 +137,11 @@ def pipeline_ols_summary(parameters, ieeg_file):
         name(parameters, 'ols_tsv') / f'{ieeg_file.stem}.tsv',
         sep='\t', index=False)
 
-    elec = load('electrodes', parameters, ieeg_file)
+    try:
+        elec = load('electrodes', parameters, ieeg_file)
+    except FileNotFoundError:
+        return
+
     try:
         pial = load('surface', parameters, ieeg_file)
     except FileNotFoundError:

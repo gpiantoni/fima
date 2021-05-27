@@ -32,33 +32,40 @@ def name(parameters, what, ieeg_file=None):
         out.parent.mkdir(parents=True, exist_ok=True)
 
     elif what == 'timepoints':
-        out = out_dir / 'timepoints' / 'timings' / f'{ieeg_file.stem}.npy'
+        event_type = parameters['timepoints']['read']['event_type']
+        out = out_dir / 'timepoints' / event_type / 'timings' / f'{ieeg_file.stem}.npy'
         out.parent.mkdir(parents=True, exist_ok=True)
 
     elif what == 'timepoints_plot':
-        out = out_dir / 'timepoints' / 'plots' / f'{ieeg_file.stem}.html'
+        event_type = parameters['timepoints']['read']['event_type']
+        out = out_dir / 'timepoints' / event_type / 'plots' / f'{ieeg_file.stem}.html'
         out.parent.mkdir(parents=True, exist_ok=True)
 
     elif what == 'continuous':
         out = out_dir / 'continuous' / f'{ieeg_file.stem}.html'
 
     elif what == 'spectrum':
-        out = out_dir / 'spectrum' / 'overview' / f'{ieeg_file.stem}.html'
+        event_type = parameters['spectrum']['read']['event_type']
+        out = out_dir / 'spectrum' / event_type / 'overview' / f'{ieeg_file.stem}.html'
 
     elif what == 'ols_chan':
-        out = out_dir / 'ols' / ieeg_file.stem
+        event_type = parameters['ols']['read']['event_type']
+        out = out_dir / 'ols' / event_type / ieeg_file.stem
         out.mkdir(parents=True, exist_ok=True)
 
     elif what == 'ols_tsv':
-        out = out_dir / 'ols' / 'tsv'
+        event_type = parameters['ols']['read']['event_type']
+        out = out_dir / 'ols' / event_type / 'tsv'
         out.mkdir(parents=True, exist_ok=True)
 
     elif what == 'ols_summary':
-        out = out_dir / 'ols' / 'summary'
+        event_type = parameters['ols']['read']['event_type']
+        out = out_dir / 'ols' / event_type / 'summary'
         out.mkdir(parents=True, exist_ok=True)
 
     elif what == 'ols_plot':
-        out = out_dir / 'ols' / 'plots'
+        event_type = parameters['ols']['read']['event_type']
+        out = out_dir / 'ols' / event_type / 'plots'
         out.mkdir(parents=True, exist_ok=True)
 
     return out

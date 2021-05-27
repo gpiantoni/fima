@@ -19,7 +19,7 @@ def pipeline_spectrum(parameters, ieeg_file):
     Parameters
     ----------
     """
-    data, names = load('data', parameters, ieeg_file)
+    data, names = load('data', parameters, ieeg_file, parameters['spectrum']['read'])
 
     try:
         elec = load('electrodes', parameters, ieeg_file)
