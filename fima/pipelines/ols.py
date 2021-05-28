@@ -12,7 +12,7 @@ from ..ols.prf import add_prf_estimates
 from ..ols.summary import import_all_ols
 from ..viz import to_div, to_html
 from ..viz.surf import plot_surf
-# from ..viz.ols import plot_coefficient, plot_data_prediction
+from ..viz.ols import plot_coefficient, plot_data_prediction
 from ..viz.ols_summary import plot_ols_rsquared, plot_ols_params, plot_ols_flexext, plot_ols_prf, plot_fingerfriends
 from ..names import name
 
@@ -107,21 +107,16 @@ def pipeline_ols_allchan(parameters, ieeg_file):
         out, result = get_max(parameters, t, x, names, MAT)
         out['chan'] = chan
 
-        """
         divs = []
 
-        # fig = plot_sigma_delay_mat(MAT, SIGMAS * t_diff, DELAYS * t_diff)
-        # divs.append(to_div(fig))
+        fig = plot_data_prediction(tf.time[0], result)
+        divs.append(to_div(fig))
 
         fig = plot_coefficient(result)
         divs.append(to_div(fig))
 
-        fig = plot_data_prediction(tf.time[0], result)
-        divs.append(to_div(fig))
-        """
-
         html_file = name(parameters, 'ols_chan', ieeg_file) / f'{chan}.html'
-        # to_html(divs, html_file)
+        to_html(divs, html_file)
 
         json_file = html_file.with_suffix('.json')
         with json_file.open('w') as f:

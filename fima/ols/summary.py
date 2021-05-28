@@ -51,7 +51,13 @@ def import_all_ols(parameters):
 
     df = df.sort_values('rsquared', ascending=False).reset_index(drop=True)
 
-    missing_columns = set(df.columns) - set(COLUMNS.values())
+    if 'thumb close' in df.columns:
+        cols = {k.replace('flexion', 'close'): v.replace('flexion', 'close') for k, v in COLUMNS.items()}
+        cols = {k.replace('extension', 'open'): v.replace('extension', 'open') for k, v in cols.items()}
+    else:
+        cols = COLUMNS
+
+    missing_columns = set(df.columns) - set(cols.values())
     print('These columns will not be included in overview dataset: ' + ', '.join(missing_columns))
 
     # exclude columns which are in the overview but were not computed
