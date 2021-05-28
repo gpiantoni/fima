@@ -1,9 +1,10 @@
+from shutil import rmtree
 from json import dump
 from json import load as json_load
 from logging import getLogger
 from wonambi import Data
 from pandas import DataFrame
-from numpy import nanmin, nanmax, array
+from numpy import nanmin, nanmax, array, arange
 
 from ..read import load
 from ..spectrum.compute import compute_timefreq, get_chantime
@@ -90,6 +91,9 @@ def pipeline_ols_all(parameters):
 
 def pipeline_ols_allchan(parameters, ieeg_file):
 
+    out_dir = name(parameters, 'ols_chan', ieeg_file)
+    rmtree(out_dir, ignore_errors=True)
+
     try:
         data, names = load('data', parameters, ieeg_file, parameters['ols']['read'])
     except IndexError:
@@ -109,13 +113,14 @@ def pipeline_ols_allchan(parameters, ieeg_file):
 
         divs = []
 
-        fig = plot_data_prediction(tf.time[0], result)
+        t_plot = arange(x.shape[0]) * out['tdiff']
+        fig = plot_data_prediction(t_plot, result, names)
         divs.append(to_div(fig))
 
         fig = plot_coefficient(result)
         divs.append(to_div(fig))
 
-        html_file = name(parameters, 'ols_chan', ieeg_file) / f'{chan}.html'
+        html_file = out_dir / f'{chan}.html'
         to_html(divs, html_file)
 
         json_file = html_file.with_suffix('.json')

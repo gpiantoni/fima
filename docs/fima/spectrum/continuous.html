@@ -34,7 +34,8 @@ lg = getLogger(__name__)
 
 def get_continuous_cht(parameters, ieeg_file):
 
-    data, events, onsets = load(&#39;continuous&#39;, parameters, ieeg_file)
+    event_type = parameters[&#39;continuous&#39;][&#39;read&#39;][&#39;event_type&#39;]
+    data, events, onsets = load(&#39;continuous&#39;, parameters, ieeg_file, event_type)
 
     lg.info(&#39;Computing timefreq (baseline=False, mean=False)&#39;)
     tf = compute_timefreq(parameters, data, baseline=False, mean=False)
@@ -64,7 +65,8 @@ def get_continuous_cht(parameters, ieeg_file):
 </summary>
 <pre><code class="python">def get_continuous_cht(parameters, ieeg_file):
 
-    data, events, onsets = load(&#39;continuous&#39;, parameters, ieeg_file)
+    event_type = parameters[&#39;continuous&#39;][&#39;read&#39;][&#39;event_type&#39;]
+    data, events, onsets = load(&#39;continuous&#39;, parameters, ieeg_file, event_type)
 
     lg.info(&#39;Computing timefreq (baseline=False, mean=False)&#39;)
     tf = compute_timefreq(parameters, data, baseline=False, mean=False)

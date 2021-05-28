@@ -24,12 +24,13 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from json import dump
+<pre><code class="python">from shutil import rmtree
+from json import dump
 from json import load as json_load
 from logging import getLogger
 from wonambi import Data
 from pandas import DataFrame
-from numpy import nanmin, nanmax, array
+from numpy import nanmin, nanmax, array, arange
 
 from ..read import load
 from ..spectrum.compute import compute_timefreq, get_chantime
@@ -38,7 +39,7 @@ from ..ols.prf import add_prf_estimates
 from ..ols.summary import import_all_ols
 from ..viz import to_div, to_html
 from ..viz.surf import plot_surf
-# from ..viz.ols import plot_coefficient, plot_data_prediction
+from ..viz.ols import plot_coefficient, plot_data_prediction
 from ..viz.ols_summary import plot_ols_rsquared, plot_ols_params, plot_ols_flexext, plot_ols_prf, plot_fingerfriends
 from ..names import name
 
@@ -116,8 +117,11 @@ def pipeline_ols_all(parameters):
 
 def pipeline_ols_allchan(parameters, ieeg_file):
 
+    out_dir = name(parameters, &#39;ols_chan&#39;, ieeg_file)
+    rmtree(out_dir, ignore_errors=True)
+
     try:
-        data, names = load(&#39;data&#39;, parameters, ieeg_file)
+        data, names = load(&#39;data&#39;, parameters, ieeg_file, parameters[&#39;ols&#39;][&#39;read&#39;])
     except IndexError:
         return
     tf = compute_timefreq(parameters, data, baseline=True, mean=False)
@@ -133,21 +137,17 @@ def pipeline_ols_allchan(parameters, ieeg_file):
         out, result = get_max(parameters, t, x, names, MAT)
         out[&#39;chan&#39;] = chan
 
-        &#34;&#34;&#34;
         divs = []
 
-        # fig = plot_sigma_delay_mat(MAT, SIGMAS * t_diff, DELAYS * t_diff)
-        # divs.append(to_div(fig))
+        t_plot = arange(x.shape[0]) * out[&#39;tdiff&#39;]
+        fig = plot_data_prediction(t_plot, result, names)
+        divs.append(to_div(fig))
 
         fig = plot_coefficient(result)
         divs.append(to_div(fig))
 
-        fig = plot_data_prediction(tf.time[0], result)
-        divs.append(to_div(fig))
-        &#34;&#34;&#34;
-
-        html_file = name(parameters, &#39;ols_chan&#39;, ieeg_file) / f&#39;{chan}.html&#39;
-        # to_html(divs, html_file)
+        html_file = out_dir / f&#39;{chan}.html&#39;
+        to_html(divs, html_file)
 
         json_file = html_file.with_suffix(&#39;.json&#39;)
         with json_file.open(&#39;w&#39;) as f:
@@ -163,7 +163,11 @@ def pipeline_ols_summary(parameters, ieeg_file):
         name(parameters, &#39;ols_tsv&#39;) / f&#39;{ieeg_file.stem}.tsv&#39;,
         sep=&#39;\t&#39;, index=False)
 
-    elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
+    try:
+        elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
+    except FileNotFoundError:
+        return
+
     try:
         pial = load(&#39;surface&#39;, parameters, ieeg_file)
     except FileNotFoundError:
@@ -343,8 +347,11 @@ def pipeline_ols_prf(parameters, ieeg_file):
 </summary>
 <pre><code class="python">def pipeline_ols_allchan(parameters, ieeg_file):
 
+    out_dir = name(parameters, &#39;ols_chan&#39;, ieeg_file)
+    rmtree(out_dir, ignore_errors=True)
+
     try:
-        data, names = load(&#39;data&#39;, parameters, ieeg_file)
+        data, names = load(&#39;data&#39;, parameters, ieeg_file, parameters[&#39;ols&#39;][&#39;read&#39;])
     except IndexError:
         return
     tf = compute_timefreq(parameters, data, baseline=True, mean=False)
@@ -360,21 +367,17 @@ def pipeline_ols_prf(parameters, ieeg_file):
         out, result = get_max(parameters, t, x, names, MAT)
         out[&#39;chan&#39;] = chan
 
-        &#34;&#34;&#34;
         divs = []
 
-        # fig = plot_sigma_delay_mat(MAT, SIGMAS * t_diff, DELAYS * t_diff)
-        # divs.append(to_div(fig))
+        t_plot = arange(x.shape[0]) * out[&#39;tdiff&#39;]
+        fig = plot_data_prediction(t_plot, result, names)
+        divs.append(to_div(fig))
 
         fig = plot_coefficient(result)
         divs.append(to_div(fig))
 
-        fig = plot_data_prediction(tf.time[0], result)
-        divs.append(to_div(fig))
-        &#34;&#34;&#34;
-
-        html_file = name(parameters, &#39;ols_chan&#39;, ieeg_file) / f&#39;{chan}.html&#39;
-        # to_html(divs, html_file)
+        html_file = out_dir / f&#39;{chan}.html&#39;
+        to_html(divs, html_file)
 
         json_file = html_file.with_suffix(&#39;.json&#39;)
         with json_file.open(&#39;w&#39;) as f:
@@ -416,7 +419,11 @@ def pipeline_ols_prf(parameters, ieeg_file):
         name(parameters, &#39;ols_tsv&#39;) / f&#39;{ieeg_file.stem}.tsv&#39;,
         sep=&#39;\t&#39;, index=False)
 
-    elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
+    try:
+        elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
+    except FileNotFoundError:
+        return
+
     try:
         pial = load(&#39;surface&#39;, parameters, ieeg_file)
     except FileNotFoundError:

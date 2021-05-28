@@ -87,7 +87,7 @@ def load(what, parameters, ieeg_file, opts=None):
             pattern = f'sub-{ieeg.subject}_*_run-{ieeg.run}_dataglove.tsv'
             folder = parameters['paths']['movements']
         elif opts in ('realigned', ):
-            event_path = name(parameters, 'realign', ieeg_file)
+            event_path = name(parameters, 'realign_tsv', ieeg_file)
             pattern = event_path.name
             folder = event_path.parent
 

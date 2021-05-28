@@ -30,62 +30,57 @@
     FINGERS_FLEXION,
     FINGERS_OPEN,
     FINGERS_CLOSED,
+    MOVEMENT_LINE,
     )
 import plotly.graph_objects as go
 
 
-def plot_sigma_delay_mat(MAT, SIGMAS, DELAYS):
-    &#34;&#34;&#34;Not being used at this point, because gamma is 3D so I don&#39;t know how to
-    plot it&#34;&#34;&#34;
-    raise NotImplementedError
+def plot_data_prediction(t, results, names):
 
-    fig = go.Figure(data=[
-        go.Heatmap(
-            x=DELAYS,
-            y=SIGMAS,
-            z=MAT,
-            zmin=0,
-            colorscale=&#39;Hot&#39;,
-            ),
-        ],
-        layout=go.Layout(
-            xaxis=dict(
-                title=&#39;Delay (ms, 0s == movement start)&#39;),
-            yaxis=dict(
-                title=&#39;Kernel size (ms)&#39;),
-            ))
-    return fig
+    n_trl = len(names)
+    n_time = results.fittedvalues.shape[0] // n_trl
 
-
-def plot_data_prediction(t, results):
-    fig = go.Figure(data=[
+    traces = [
         go.Scatter(
             x=t,
             y=results.model.data.endog,
             name=&#39;data&#39;,
             line=dict(
-                color=&#39;blue&#39;,
+                color=&#39;black&#39;,
                 width=1,
             ),
         ),
-        go.Scatter(
-            x=t,
-            y=results.fittedvalues,
-            name=&#39;prediction&#39;,
-            line=dict(
-                color=&#39;red&#39;,
-                width=1,
+        ]
+
+    for i_trl in range(n_trl):
+        finger, action = names[i_trl].split()
+
+        i_x = slice(
+            i_trl * n_time,
+            (i_trl + 1) * n_time)
+        traces.append(
+            go.Scatter(
+                x=t[i_x],
+                y=results.fittedvalues[i_x],
+                name=&#39;prediction&#39;,
+                line=dict(
+                    color=FINGER_COLOR[finger],
+                    dash=MOVEMENT_LINE[action],
+                    width=2,
+                ),
             ),
-        ),
-    ])
+            )
+    fig = go.Figure(
+        data=traces,
+        layout=go.Layout(
+            showlegend=False))
+
     return fig
 
 
 def plot_coefficient(results):
 
     COEF = results.params
-    LOW = results.conf_int()[0]
-    HIGH = results.conf_int()[1]
 
     if &#39;index open&#39; in COEF.index.values:
         COLS = [&#39;const&#39;, ] + FINGERS_OPEN + FINGERS_CLOSED
@@ -100,11 +95,6 @@ def plot_coefficient(results):
             y=[COEF[col] for col in COLS],
             marker=dict(
                 color=COLORS,
-            ),
-            error_y=dict(
-                type=&#39;data&#39;,
-                arrayminus=[COEF[col] - LOW[col] for col in COLS],
-                array=[HIGH[col] - COEF[col] for col in COLS],
             ),
         ), ],
         layout=go.Layout(
@@ -134,8 +124,6 @@ def plot_coefficient(results):
 <pre><code class="python">def plot_coefficient(results):
 
     COEF = results.params
-    LOW = results.conf_int()[0]
-    HIGH = results.conf_int()[1]
 
     if &#39;index open&#39; in COEF.index.values:
         COLS = [&#39;const&#39;, ] + FINGERS_OPEN + FINGERS_CLOSED
@@ -151,11 +139,6 @@ def plot_coefficient(results):
             marker=dict(
                 color=COLORS,
             ),
-            error_y=dict(
-                type=&#39;data&#39;,
-                arrayminus=[COEF[col] - LOW[col] for col in COLS],
-                array=[HIGH[col] - COEF[col] for col in COLS],
-            ),
         ), ],
         layout=go.Layout(
             yaxis=dict(
@@ -166,7 +149,7 @@ def plot_coefficient(results):
 </details>
 </dd>
 <dt id="fima.viz.ols.plot_data_prediction"><code class="name flex">
-<span>def <span class="ident">plot_data_prediction</span></span>(<span>t, results)</span>
+<span>def <span class="ident">plot_data_prediction</span></span>(<span>t, results, names)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -174,60 +157,46 @@ def plot_coefficient(results):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def plot_data_prediction(t, results):
-    fig = go.Figure(data=[
+<pre><code class="python">def plot_data_prediction(t, results, names):
+
+    n_trl = len(names)
+    n_time = results.fittedvalues.shape[0] // n_trl
+
+    traces = [
         go.Scatter(
             x=t,
             y=results.model.data.endog,
             name=&#39;data&#39;,
             line=dict(
-                color=&#39;blue&#39;,
+                color=&#39;black&#39;,
                 width=1,
             ),
         ),
-        go.Scatter(
-            x=t,
-            y=results.fittedvalues,
-            name=&#39;prediction&#39;,
-            line=dict(
-                color=&#39;red&#39;,
-                width=1,
-            ),
-        ),
-    ])
-    return fig</code></pre>
-</details>
-</dd>
-<dt id="fima.viz.ols.plot_sigma_delay_mat"><code class="name flex">
-<span>def <span class="ident">plot_sigma_delay_mat</span></span>(<span>MAT, SIGMAS, DELAYS)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Not being used at this point, because gamma is 3D so I don't know how to
-plot it</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def plot_sigma_delay_mat(MAT, SIGMAS, DELAYS):
-    &#34;&#34;&#34;Not being used at this point, because gamma is 3D so I don&#39;t know how to
-    plot it&#34;&#34;&#34;
-    raise NotImplementedError
+        ]
 
-    fig = go.Figure(data=[
-        go.Heatmap(
-            x=DELAYS,
-            y=SIGMAS,
-            z=MAT,
-            zmin=0,
-            colorscale=&#39;Hot&#39;,
+    for i_trl in range(n_trl):
+        finger, action = names[i_trl].split()
+
+        i_x = slice(
+            i_trl * n_time,
+            (i_trl + 1) * n_time)
+        traces.append(
+            go.Scatter(
+                x=t[i_x],
+                y=results.fittedvalues[i_x],
+                name=&#39;prediction&#39;,
+                line=dict(
+                    color=FINGER_COLOR[finger],
+                    dash=MOVEMENT_LINE[action],
+                    width=2,
+                ),
             ),
-        ],
+            )
+    fig = go.Figure(
+        data=traces,
         layout=go.Layout(
-            xaxis=dict(
-                title=&#39;Delay (ms, 0s == movement start)&#39;),
-            yaxis=dict(
-                title=&#39;Kernel size (ms)&#39;),
-            ))
+            showlegend=False))
+
     return fig</code></pre>
 </details>
 </dd>
@@ -251,7 +220,6 @@ plot it</p></div>
 <ul class="">
 <li><code><a title="fima.viz.ols.plot_coefficient" href="#fima.viz.ols.plot_coefficient">plot_coefficient</a></code></li>
 <li><code><a title="fima.viz.ols.plot_data_prediction" href="#fima.viz.ols.plot_data_prediction">plot_data_prediction</a></code></li>
-<li><code><a title="fima.viz.ols.plot_sigma_delay_mat" href="#fima.viz.ols.plot_sigma_delay_mat">plot_sigma_delay_mat</a></code></li>
 </ul>
 </li>
 </ul>

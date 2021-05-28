@@ -77,11 +77,17 @@ def import_all_ols(parameters):
 
     df = df.sort_values(&#39;rsquared&#39;, ascending=False).reset_index(drop=True)
 
-    missing_columns = set(df.columns) - set(COLUMNS.values())
+    if &#39;thumb close&#39; in df.columns:
+        columns = {k.replace(&#39;flexion&#39;, &#39;close&#39;): v.replace(&#39;flexion&#39;, &#39;close&#39;) for k, v in COLUMNS.items()}
+        columns = {k.replace(&#39;extension&#39;, &#39;open&#39;): v.replace(&#39;extension&#39;, &#39;open&#39;) for k, v in columns.items()}
+    else:
+        columns = COLUMNS
+
+    missing_columns = set(df.columns) - set(columns.values())
     print(&#39;These columns will not be included in overview dataset: &#39; + &#39;, &#39;.join(missing_columns))
 
     # exclude columns which are in the overview but were not computed
-    columns = {k: v for k, v in COLUMNS.items() if v in df.columns}
+    columns = {k: v for k, v in columns.items() if v in df.columns}
     df1 = df[list(columns.values())]
     df1.columns = MultiIndex.from_tuples([tuple(k.split(&#39;/&#39;)) for k in columns.keys()])
 
@@ -237,11 +243,17 @@ certain threshold (percent of the max)</p>
 
     df = df.sort_values(&#39;rsquared&#39;, ascending=False).reset_index(drop=True)
 
-    missing_columns = set(df.columns) - set(COLUMNS.values())
+    if &#39;thumb close&#39; in df.columns:
+        columns = {k.replace(&#39;flexion&#39;, &#39;close&#39;): v.replace(&#39;flexion&#39;, &#39;close&#39;) for k, v in COLUMNS.items()}
+        columns = {k.replace(&#39;extension&#39;, &#39;open&#39;): v.replace(&#39;extension&#39;, &#39;open&#39;) for k, v in columns.items()}
+    else:
+        columns = COLUMNS
+
+    missing_columns = set(df.columns) - set(columns.values())
     print(&#39;These columns will not be included in overview dataset: &#39; + &#39;, &#39;.join(missing_columns))
 
     # exclude columns which are in the overview but were not computed
-    columns = {k: v for k, v in COLUMNS.items() if v in df.columns}
+    columns = {k: v for k, v in columns.items() if v in df.columns}
     df1 = df[list(columns.values())]
     df1.columns = MultiIndex.from_tuples([tuple(k.split(&#39;/&#39;)) for k in columns.keys()])
 

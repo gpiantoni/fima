@@ -42,7 +42,7 @@ from ..viz.utils import to_html
 
 def pipeline_timepoints(parameters, ieeg_file):
 
-    data, names = load(&#39;data&#39;, parameters, ieeg_file)
+    data, names = load(&#39;data&#39;, parameters, ieeg_file, parameters[&#39;timepoints&#39;][&#39;read&#39;])
     tf = compute_timefreq(parameters, data, baseline=True, mean=False)
     tf = get_chantime(parameters, tf, freq_operator=&#39;nanmean&#39;)
 
@@ -148,7 +148,7 @@ def find_threshold_points(t, dat, info):
 </summary>
 <pre><code class="python">def pipeline_timepoints(parameters, ieeg_file):
 
-    data, names = load(&#39;data&#39;, parameters, ieeg_file)
+    data, names = load(&#39;data&#39;, parameters, ieeg_file, parameters[&#39;timepoints&#39;][&#39;read&#39;])
     tf = compute_timefreq(parameters, data, baseline=True, mean=False)
     tf = get_chantime(parameters, tf, freq_operator=&#39;nanmean&#39;)
 

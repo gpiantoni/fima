@@ -53,38 +53,49 @@ def name(parameters, what, ieeg_file=None):
         out = out_dir / &#39;dataglove&#39;
         out.mkdir(parents=True, exist_ok=True)
 
-    elif what == &#39;realign&#39;:
-        out = out_dir / &#39;realigned&#39; / f&#39;{ieeg_file.stem}.tsv&#39;
+    elif what == &#39;realign_tsv&#39;:
+        out = out_dir / &#39;realigned&#39; / &#39;tsv&#39; / f&#39;{ieeg_file.stem}.tsv&#39;
+        out.parent.mkdir(parents=True, exist_ok=True)
+
+    elif what == &#39;realign_plot&#39;:
+        out = out_dir / &#39;realigned&#39; / &#39;plots&#39; / f&#39;{ieeg_file.stem}.html&#39;
         out.parent.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;timepoints&#39;:
-        out = out_dir / &#39;timepoints&#39; / &#39;timings&#39; / f&#39;{ieeg_file.stem}.npy&#39;
+        event_type = parameters[&#39;timepoints&#39;][&#39;read&#39;][&#39;event_type&#39;]
+        out = out_dir / &#39;timepoints&#39; / event_type / &#39;timings&#39; / f&#39;{ieeg_file.stem}.npy&#39;
         out.parent.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;timepoints_plot&#39;:
-        out = out_dir / &#39;timepoints&#39; / &#39;plots&#39; / f&#39;{ieeg_file.stem}.html&#39;
+        event_type = parameters[&#39;timepoints&#39;][&#39;read&#39;][&#39;event_type&#39;]
+        out = out_dir / &#39;timepoints&#39; / event_type / &#39;plots&#39; / f&#39;{ieeg_file.stem}.html&#39;
         out.parent.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;continuous&#39;:
         out = out_dir / &#39;continuous&#39; / f&#39;{ieeg_file.stem}.html&#39;
 
     elif what == &#39;spectrum&#39;:
-        out = out_dir / &#39;spectrum&#39; / &#39;overview&#39; / f&#39;{ieeg_file.stem}.html&#39;
+        event_type = parameters[&#39;spectrum&#39;][&#39;read&#39;][&#39;event_type&#39;]
+        out = out_dir / &#39;spectrum&#39; / event_type / &#39;overview&#39; / f&#39;{ieeg_file.stem}.html&#39;
 
     elif what == &#39;ols_chan&#39;:
-        out = out_dir / &#39;ols&#39; / ieeg_file.stem
+        event_type = parameters[&#39;ols&#39;][&#39;read&#39;][&#39;event_type&#39;]
+        out = out_dir / &#39;ols&#39; / event_type / ieeg_file.stem
         out.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;ols_tsv&#39;:
-        out = out_dir / &#39;ols&#39; / &#39;tsv&#39;
+        event_type = parameters[&#39;ols&#39;][&#39;read&#39;][&#39;event_type&#39;]
+        out = out_dir / &#39;ols&#39; / event_type / &#39;tsv&#39;
         out.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;ols_summary&#39;:
-        out = out_dir / &#39;ols&#39; / &#39;summary&#39;
+        event_type = parameters[&#39;ols&#39;][&#39;read&#39;][&#39;event_type&#39;]
+        out = out_dir / &#39;ols&#39; / event_type / &#39;summary&#39;
         out.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;ols_plot&#39;:
-        out = out_dir / &#39;ols&#39; / &#39;plots&#39;
+        event_type = parameters[&#39;ols&#39;][&#39;read&#39;][&#39;event_type&#39;]
+        out = out_dir / &#39;ols&#39; / event_type / &#39;plots&#39;
         out.mkdir(parents=True, exist_ok=True)
 
     return out</code></pre>
@@ -132,38 +143,49 @@ def name(parameters, what, ieeg_file=None):
         out = out_dir / &#39;dataglove&#39;
         out.mkdir(parents=True, exist_ok=True)
 
-    elif what == &#39;realign&#39;:
-        out = out_dir / &#39;realigned&#39; / f&#39;{ieeg_file.stem}.tsv&#39;
+    elif what == &#39;realign_tsv&#39;:
+        out = out_dir / &#39;realigned&#39; / &#39;tsv&#39; / f&#39;{ieeg_file.stem}.tsv&#39;
+        out.parent.mkdir(parents=True, exist_ok=True)
+
+    elif what == &#39;realign_plot&#39;:
+        out = out_dir / &#39;realigned&#39; / &#39;plots&#39; / f&#39;{ieeg_file.stem}.html&#39;
         out.parent.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;timepoints&#39;:
-        out = out_dir / &#39;timepoints&#39; / &#39;timings&#39; / f&#39;{ieeg_file.stem}.npy&#39;
+        event_type = parameters[&#39;timepoints&#39;][&#39;read&#39;][&#39;event_type&#39;]
+        out = out_dir / &#39;timepoints&#39; / event_type / &#39;timings&#39; / f&#39;{ieeg_file.stem}.npy&#39;
         out.parent.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;timepoints_plot&#39;:
-        out = out_dir / &#39;timepoints&#39; / &#39;plots&#39; / f&#39;{ieeg_file.stem}.html&#39;
+        event_type = parameters[&#39;timepoints&#39;][&#39;read&#39;][&#39;event_type&#39;]
+        out = out_dir / &#39;timepoints&#39; / event_type / &#39;plots&#39; / f&#39;{ieeg_file.stem}.html&#39;
         out.parent.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;continuous&#39;:
         out = out_dir / &#39;continuous&#39; / f&#39;{ieeg_file.stem}.html&#39;
 
     elif what == &#39;spectrum&#39;:
-        out = out_dir / &#39;spectrum&#39; / &#39;overview&#39; / f&#39;{ieeg_file.stem}.html&#39;
+        event_type = parameters[&#39;spectrum&#39;][&#39;read&#39;][&#39;event_type&#39;]
+        out = out_dir / &#39;spectrum&#39; / event_type / &#39;overview&#39; / f&#39;{ieeg_file.stem}.html&#39;
 
     elif what == &#39;ols_chan&#39;:
-        out = out_dir / &#39;ols&#39; / ieeg_file.stem
+        event_type = parameters[&#39;ols&#39;][&#39;read&#39;][&#39;event_type&#39;]
+        out = out_dir / &#39;ols&#39; / event_type / ieeg_file.stem
         out.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;ols_tsv&#39;:
-        out = out_dir / &#39;ols&#39; / &#39;tsv&#39;
+        event_type = parameters[&#39;ols&#39;][&#39;read&#39;][&#39;event_type&#39;]
+        out = out_dir / &#39;ols&#39; / event_type / &#39;tsv&#39;
         out.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;ols_summary&#39;:
-        out = out_dir / &#39;ols&#39; / &#39;summary&#39;
+        event_type = parameters[&#39;ols&#39;][&#39;read&#39;][&#39;event_type&#39;]
+        out = out_dir / &#39;ols&#39; / event_type / &#39;summary&#39;
         out.mkdir(parents=True, exist_ok=True)
 
     elif what == &#39;ols_plot&#39;:
-        out = out_dir / &#39;ols&#39; / &#39;plots&#39;
+        event_type = parameters[&#39;ols&#39;][&#39;read&#39;][&#39;event_type&#39;]
+        out = out_dir / &#39;ols&#39; / event_type / &#39;plots&#39;
         out.mkdir(parents=True, exist_ok=True)
 
     return out</code></pre>

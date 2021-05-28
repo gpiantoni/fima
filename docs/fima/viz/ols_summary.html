@@ -205,7 +205,9 @@ def plot_fingerfriends(df_ols, region_type):
         if i_region.sum() &lt; 2:
             continue
 
-        for MOVEMENT in (&#39;flexion&#39;, &#39;extension&#39;):
+        for MOVEMENT in (&#39;flexion&#39;, &#39;extension&#39;, &#39;close&#39;, &#39;open&#39;):
+            if MOVEMENT not in df_sign.columns:
+                continue
 
             cc = zeros((5, 5))
             for i0, f0 in enumerate(FINGERS):
@@ -281,7 +283,9 @@ def plot_fingerfriends(df_ols, region_type):
         if i_region.sum() &lt; 2:
             continue
 
-        for MOVEMENT in (&#39;flexion&#39;, &#39;extension&#39;):
+        for MOVEMENT in (&#39;flexion&#39;, &#39;extension&#39;, &#39;close&#39;, &#39;open&#39;):
+            if MOVEMENT not in df_sign.columns:
+                continue
 
             cc = zeros((5, 5))
             for i0, f0 in enumerate(FINGERS):

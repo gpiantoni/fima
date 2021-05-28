@@ -34,7 +34,7 @@ from wonambi.trans import montage
 lg = getLogger(__name__)
 
 
-def read_data(parameters, filename, event_onsets, continuous=False):
+def read_data(parameters, filename, event_onsets, opts, continuous=False):
 
     d = BIDSEEG(filename)
     chans = d.channels[
@@ -44,17 +44,17 @@ def read_data(parameters, filename, event_onsets, continuous=False):
 
     if continuous:
         data = d.read_data(
-            begtime=event_onsets[0] - parameters[&#39;read&#39;][&#39;pre&#39;],
-            endtime=event_onsets[-1] + parameters[&#39;read&#39;][&#39;post&#39;],
+            begtime=event_onsets[0] - opts[&#39;pre&#39;],
+            endtime=event_onsets[-1] + opts[&#39;post&#39;],
             chan=list(chans[&#39;name&#39;]))
     else:
         data = d.read_data(
             events=event_onsets,
-            pre=parameters[&#39;read&#39;][&#39;pre&#39;],
-            post=parameters[&#39;read&#39;][&#39;post&#39;],
+            pre=opts[&#39;pre&#39;],
+            post=opts[&#39;post&#39;],
             chan=list(chans[&#39;name&#39;]))
 
-    if parameters[&#39;read&#39;][&#39;artifacts&#39;][&#39;remove&#39;]:
+    if parameters[&#39;artifacts&#39;][&#39;remove&#39;]:
         data, bad_smp_per_chan = hide_artifacts(parameters, data)
         lg.info(f&#39;{filename.stem} bad points {mean(bad_smp_per_chan):.3f}s, s.d. {std(bad_smp_per_chan):.3f}s [{min(bad_smp_per_chan):.3f}-{max(bad_smp_per_chan):.3f}s]&#39;)
 
@@ -138,7 +138,7 @@ def hide_artifacts(parameters, data):
 </details>
 </dd>
 <dt id="fima.preproc.ieeg.read_data"><code class="name flex">
-<span>def <span class="ident">read_data</span></span>(<span>parameters, filename, event_onsets, continuous=False)</span>
+<span>def <span class="ident">read_data</span></span>(<span>parameters, filename, event_onsets, opts, continuous=False)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -146,7 +146,7 @@ def hide_artifacts(parameters, data):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def read_data(parameters, filename, event_onsets, continuous=False):
+<pre><code class="python">def read_data(parameters, filename, event_onsets, opts, continuous=False):
 
     d = BIDSEEG(filename)
     chans = d.channels[
@@ -156,17 +156,17 @@ def hide_artifacts(parameters, data):
 
     if continuous:
         data = d.read_data(
-            begtime=event_onsets[0] - parameters[&#39;read&#39;][&#39;pre&#39;],
-            endtime=event_onsets[-1] + parameters[&#39;read&#39;][&#39;post&#39;],
+            begtime=event_onsets[0] - opts[&#39;pre&#39;],
+            endtime=event_onsets[-1] + opts[&#39;post&#39;],
             chan=list(chans[&#39;name&#39;]))
     else:
         data = d.read_data(
             events=event_onsets,
-            pre=parameters[&#39;read&#39;][&#39;pre&#39;],
-            post=parameters[&#39;read&#39;][&#39;post&#39;],
+            pre=opts[&#39;pre&#39;],
+            post=opts[&#39;post&#39;],
             chan=list(chans[&#39;name&#39;]))
 
-    if parameters[&#39;read&#39;][&#39;artifacts&#39;][&#39;remove&#39;]:
+    if parameters[&#39;artifacts&#39;][&#39;remove&#39;]:
         data, bad_smp_per_chan = hide_artifacts(parameters, data)
         lg.info(f&#39;{filename.stem} bad points {mean(bad_smp_per_chan):.3f}s, s.d. {std(bad_smp_per_chan):.3f}s [{min(bad_smp_per_chan):.3f}-{max(bad_smp_per_chan):.3f}s]&#39;)
 

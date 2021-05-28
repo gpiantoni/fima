@@ -46,7 +46,7 @@ def pipeline_spectrum(parameters, ieeg_file):
     Parameters
     ----------
     &#34;&#34;&#34;
-    data, names = load(&#39;data&#39;, parameters, ieeg_file)
+    data, names = load(&#39;data&#39;, parameters, ieeg_file, parameters[&#39;spectrum&#39;][&#39;read&#39;])
 
     try:
         elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
@@ -201,7 +201,7 @@ def find_runs(x):
     Parameters
     ----------
     &#34;&#34;&#34;
-    data, names = load(&#39;data&#39;, parameters, ieeg_file)
+    data, names = load(&#39;data&#39;, parameters, ieeg_file, parameters[&#39;spectrum&#39;][&#39;read&#39;])
 
     try:
         elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
