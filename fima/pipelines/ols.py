@@ -96,7 +96,7 @@ def pipeline_ols_allchan(parameters, ieeg_file):
 
     try:
         data, names = load('data', parameters, ieeg_file, parameters['ols']['read'])
-    except IndexError:
+    except (FileNotFoundError, IndexError):
         return
     tf = compute_timefreq(parameters, data, baseline=True, mean=False)
     tf = get_chantime(parameters, tf, freq_operator='nanmean')
