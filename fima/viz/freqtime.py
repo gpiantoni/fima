@@ -4,7 +4,6 @@ from wonambi.attr import Channels
 from wonambi.attr.chan import assign_region_to_channels
 from numpy import c_
 
-from ..viz.fitting import get_color_symbol
 from ..utils import group_per_condition
 from .utils import to_div
 

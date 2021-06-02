@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>fima.viz API documentation</title>
-<meta name="description" content="Functions to plot the results of the analyses" />
+<title>fima.viz.paper API documentation</title>
+<meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -17,86 +17,129 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>fima.viz</code></h1>
+<h1 class="title">Module <code>fima.viz.paper</code></h1>
 </header>
 <section id="section-intro">
-<p>Functions to plot the results of the analyses</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;Functions to plot the results of the analyses&#34;&#34;&#34;
-from .tfr_chan import plot_tfr
-from .tfr_time import plot_tfr_time
-from .surf import plot_surf
-from .utils import to_div, to_html, to_png
-from .freqtime import plot_conditions_per_chan</code></pre>
+<pre><code class="python">from pathlib import Path
+
+from ..names import name
+from ..read import load
+from .utils import LAYOUT, merge
+from .dataglove import plot_dataglove
+
+
+def plot_papers(parameters):
+    plot_dir = name(parameters, &#39;paper&#39;)
+
+    fig = paper_plot_dataglove(parameters)
+    fig.write_image(str(plot_dir / &#39;dataglove.svg&#39;))
+
+
+def paper_plot_dataglove(parameters):
+    ieeg_file = Path(&#39;/Fridge/users/giovanni/projects/finger_mapping/subjects/sub-drouwen/ses-iemu1/ieeg/sub-drouwen_ses-iemu1_task-fingermapping_acq-clinical_run-1_ieeg.eeg&#39;)
+
+    events = load(&#39;events&#39;, parameters, ieeg_file, &#39;cues&#39;)
+    tsv = load(&#39;dataglove&#39;, parameters, ieeg_file)
+    mov = load(&#39;events&#39;, parameters, ieeg_file, &#39;movements&#39;)
+
+    fig = plot_dataglove(tsv, events, mov)
+
+    layout = dict(
+        width=300,
+        height=200,
+        xaxis=dict(
+            showgrid=False,
+            showline=False,
+            zerolinewidth=0.5,
+            title=dict(
+                text=&#39;time (s)&#39;,
+                standoff=4,
+                ),
+            range=(
+                60,
+                130,)
+            ),
+        yaxis=dict(
+            showgrid=False,
+            showline=False,
+            zeroline=False,
+            ),
+    )
+
+    return fig.update_layout(merge(LAYOUT, layout))</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="fima.viz.brainregions" href="brainregions.html">fima.viz.brainregions</a></code></dt>
+<dt id="fima.viz.paper.paper_plot_dataglove"><code class="name flex">
+<span>def <span class="ident">paper_plot_dataglove</span></span>(<span>parameters)</span>
+</code></dt>
 <dd>
 <div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def paper_plot_dataglove(parameters):
+    ieeg_file = Path(&#39;/Fridge/users/giovanni/projects/finger_mapping/subjects/sub-drouwen/ses-iemu1/ieeg/sub-drouwen_ses-iemu1_task-fingermapping_acq-clinical_run-1_ieeg.eeg&#39;)
+
+    events = load(&#39;events&#39;, parameters, ieeg_file, &#39;cues&#39;)
+    tsv = load(&#39;dataglove&#39;, parameters, ieeg_file)
+    mov = load(&#39;events&#39;, parameters, ieeg_file, &#39;movements&#39;)
+
+    fig = plot_dataglove(tsv, events, mov)
+
+    layout = dict(
+        width=300,
+        height=200,
+        xaxis=dict(
+            showgrid=False,
+            showline=False,
+            zerolinewidth=0.5,
+            title=dict(
+                text=&#39;time (s)&#39;,
+                standoff=4,
+                ),
+            range=(
+                60,
+                130,)
+            ),
+        yaxis=dict(
+            showgrid=False,
+            showline=False,
+            zeroline=False,
+            ),
+    )
+
+    return fig.update_layout(merge(LAYOUT, layout))</code></pre>
+</details>
 </dd>
-<dt><code class="name"><a title="fima.viz.continuous" href="continuous.html">fima.viz.continuous</a></code></dt>
+<dt id="fima.viz.paper.plot_papers"><code class="name flex">
+<span>def <span class="ident">plot_papers</span></span>(<span>parameters)</span>
+</code></dt>
 <dd>
 <div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.dataglove" href="dataglove.html">fima.viz.dataglove</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.finger_channels" href="finger_channels.html">fima.viz.finger_channels</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.fitting" href="fitting.html">fima.viz.fitting</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.freqtime" href="freqtime.html">fima.viz.freqtime</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.ols" href="ols.html">fima.viz.ols</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.ols_summary" href="ols_summary.html">fima.viz.ols_summary</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.paper" href="paper.html">fima.viz.paper</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.surf" href="surf.html">fima.viz.surf</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.tfr_chan" href="tfr_chan.html">fima.viz.tfr_chan</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.tfr_time" href="tfr_time.html">fima.viz.tfr_time</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.timepoints" href="timepoints.html">fima.viz.timepoints</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="fima.viz.utils" href="utils.html">fima.viz.utils</a></code></dt>
-<dd>
-<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_papers(parameters):
+    plot_dir = name(parameters, &#39;paper&#39;)
+
+    fig = paper_plot_dataglove(parameters)
+    fig.write_image(str(plot_dir / &#39;dataglove.svg&#39;))</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -109,25 +152,13 @@ from .freqtime import plot_conditions_per_chan</code></pre>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="fima" href="../index.html">fima</a></code></li>
+<li><code><a title="fima.viz" href="index.html">fima.viz</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="fima.viz.brainregions" href="brainregions.html">fima.viz.brainregions</a></code></li>
-<li><code><a title="fima.viz.continuous" href="continuous.html">fima.viz.continuous</a></code></li>
-<li><code><a title="fima.viz.dataglove" href="dataglove.html">fima.viz.dataglove</a></code></li>
-<li><code><a title="fima.viz.finger_channels" href="finger_channels.html">fima.viz.finger_channels</a></code></li>
-<li><code><a title="fima.viz.fitting" href="fitting.html">fima.viz.fitting</a></code></li>
-<li><code><a title="fima.viz.freqtime" href="freqtime.html">fima.viz.freqtime</a></code></li>
-<li><code><a title="fima.viz.ols" href="ols.html">fima.viz.ols</a></code></li>
-<li><code><a title="fima.viz.ols_summary" href="ols_summary.html">fima.viz.ols_summary</a></code></li>
-<li><code><a title="fima.viz.paper" href="paper.html">fima.viz.paper</a></code></li>
-<li><code><a title="fima.viz.surf" href="surf.html">fima.viz.surf</a></code></li>
-<li><code><a title="fima.viz.tfr_chan" href="tfr_chan.html">fima.viz.tfr_chan</a></code></li>
-<li><code><a title="fima.viz.tfr_time" href="tfr_time.html">fima.viz.tfr_time</a></code></li>
-<li><code><a title="fima.viz.timepoints" href="timepoints.html">fima.viz.timepoints</a></code></li>
-<li><code><a title="fima.viz.utils" href="utils.html">fima.viz.utils</a></code></li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="fima.viz.paper.paper_plot_dataglove" href="#fima.viz.paper.paper_plot_dataglove">paper_plot_dataglove</a></code></li>
+<li><code><a title="fima.viz.paper.plot_papers" href="#fima.viz.paper.plot_papers">plot_papers</a></code></li>
 </ul>
 </li>
 </ul>

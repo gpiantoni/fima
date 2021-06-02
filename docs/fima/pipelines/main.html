@@ -41,6 +41,7 @@ from .spectrum import pipeline_spectrum
 from .timepoints import pipeline_timepoints
 from .realign import pipeline_realign
 from ..utils import be_nice
+from ..viz.paper import plot_papers
 
 
 lg = getLogger(__name__)
@@ -60,20 +61,24 @@ def pipeline_fima(parameters, pipeline, subject_only=&#39;*&#39;, parallel=False
     parallel : bool
         where to run it with multiprocessing
     &#34;&#34;&#34;
-    func = partial(sub_pipeline, parameters=parameters, pipeline=pipeline)
-    bids_dir = parameters[&#39;paths&#39;][&#39;input&#39;]
-    list_ieeg = bids_dir.rglob(f&#39;sub-{subject_only}_ses-*_acq-*_run-*_ieeg.eeg&#39;)
-    if parallel:
-        with Pool(initializer=be_nice) as p:
-            p.map(func, list_ieeg)
+    if pipeline != &#39;paper&#39;:
+        func = partial(sub_pipeline, parameters=parameters, pipeline=pipeline)
+        bids_dir = parameters[&#39;paths&#39;][&#39;input&#39;]
+        list_ieeg = bids_dir.rglob(f&#39;sub-{subject_only}_ses-*_acq-*_run-*_ieeg.eeg&#39;)
+        if parallel:
+            with Pool(initializer=be_nice) as p:
+                p.map(func, list_ieeg)
 
-    else:
-        for ieeg in list_ieeg:
-            lg.info(f&#39;Running {ieeg.stem}&#39;)
-            func(ieeg)
+        else:
+            for ieeg in list_ieeg:
+                lg.info(f&#39;Running {ieeg.stem}&#39;)
+                func(ieeg)
 
     if pipeline == &#39;ols&#39;:
         pipeline_ols_all(parameters)
+
+    if pipeline == &#39;paper&#39;:
+        plot_papers(parameters)
 
 
 def sub_pipeline(ieeg, parameters, pipeline):
@@ -156,20 +161,24 @@ def sub_pipeline(ieeg, parameters, pipeline):
     parallel : bool
         where to run it with multiprocessing
     &#34;&#34;&#34;
-    func = partial(sub_pipeline, parameters=parameters, pipeline=pipeline)
-    bids_dir = parameters[&#39;paths&#39;][&#39;input&#39;]
-    list_ieeg = bids_dir.rglob(f&#39;sub-{subject_only}_ses-*_acq-*_run-*_ieeg.eeg&#39;)
-    if parallel:
-        with Pool(initializer=be_nice) as p:
-            p.map(func, list_ieeg)
+    if pipeline != &#39;paper&#39;:
+        func = partial(sub_pipeline, parameters=parameters, pipeline=pipeline)
+        bids_dir = parameters[&#39;paths&#39;][&#39;input&#39;]
+        list_ieeg = bids_dir.rglob(f&#39;sub-{subject_only}_ses-*_acq-*_run-*_ieeg.eeg&#39;)
+        if parallel:
+            with Pool(initializer=be_nice) as p:
+                p.map(func, list_ieeg)
 
-    else:
-        for ieeg in list_ieeg:
-            lg.info(f&#39;Running {ieeg.stem}&#39;)
-            func(ieeg)
+        else:
+            for ieeg in list_ieeg:
+                lg.info(f&#39;Running {ieeg.stem}&#39;)
+                func(ieeg)
 
     if pipeline == &#39;ols&#39;:
-        pipeline_ols_all(parameters)</code></pre>
+        pipeline_ols_all(parameters)
+
+    if pipeline == &#39;paper&#39;:
+        plot_papers(parameters)</code></pre>
 </details>
 </dd>
 <dt id="fima.pipelines.main.sub_pipeline"><code class="name flex">

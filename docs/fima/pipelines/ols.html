@@ -122,7 +122,7 @@ def pipeline_ols_allchan(parameters, ieeg_file):
 
     try:
         data, names = load(&#39;data&#39;, parameters, ieeg_file, parameters[&#39;ols&#39;][&#39;read&#39;])
-    except IndexError:
+    except (FileNotFoundError, IndexError):
         return
     tf = compute_timefreq(parameters, data, baseline=True, mean=False)
     tf = get_chantime(parameters, tf, freq_operator=&#39;nanmean&#39;)
@@ -352,7 +352,7 @@ def pipeline_ols_prf(parameters, ieeg_file):
 
     try:
         data, names = load(&#39;data&#39;, parameters, ieeg_file, parameters[&#39;ols&#39;][&#39;read&#39;])
-    except IndexError:
+    except (FileNotFoundError, IndexError):
         return
     tf = compute_timefreq(parameters, data, baseline=True, mean=False)
     tf = get_chantime(parameters, tf, freq_operator=&#39;nanmean&#39;)

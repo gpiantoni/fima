@@ -72,4 +72,8 @@ def name(parameters, what, ieeg_file=None):
         out = out_dir / 'ols' / event_type / 'plots'
         out.mkdir(parents=True, exist_ok=True)
 
+    elif what == 'paper':
+        out = out_dir / 'paper'
+        out.mkdir(parents=True, exist_ok=True)
+
     return out

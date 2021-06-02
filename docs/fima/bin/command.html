@@ -128,6 +128,12 @@ def main():
         )
     action.set_defaults(function=&#39;fitting&#39;)
 
+    action = list_pipelines.add_parser(
+        &#39;paper&#39;,
+        help=&#39;Prepare figures for the manuscript&#39;,
+        )
+    action.set_defaults(function=&#39;paper&#39;)
+
     args = parser.parse_args()
 
     parameters = read_parameters(args.parameters)
@@ -292,6 +298,12 @@ if __name__ == &#39;__main__&#39;:
         help=&#39;Fit a PRF model to the data&#39;,
         )
     action.set_defaults(function=&#39;fitting&#39;)
+
+    action = list_pipelines.add_parser(
+        &#39;paper&#39;,
+        help=&#39;Prepare figures for the manuscript&#39;,
+        )
+    action.set_defaults(function=&#39;paper&#39;)
 
     args = parser.parse_args()
 

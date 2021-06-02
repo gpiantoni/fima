@@ -4,41 +4,57 @@ from numpy import isnan, array, where
 from plotly.offline import plot
 from scipy.stats import ttest_rel
 from wonambi.trans import select
+from copy import deepcopy
+from collections import Mapping
 
-# from ..parameters import FINGER_COLOR, MOVEMENT_SYMBOL_DATA, MOVEMENT_SYMBOL_MODEL
 
 lg = getLogger(__name__)
 
 
-def get_color_symbol(names):
-    raise NotImplementedError
-    """Get the appropriate color and symbol for each condition
+LIGHT_COLOR = 'lightGray'
 
-    Parameters
-    ----------
-    names : list of str
-        list of conditions
-
-    Returns
-    -------
-    list of str
-        list of colors
-    list of str
-        list of symbols for the data
-    list of str
-        list of symbols for the model estimates
-    """
-    color = []
-    symbol_data = []
-    symbol_model = []
-
-    for m in names:
-        finger, action = m.split()
-        color.append(FINGER_COLOR[finger])
-        symbol_data.append(MOVEMENT_SYMBOL_DATA[action])
-        symbol_model.append(MOVEMENT_SYMBOL_MODEL[action])
-
-    return color, symbol_data, symbol_model
+LAYOUT = dict(
+    paper_bgcolor='rgba(0,0,0,0)',
+    plot_bgcolor='rgba(0,0,0,0)',
+    margin=dict(
+        l=0,
+        t=0,
+        b=0,
+        r=0,
+        pad=0,
+        ),
+    title=dict(
+        font=dict(
+            size=14,
+            ),
+        ),
+    xaxis=dict(
+        title=dict(
+            font=dict(
+                size=14,
+                ),
+            ),
+        zerolinecolor='black',
+        linecolor='black',
+        gridcolor=LIGHT_COLOR,
+        tickfont=dict(
+            size=11,
+            ),
+        ),
+    yaxis=dict(
+        title=dict(
+            font=dict(
+                size=14,
+                ),
+            ),
+        zerolinecolor='black',
+        linecolor='black',
+        gridcolor=LIGHT_COLOR,
+        tickfont=dict(
+            size=11,
+            ),
+        ),
+    )
 
 
 def to_div(fig):
@@ -152,3 +168,19 @@ def select_significant_channels(data, onsets, threshold=0.0005):
     lg.info('; '.join(out))
 
     return significant_chan
+
+
+def merge(dict1, dict2):
+    """Return a new dictionary by merging two dictionaries recursively.
+
+    https://stackoverflow.com/a/43228384
+    """
+    result = deepcopy(dict1)
+
+    for key, value in dict2.items():
+        if isinstance(value, Mapping):
+            result[key] = merge(result.get(key, {}), value)
+        else:
+            result[key] = deepcopy(dict2[key])
+
+    return result

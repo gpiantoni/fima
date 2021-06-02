@@ -98,6 +98,10 @@ def name(parameters, what, ieeg_file=None):
         out = out_dir / &#39;ols&#39; / event_type / &#39;plots&#39;
         out.mkdir(parents=True, exist_ok=True)
 
+    elif what == &#39;paper&#39;:
+        out = out_dir / &#39;paper&#39;
+        out.mkdir(parents=True, exist_ok=True)
+
     return out</code></pre>
 </details>
 </section>
@@ -186,6 +190,10 @@ def name(parameters, what, ieeg_file=None):
     elif what == &#39;ols_plot&#39;:
         event_type = parameters[&#39;ols&#39;][&#39;read&#39;][&#39;event_type&#39;]
         out = out_dir / &#39;ols&#39; / event_type / &#39;plots&#39;
+        out.mkdir(parents=True, exist_ok=True)
+
+    elif what == &#39;paper&#39;:
+        out = out_dir / &#39;paper&#39;
         out.mkdir(parents=True, exist_ok=True)
 
     return out</code></pre>

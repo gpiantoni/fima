@@ -102,6 +102,12 @@ def main():
         )
     action.set_defaults(function='fitting')
 
+    action = list_pipelines.add_parser(
+        'paper',
+        help='Prepare figures for the manuscript',
+        )
+    action.set_defaults(function='paper')
+
     args = parser.parse_args()
 
     parameters = read_parameters(args.parameters)

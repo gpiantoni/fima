@@ -5,7 +5,6 @@ from wonambi import Data
 from .surf import plot_surf
 from ..fitting.general import estimate
 from ..fitting.utils import get_response
-from ..viz.utils import get_color_symbol
 
 
 def estimate_and_plot(y, model, names, result, channels, chan=None):
