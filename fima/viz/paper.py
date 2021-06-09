@@ -7,11 +7,13 @@ from ..parameters import FINGER_COLOR, FINGERS_OPEN, FINGERS_CLOSED, FINGERS_EXT
 from .utils import LAYOUT, merge
 from .dataglove import plot_dataglove
 from .ols import plot_data_prediction
+from .ols_summary import plot_ols_rsquared
 from ..ols.fit import compute_param_matrix, get_max, fit_one_channel
 from ..spectrum import compute_timefreq, get_chantime
 from ..names import name
 from ..read import load
 from ..ols.prf import compute_prf_from_parameters
+from ..ols.summary import import_all_ols
 
 
 def plot_papers(parameters):
@@ -20,12 +22,15 @@ def plot_papers(parameters):
     fig = paper_plot_dataglove(parameters)
     fig.write_image(str(plot_dir / 'dataglove.svg'))
 
+    fig = paper_plot_rsquared(parameters)
+    fig.write_image(str(plot_dir / 'rsquared.svg'))
+
+    # takes time
     fig, j = paper_plot_data_prediction(parameters)
     fig.write_image(str(plot_dir / 'prediction.svg'))
 
     fig = paper_plot_coefficients(parameters, j)
     fig.write_image(str(plot_dir / 'coefficients.svg'))
-
 
 def paper_plot_dataglove(parameters):
     ieeg_file = Path('/Fridge/users/giovanni/projects/finger_mapping/subjects/sub-drouwen/ses-iemu1/ieeg/sub-drouwen_ses-iemu1_task-fingermapping_acq-clinical_run-1_ieeg.eeg')
@@ -203,4 +208,37 @@ def paper_plot_coefficients(parameters, j):
     fig = go.Figure(
         data=traces,
         layout=merge(LAYOUT, layout))
+    return fig
+
+
+def paper_plot_rsquared(parameters):
+    df = import_all_ols(parameters)
+
+    fig = plot_ols_rsquared(df, 'DKTatlas')
+    layout = dict(
+        showlegend=True,
+        width=400,
+        height=300,
+        title=dict(
+            text='',
+            ),
+        xaxis=dict(
+            title=dict(
+                text='',
+                ),
+            showgrid=False,
+            tickangle=-45,
+            ),
+        yaxis=dict(
+            title=dict(
+                text='# channels',
+                standoff=10,
+                ),
+            dtick=100,
+            showgrid=False,
+            ),
+        )
+
+    fig.update_layout(merge(LAYOUT, layout))
+
     return fig

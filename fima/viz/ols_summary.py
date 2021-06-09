@@ -1,6 +1,6 @@
 import plotly.graph_objects as go
 
-from numpy import arange, sqrt, abs, max, linspace, isnan, histogram, zeros, corrcoef
+from numpy import arange, sqrt, abs, max, linspace, isnan, histogram, zeros, corrcoef, ceil
 
 from .utils import to_div
 
@@ -51,14 +51,21 @@ def plot_ols_params(df, param, region_type, yaxis_name=''):
 
 def plot_ols_rsquared(df, region_type):
 
-    rsquared_levels = arange(0, 1, .1)
+    max_val = ceil(df['estimate']['rsquared'].max() * 10) / 10
+    rsquared_levels = arange(0, max_val, .1)
     BARS = {}
     for region in sorted(df['channel'][region_type].unique()):
+
+        if region == 'unknown':
+            continue
+        i_region = df['channel'][region_type] == region
+        if i_region.sum() < 50:
+            continue
 
         vals = []
         for i in rsquared_levels:
             vals.append(
-                len(df[(df['channel'][region_type] == region) & (i <= df['estimate']['rsquared']) & (df['estimate']['rsquared'] <= (i + 0.1))]))
+                len(df[i_region & (i <= df['estimate']['rsquared']) & (df['estimate']['rsquared'] <= (i + 0.1))]))
         BARS[region] = vals
 
     n_levels = len(BARS[df['channel'][region_type][0]])
@@ -70,7 +77,10 @@ def plot_ols_rsquared(df, region_type):
                 y=[x[i] for x in BARS.values()],
                 name=f'{rsquared_levels[i]:0.1f} - {rsquared_levels[i]+0.1:0.1f}',
                 marker=dict(
-                    color=get_color_for_val(i, 'Hot', 0, n_levels - 3),
+                    line=dict(
+                        width=0,
+                        ),
+                    color=get_color_for_val(i, 'Hot', 0, n_levels),
                 ),
             ),
         )
