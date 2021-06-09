@@ -1,6 +1,8 @@
 from pathlib import Path
+from shutil import rmtree
 from numpy import arange, array, ceil, floor, histogram, max, sqrt
 from scipy.stats import norm
+from subprocess import run
 import plotly.graph_objects as go
 
 from ..parameters import FINGER_COLOR, FINGERS_OPEN, FINGERS_CLOSED, FINGERS_EXTENSION, FINGERS_FLEXION, FINGERS
@@ -20,7 +22,13 @@ REGIONS = 'precentral', 'postcentral'
 
 
 def plot_papers(parameters):
+
     plot_dir = name(parameters, 'paper')
+    try:
+        rmtree(plot_dir)
+    except OSError:
+        pass
+    plot_dir.mkdir(exist_ok=True, parents=True)
 
     fig = paper_plot_dataglove(parameters)
     fig.write_image(str(plot_dir / 'dataglove.svg'))
@@ -39,6 +47,11 @@ def plot_papers(parameters):
     figs = paper_plot_prf(df)
     for region, fig in zip(REGIONS, figs):
         fig.write_image(str(plot_dir / f'prf_{region}.svg'))
+
+    fig = paper_plot_surf()
+    fig_name = str(plot_dir / 'surf_rsquared.png')
+    fig.write_image(fig_name)
+    run(['convert', fig_name, '-trim', fig_name])
 
     # takes time
     fig, j = paper_plot_data_prediction(parameters)
@@ -387,3 +400,7 @@ def paper_plot_prf(df):
                 layout=merge(LAYOUT, layout))
             )
     return figs
+
+
+def paper_plot_surf():
+    pass

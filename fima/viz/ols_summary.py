@@ -49,6 +49,7 @@ def plot_ols_params(df, param, region_type, yaxis_name=''):
 
     return fig
 
+
 def plot_ols_rsquared(df, region_type):
 
     max_val = ceil(df['estimate']['rsquared'].max() * 10) / 10
