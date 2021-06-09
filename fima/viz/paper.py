@@ -1,5 +1,5 @@
 from pathlib import Path
-from numpy import arange, array
+from numpy import arange, array, ceil, floor, histogram, max
 from scipy.stats import norm
 import plotly.graph_objects as go
 
@@ -25,12 +25,21 @@ def plot_papers(parameters):
     fig = paper_plot_rsquared(parameters)
     fig.write_image(str(plot_dir / 'rsquared.svg'))
 
+    df = import_all_ols(parameters)
+    fig = paper_plot_df_time(df, 'spread')
+    fig.write_image(str(plot_dir / 'time_spread.svg'))
+    fig = paper_plot_df_time(df, 'onset')
+    fig.write_image(str(plot_dir / 'time_onset.svg'))
+    fig = paper_plot_df_time(df, 'peak')
+    fig.write_image(str(plot_dir / 'time_peak.svg'))
+
     # takes time
     fig, j = paper_plot_data_prediction(parameters)
     fig.write_image(str(plot_dir / 'prediction.svg'))
 
     fig = paper_plot_coefficients(parameters, j)
     fig.write_image(str(plot_dir / 'coefficients.svg'))
+
 
 def paper_plot_dataglove(parameters):
     ieeg_file = Path('/Fridge/users/giovanni/projects/finger_mapping/subjects/sub-drouwen/ses-iemu1/ieeg/sub-drouwen_ses-iemu1_task-fingermapping_acq-clinical_run-1_ieeg.eeg')
@@ -240,5 +249,72 @@ def paper_plot_rsquared(parameters):
         )
 
     fig.update_layout(merge(LAYOUT, layout))
+
+    return fig
+
+
+def paper_plot_df_time(df, param):
+    width = 0.05
+
+    markers = dict(
+        color='white',
+        line=dict(
+            width=2,
+            color='black',
+            ),
+        )
+
+    regions = 'precentral', 'postcentral'
+
+    i_rsquared = df['estimate']['rsquared'] > 0.1
+    i_region = df['channel']['DKTatlas'].isin(regions)
+    y = df[i_rsquared & i_region]['estimate'][param]
+
+    min_val = floor(y.min() / 0.05) * 0.05
+    max_val = ceil(y.max() / 0.05) * 0.05
+    t_plot = arange(min_val, max_val, width)
+
+    traces = []
+    h_all = []
+
+    for region in regions:
+        i_region = df['channel']['DKTatlas'] == region
+        y = df[i_rsquared & i_region]['estimate'][param]
+        h0 = histogram(y, t_plot)[0]
+        h_all.append(h0)
+
+        if region == 'precentral':
+            scale = 1
+        else:
+            scale = -1
+
+        traces.append(
+            go.Bar(
+                x=t_plot,
+                y=h0 * scale,
+                name=region,
+                marker=markers,
+                width=width,
+                )
+            )
+
+    m = max(h_all) + 5
+    layout = dict(
+        showlegend=False,
+        width=400,
+        height=200,
+        barmode='relative',
+        yaxis=dict(
+            range=[-m, m],
+            title=dict(
+                text=''
+                ),
+            ),
+        )
+
+    fig = go.Figure(
+        data=traces,
+        layout=merge(LAYOUT, layout),
+        )
 
     return fig
