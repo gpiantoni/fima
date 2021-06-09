@@ -1,9 +1,9 @@
 from pathlib import Path
-from numpy import arange, array, ceil, floor, histogram, max
+from numpy import arange, array, ceil, floor, histogram, max, sqrt
 from scipy.stats import norm
 import plotly.graph_objects as go
 
-from ..parameters import FINGER_COLOR, FINGERS_OPEN, FINGERS_CLOSED, FINGERS_EXTENSION, FINGERS_FLEXION
+from ..parameters import FINGER_COLOR, FINGERS_OPEN, FINGERS_CLOSED, FINGERS_EXTENSION, FINGERS_FLEXION, FINGERS
 from .utils import LAYOUT, merge
 from .dataglove import plot_dataglove
 from .ols import plot_data_prediction
@@ -14,6 +14,9 @@ from ..names import name
 from ..read import load
 from ..ols.prf import compute_prf_from_parameters
 from ..ols.summary import import_all_ols
+
+
+REGIONS = 'precentral', 'postcentral'
 
 
 def plot_papers(parameters):
@@ -32,6 +35,10 @@ def plot_papers(parameters):
     fig.write_image(str(plot_dir / 'time_onset.svg'))
     fig = paper_plot_df_time(df, 'peak')
     fig.write_image(str(plot_dir / 'time_peak.svg'))
+
+    figs = paper_plot_prf(df)
+    for region, fig in zip(REGIONS, figs):
+        fig.write_image(str(plot_dir / f'prf_{region}.svg'))
 
     # takes time
     fig, j = paper_plot_data_prediction(parameters)
@@ -264,10 +271,8 @@ def paper_plot_df_time(df, param):
             ),
         )
 
-    regions = 'precentral', 'postcentral'
-
     i_rsquared = df['estimate']['rsquared'] > 0.1
-    i_region = df['channel']['DKTatlas'].isin(regions)
+    i_region = df['channel']['DKTatlas'].isin(REGIONS)
     y = df[i_rsquared & i_region]['estimate'][param]
 
     min_val = floor(y.min() / 0.05) * 0.05
@@ -277,7 +282,7 @@ def paper_plot_df_time(df, param):
     traces = []
     h_all = []
 
-    for region in regions:
+    for region in REGIONS:
         i_region = df['channel']['DKTatlas'] == region
         y = df[i_rsquared & i_region]['estimate'][param]
         h0 = histogram(y, t_plot)[0]
@@ -318,3 +323,67 @@ def paper_plot_df_time(df, param):
         )
 
     return fig
+
+
+def paper_plot_prf(df):
+
+    pick_finger = lambda v: int(floor(v + 0.5))
+    figs = []
+    i_rsquared = df['estimate']['rsquared'] >= 0.1  # TODO: in parameters
+
+    for region in REGIONS:
+        i_region = df['channel']['DKTatlas'] == region
+
+        m = {}
+        s = {}
+        traces = []
+        for movement_type in ('ext', 'flex'):
+            df_prf = df['prf_' + movement_type]
+
+            i_prf = df_prf['rsquared'] >= 0.9  # TODO: in parameters
+            main_finger = df_prf['finger'].apply(pick_finger)
+
+            i_row = i_region & i_rsquared & i_prf & main_finger.isin(range(5))
+            m[movement_type] = df_prf[i_row].groupby(main_finger).mean()['spread']
+            s[movement_type] = df_prf[i_row].groupby(main_finger).std()['spread'] / sqrt(i_row.sum())
+
+            traces.append(
+                go.Scatter(
+                    x=arange(5) + 1,
+                    y=m[movement_type],
+                    mode='markers',
+                    error_y=dict(
+                        type='data',
+                        array=s[movement_type],
+                        ),
+                    ),
+            )
+
+        layout = dict(
+            showlegend=False,
+            width=300,
+            height=250,
+            xaxis=dict(
+                tickmode='array',
+                tickvals=arange(len(FINGERS)) + 1,
+                ticktext=FINGERS,
+                showgrid=False,
+                tickangle=-45,
+                ),
+            yaxis=dict(
+                title=dict(
+                    text='Spread',
+                    standoff=10,
+                    ),
+                dtick=1,
+                range=(0, 4),
+                showgrid=False,
+                ),
+            )
+
+        figs.append(
+            go.Figure(
+                data=traces,
+                layout=merge(LAYOUT, layout))
+            )
+    return figs
