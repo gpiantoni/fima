@@ -10,7 +10,7 @@ from ..read import load
 from ..spectrum.compute import compute_timefreq, get_chantime
 from ..ols.fit import get_max, fit_one_channel
 from ..ols.prf import add_prf_estimates
-from ..ols.summary import import_all_ols
+from ..ols.summary import import_all_ols, compute_onset
 from ..viz import to_div, to_html
 from ..viz.surf import plot_surf
 from ..viz.ols import plot_coefficient, plot_data_prediction
@@ -110,6 +110,7 @@ def pipeline_ols_allchan(parameters, ieeg_file):
         MAT = fit_one_channel(parameters, t, x, names)
         out, result = get_max(parameters, t, x, names, MAT)
         out['chan'] = chan
+        out['onset'] = compute_onset(parameters, out)
 
         divs = []
 
@@ -158,10 +159,17 @@ def pipeline_ols_summary(parameters, ieeg_file):
         lg.warning(f'No channels had a fit better than threshold {parameters["ols"]["threshold"]}')
         return
 
+    i_chan = (df['rsquared'] >= 0.1)
     params = set(df) - {'rsquared', 'chan'}
     for param in params:
-        dat = Data(array(df[param]), chan=array(df['chan']))
-        fig = plot_surf(parameters, dat, elec, pial=pial, clim=(nanmin(df[param]), nanmax(df[param])), colorscale='Hot')
+        x = df[param][i_chan]
+
+        dat = Data(array(x), chan=array(df['chan'][i_chan]))
+        if param.endswith(' loc'):
+            info = 'finger'
+        else:
+            info = None
+        fig = plot_surf(parameters, dat, elec, pial=pial, info=info, clim=(nanmin(x), nanmax(x)), colorscale='Hot')
         to_html([to_div(fig), ], plots_dir / f'{param.replace(" ", "_")}.html')
 
 
@@ -172,7 +180,9 @@ def import_ols(parameters, ieeg_file):
     df = []
     for json_file in out_dir.glob('*.json'):
         with json_file.open() as f:
-            df.append(json_load(f))
+            j = json_load(f)
+            j['onset'] = compute_onset(parameters, j)
+            df.append(j)
 
     if len(df) == 0:
         return

@@ -88,11 +88,6 @@ def import_df_ols(parameters):
 
     ols = concat(all_ols, sort=False)   # pandas throws a warning when data is not complete
 
-    onsets = []
-    for row in ols.itertuples():
-        onsets.append(compute_onset(parameters, row))
-    ols['onset'] = onsets
-
     return ols
 
 
@@ -129,13 +124,13 @@ def compute_onset(parameters, row):
 
     """
     if parameters['ols']['window']['method'] == 'gaussian':
-        params = [row.loc, row.scale]
+        params = [row['loc'], row['scale']]
     else:
-        params = [row.loc, row.scale, row.a]
+        params = [row['loc'], row['scale'], row['a']]
 
     t, resp = compute_canonical(
         parameters,
-        [0, row.tdiff],
+        [0, row['tdiff']],
         params
         )
     thresh = resp.max() * parameters['ols']['results']['onset_percent']

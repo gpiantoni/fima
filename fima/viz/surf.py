@@ -76,7 +76,7 @@ def plot_surf(parameters, data, elec, pial=None, info='activity', clim=None, col
                 ),
             lightposition=dict(
                 x=0,
-                y=0,
+                y=0.5,
                 z=-1,
                 ),
             )
@@ -94,9 +94,9 @@ def plot_surf(parameters, data, elec, pial=None, info='activity', clim=None, col
 
     traces.append(
         go.Scatter3d(
-            x=elec['x'] + right_or_left,
+            x=elec['x'], # + right_or_left,
             y=elec['y'],
-            z=elec['z'] + .5,
+            z=elec['z'], # + .5,
             text=labels,
             mode='markers',
             hoverinfo='text',
