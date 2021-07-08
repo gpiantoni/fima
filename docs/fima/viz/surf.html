@@ -102,7 +102,7 @@ def plot_surf(parameters, data, elec, pial=None, info=&#39;activity&#39;, clim=N
                 ),
             lightposition=dict(
                 x=0,
-                y=0,
+                y=0.5,
                 z=-1,
                 ),
             )
@@ -120,9 +120,9 @@ def plot_surf(parameters, data, elec, pial=None, info=&#39;activity&#39;, clim=N
 
     traces.append(
         go.Scatter3d(
-            x=elec[&#39;x&#39;] + right_or_left,
+            x=elec[&#39;x&#39;], # + right_or_left,
             y=elec[&#39;y&#39;],
-            z=elec[&#39;z&#39;] + .5,
+            z=elec[&#39;z&#39;], # + .5,
             text=labels,
             mode=&#39;markers&#39;,
             hoverinfo=&#39;text&#39;,
@@ -242,7 +242,7 @@ def plot_surf(parameters, data, elec, pial=None, info=&#39;activity&#39;, clim=N
                 ),
             lightposition=dict(
                 x=0,
-                y=0,
+                y=0.5,
                 z=-1,
                 ),
             )
@@ -260,9 +260,9 @@ def plot_surf(parameters, data, elec, pial=None, info=&#39;activity&#39;, clim=N
 
     traces.append(
         go.Scatter3d(
-            x=elec[&#39;x&#39;] + right_or_left,
+            x=elec[&#39;x&#39;], # + right_or_left,
             y=elec[&#39;y&#39;],
-            z=elec[&#39;z&#39;] + .5,
+            z=elec[&#39;z&#39;], # + .5,
             text=labels,
             mode=&#39;markers&#39;,
             hoverinfo=&#39;text&#39;,

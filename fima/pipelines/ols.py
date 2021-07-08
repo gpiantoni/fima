@@ -159,12 +159,11 @@ def pipeline_ols_summary(parameters, ieeg_file):
         lg.warning(f'No channels had a fit better than threshold {parameters["ols"]["threshold"]}')
         return
 
-    i_chan = (df['rsquared'] >= 0.1)
     params = set(df) - {'rsquared', 'chan'}
     for param in params:
-        x = df[param][i_chan]
+        x = df[param]
 
-        dat = Data(array(x), chan=array(df['chan'][i_chan]))
+        dat = Data(array(x), chan=array(df['chan']))
         if param.endswith(' loc'):
             info = 'finger'
         else:

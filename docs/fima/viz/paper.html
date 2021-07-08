@@ -25,18 +25,66 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from pathlib import Path
+from shutil import rmtree
+from numpy import arange, array, ceil, floor, histogram, max, sqrt
+from scipy.stats import norm
+from subprocess import run
+import plotly.graph_objects as go
 
-from ..names import name
-from ..read import load
+from ..parameters import FINGER_COLOR, FINGERS_OPEN, FINGERS_CLOSED, FINGERS_EXTENSION, FINGERS_FLEXION, FINGERS
 from .utils import LAYOUT, merge
 from .dataglove import plot_dataglove
+from .ols import plot_data_prediction
+from .ols_summary import plot_ols_rsquared
+from ..ols.fit import compute_param_matrix, get_max, fit_one_channel
+from ..spectrum import compute_timefreq, get_chantime
+from ..names import name
+from ..read import load
+from ..ols.prf import compute_prf_from_parameters
+from ..ols.summary import import_all_ols
+
+
+REGIONS = &#39;precentral&#39;, &#39;postcentral&#39;
 
 
 def plot_papers(parameters):
+
     plot_dir = name(parameters, &#39;paper&#39;)
+    try:
+        rmtree(plot_dir)
+    except OSError:
+        pass
+    plot_dir.mkdir(exist_ok=True, parents=True)
 
     fig = paper_plot_dataglove(parameters)
     fig.write_image(str(plot_dir / &#39;dataglove.svg&#39;))
+
+    fig = paper_plot_rsquared(parameters)
+    fig.write_image(str(plot_dir / &#39;rsquared.svg&#39;))
+
+    df = import_all_ols(parameters)
+    fig = paper_plot_df_time(df, &#39;spread&#39;)
+    fig.write_image(str(plot_dir / &#39;time_spread.svg&#39;))
+    fig = paper_plot_df_time(df, &#39;onset&#39;)
+    fig.write_image(str(plot_dir / &#39;time_onset.svg&#39;))
+    fig = paper_plot_df_time(df, &#39;peak&#39;)
+    fig.write_image(str(plot_dir / &#39;time_peak.svg&#39;))
+
+    figs = paper_plot_prf(df)
+    for region, fig in zip(REGIONS, figs):
+        fig.write_image(str(plot_dir / f&#39;prf_{region}.svg&#39;))
+
+    fig = paper_plot_surf()
+    fig_name = str(plot_dir / &#39;surf_rsquared.png&#39;)
+    fig.write_image(fig_name)
+    run([&#39;convert&#39;, fig_name, &#39;-trim&#39;, fig_name])
+
+    # takes time
+    fig, j = paper_plot_data_prediction(parameters)
+    fig.write_image(str(plot_dir / &#39;prediction.svg&#39;))
+
+    fig = paper_plot_coefficients(parameters, j)
+    fig.write_image(str(plot_dir / &#39;coefficients.svg&#39;))
 
 
 def paper_plot_dataglove(parameters):
@@ -68,9 +116,320 @@ def paper_plot_dataglove(parameters):
             showline=False,
             zeroline=False,
             ),
-    )
+        )
 
-    return fig.update_layout(merge(LAYOUT, layout))</code></pre>
+    return fig.update_layout(merge(LAYOUT, layout))
+
+
+def paper_plot_data_prediction(parameters):
+    ieeg_file = Path(&#39;/Fridge/users/giovanni/projects/finger_mapping/subjects/sub-ommen/ses-iemu1/ieeg/sub-ommen_ses-iemu1_task-fingermapping_acq-HDgrid_run-1_ieeg.eeg&#39;)
+
+    chan = &#39;chan40&#39;
+
+    data, names = load(&#39;data&#39;, parameters, ieeg_file, parameters[&#39;ols&#39;][&#39;read&#39;])
+    tf = compute_timefreq(parameters, data, baseline=True, mean=False)
+    tf = get_chantime(parameters, tf, freq_operator=&#39;nanmean&#39;)
+
+    t = tf.time[0]
+    x = tf(trial=0, chan=chan).flatten(order=&#39;F&#39;)
+
+    t_plot = arange(x.shape[0]) * (t[1] - t[0])
+    matrix_values, out_dim = compute_param_matrix(parameters, t)
+
+    MAT = fit_one_channel(parameters, t, x, names)
+    result = get_max(parameters, t, x, names, MAT)[1]
+
+    j = dict(result.params)
+
+    if &#39;index open&#39; in j:
+        columns_open = FINGERS_OPEN
+        columns_closed = FINGERS_CLOSED
+    else:
+        columns_open = FINGERS_EXTENSION
+        columns_closed = FINGERS_FLEXION
+
+    compute_prf_from_parameters(j, columns_open)
+    compute_prf_from_parameters(j, columns_closed)
+
+    fig = plot_data_prediction(t_plot, result, names)
+
+    layout = dict(
+        width=300,
+        height=200,
+        xaxis=dict(
+            showgrid=False,
+            showline=False,
+            zerolinewidth=0.5,
+            title=dict(
+                text=&#39;time (s)&#39;,
+                standoff=4,
+                ),
+            range=(54, 108),
+            ),
+        yaxis=dict(
+            title=dict(
+                text=&#39;z-score&#39;,
+                standoff=8,
+                ),
+            showgrid=False,
+            showline=False,
+            zeroline=False,
+            range=(-1, 7.5),
+            ),
+        )
+
+    return fig.update_layout(merge(LAYOUT, layout)), j
+
+
+def paper_plot_coefficients(parameters, j):
+
+    COLS = list(j)[:11]
+
+    COLORS = [&#39;grey&#39;, ] + list(FINGER_COLOR.values()) + list(FINGER_COLOR.values())
+
+    traces = [
+        go.Bar(
+            offset=0.5,
+            x=arange(len(COLS)),
+            y=[j[col] for col in COLS],
+            marker=dict(
+                color=COLORS,
+            ),
+        ),
+        ]
+
+    movement_types = list(j)[1].split(&#39; &#39;)[1], list(j)[6].split(&#39; &#39;)[1]
+
+    offset = 2
+    for movement_type in movement_types:
+
+        y1 = norm.pdf(
+            arange(5),
+            loc=j[movement_type + &#39; loc&#39;],
+            scale=j[movement_type + &#39; scale&#39;],
+            )
+
+        data = array([j[f&#39;{finger} {movement_type}&#39;] for finger in FINGER_COLOR])
+        scaling = min(data / y1)
+
+        x0 = arange(-0, 4, .01)
+        y1 = norm.pdf(
+            x0,
+            loc=j[movement_type + &#39; loc&#39;],
+            scale=j[movement_type + &#39; scale&#39;],
+            ) * scaling
+
+        traces.append(
+            go.Scatter(
+                x=x0 + offset,
+                y=y1,
+                mode=&#39;lines&#39;,
+                line=dict(
+                    width=3,
+                    color=&#39;black&#39;,
+                ),
+                )
+            )
+        offset += 5
+
+    layout = dict(
+        showlegend=False,
+        width=300,
+        height=250,
+        xaxis=dict(
+            tickmode=&#39;array&#39;,
+            tickvals=arange(len(COLS)) + 0.5,
+            ticktext=COLS,
+            showgrid=False,
+            showline=False,
+            tickangle=-45,
+            title=dict(
+                text=&#39;time (s)&#39;,
+                standoff=4,
+                ),
+            ),
+        yaxis=dict(
+            title=dict(
+                text=&#39;Coefficients&#39;,
+                standoff=10,
+                ),
+            dtick=1,
+            showgrid=False,
+            showline=False,
+            zeroline=False,
+            ),
+        )
+
+    fig = go.Figure(
+        data=traces,
+        layout=merge(LAYOUT, layout))
+    return fig
+
+
+def paper_plot_rsquared(parameters):
+    df = import_all_ols(parameters)
+
+    fig = plot_ols_rsquared(df, &#39;DKTatlas&#39;)
+    layout = dict(
+        showlegend=True,
+        width=400,
+        height=300,
+        title=dict(
+            text=&#39;&#39;,
+            ),
+        xaxis=dict(
+            title=dict(
+                text=&#39;&#39;,
+                ),
+            showgrid=False,
+            tickangle=-45,
+            ),
+        yaxis=dict(
+            title=dict(
+                text=&#39;# channels&#39;,
+                standoff=10,
+                ),
+            dtick=100,
+            showgrid=False,
+            ),
+        )
+
+    fig.update_layout(merge(LAYOUT, layout))
+
+    return fig
+
+
+def paper_plot_df_time(df, param):
+    width = 0.05
+
+    markers = dict(
+        color=&#39;white&#39;,
+        line=dict(
+            width=2,
+            color=&#39;black&#39;,
+            ),
+        )
+
+    i_rsquared = df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt; 0.1
+    i_region = df[&#39;channel&#39;][&#39;DKTatlas&#39;].isin(REGIONS)
+    y = df[i_rsquared &amp; i_region][&#39;estimate&#39;][param]
+
+    min_val = floor(y.min() / 0.05) * 0.05
+    max_val = ceil(y.max() / 0.05) * 0.05
+    t_plot = arange(min_val, max_val, width)
+
+    traces = []
+    h_all = []
+
+    for region in REGIONS:
+        i_region = df[&#39;channel&#39;][&#39;DKTatlas&#39;] == region
+        y = df[i_rsquared &amp; i_region][&#39;estimate&#39;][param]
+        h0 = histogram(y, t_plot)[0]
+        h_all.append(h0)
+
+        if region == &#39;precentral&#39;:
+            scale = 1
+        else:
+            scale = -1
+
+        traces.append(
+            go.Bar(
+                x=t_plot,
+                y=h0 * scale,
+                name=region,
+                marker=markers,
+                width=width,
+                )
+            )
+
+    m = max(h_all) + 5
+    layout = dict(
+        showlegend=False,
+        width=400,
+        height=200,
+        barmode=&#39;relative&#39;,
+        yaxis=dict(
+            range=[-m, m],
+            title=dict(
+                text=&#39;&#39;
+                ),
+            ),
+        )
+
+    fig = go.Figure(
+        data=traces,
+        layout=merge(LAYOUT, layout),
+        )
+
+    return fig
+
+
+def paper_plot_prf(df):
+
+    pick_finger = lambda v: int(floor(v + 0.5))
+    figs = []
+    i_rsquared = df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1  # TODO: in parameters
+
+    for region in REGIONS:
+        i_region = df[&#39;channel&#39;][&#39;DKTatlas&#39;] == region
+
+        m = {}
+        s = {}
+        traces = []
+        for movement_type in (&#39;ext&#39;, &#39;flex&#39;):
+            df_prf = df[&#39;prf_&#39; + movement_type]
+
+            i_prf = df_prf[&#39;rsquared&#39;] &gt;= 0.9  # TODO: in parameters
+            main_finger = df_prf[&#39;finger&#39;].apply(pick_finger)
+
+            i_row = i_region &amp; i_rsquared &amp; i_prf &amp; main_finger.isin(range(5))
+            m[movement_type] = df_prf[i_row].groupby(main_finger).mean()[&#39;spread&#39;]
+            s[movement_type] = df_prf[i_row].groupby(main_finger).std()[&#39;spread&#39;] / sqrt(i_row.sum())
+
+            traces.append(
+                go.Scatter(
+                    x=arange(5) + 1,
+                    y=m[movement_type],
+                    mode=&#39;markers&#39;,
+                    error_y=dict(
+                        type=&#39;data&#39;,
+                        array=s[movement_type],
+                        ),
+                    ),
+            )
+
+        layout = dict(
+            showlegend=False,
+            width=300,
+            height=250,
+            xaxis=dict(
+                tickmode=&#39;array&#39;,
+                tickvals=arange(len(FINGERS)) + 1,
+                ticktext=FINGERS,
+                showgrid=False,
+                tickangle=-45,
+                ),
+            yaxis=dict(
+                title=dict(
+                    text=&#39;Spread&#39;,
+                    standoff=10,
+                    ),
+                dtick=1,
+                range=(0, 4),
+                showgrid=False,
+                ),
+            )
+
+        figs.append(
+            go.Figure(
+                data=traces,
+                layout=merge(LAYOUT, layout))
+            )
+    return figs
+
+
+def paper_plot_surf():
+    pass</code></pre>
 </details>
 </section>
 <section>
@@ -80,6 +439,169 @@ def paper_plot_dataglove(parameters):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="fima.viz.paper.paper_plot_coefficients"><code class="name flex">
+<span>def <span class="ident">paper_plot_coefficients</span></span>(<span>parameters, j)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def paper_plot_coefficients(parameters, j):
+
+    COLS = list(j)[:11]
+
+    COLORS = [&#39;grey&#39;, ] + list(FINGER_COLOR.values()) + list(FINGER_COLOR.values())
+
+    traces = [
+        go.Bar(
+            offset=0.5,
+            x=arange(len(COLS)),
+            y=[j[col] for col in COLS],
+            marker=dict(
+                color=COLORS,
+            ),
+        ),
+        ]
+
+    movement_types = list(j)[1].split(&#39; &#39;)[1], list(j)[6].split(&#39; &#39;)[1]
+
+    offset = 2
+    for movement_type in movement_types:
+
+        y1 = norm.pdf(
+            arange(5),
+            loc=j[movement_type + &#39; loc&#39;],
+            scale=j[movement_type + &#39; scale&#39;],
+            )
+
+        data = array([j[f&#39;{finger} {movement_type}&#39;] for finger in FINGER_COLOR])
+        scaling = min(data / y1)
+
+        x0 = arange(-0, 4, .01)
+        y1 = norm.pdf(
+            x0,
+            loc=j[movement_type + &#39; loc&#39;],
+            scale=j[movement_type + &#39; scale&#39;],
+            ) * scaling
+
+        traces.append(
+            go.Scatter(
+                x=x0 + offset,
+                y=y1,
+                mode=&#39;lines&#39;,
+                line=dict(
+                    width=3,
+                    color=&#39;black&#39;,
+                ),
+                )
+            )
+        offset += 5
+
+    layout = dict(
+        showlegend=False,
+        width=300,
+        height=250,
+        xaxis=dict(
+            tickmode=&#39;array&#39;,
+            tickvals=arange(len(COLS)) + 0.5,
+            ticktext=COLS,
+            showgrid=False,
+            showline=False,
+            tickangle=-45,
+            title=dict(
+                text=&#39;time (s)&#39;,
+                standoff=4,
+                ),
+            ),
+        yaxis=dict(
+            title=dict(
+                text=&#39;Coefficients&#39;,
+                standoff=10,
+                ),
+            dtick=1,
+            showgrid=False,
+            showline=False,
+            zeroline=False,
+            ),
+        )
+
+    fig = go.Figure(
+        data=traces,
+        layout=merge(LAYOUT, layout))
+    return fig</code></pre>
+</details>
+</dd>
+<dt id="fima.viz.paper.paper_plot_data_prediction"><code class="name flex">
+<span>def <span class="ident">paper_plot_data_prediction</span></span>(<span>parameters)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def paper_plot_data_prediction(parameters):
+    ieeg_file = Path(&#39;/Fridge/users/giovanni/projects/finger_mapping/subjects/sub-ommen/ses-iemu1/ieeg/sub-ommen_ses-iemu1_task-fingermapping_acq-HDgrid_run-1_ieeg.eeg&#39;)
+
+    chan = &#39;chan40&#39;
+
+    data, names = load(&#39;data&#39;, parameters, ieeg_file, parameters[&#39;ols&#39;][&#39;read&#39;])
+    tf = compute_timefreq(parameters, data, baseline=True, mean=False)
+    tf = get_chantime(parameters, tf, freq_operator=&#39;nanmean&#39;)
+
+    t = tf.time[0]
+    x = tf(trial=0, chan=chan).flatten(order=&#39;F&#39;)
+
+    t_plot = arange(x.shape[0]) * (t[1] - t[0])
+    matrix_values, out_dim = compute_param_matrix(parameters, t)
+
+    MAT = fit_one_channel(parameters, t, x, names)
+    result = get_max(parameters, t, x, names, MAT)[1]
+
+    j = dict(result.params)
+
+    if &#39;index open&#39; in j:
+        columns_open = FINGERS_OPEN
+        columns_closed = FINGERS_CLOSED
+    else:
+        columns_open = FINGERS_EXTENSION
+        columns_closed = FINGERS_FLEXION
+
+    compute_prf_from_parameters(j, columns_open)
+    compute_prf_from_parameters(j, columns_closed)
+
+    fig = plot_data_prediction(t_plot, result, names)
+
+    layout = dict(
+        width=300,
+        height=200,
+        xaxis=dict(
+            showgrid=False,
+            showline=False,
+            zerolinewidth=0.5,
+            title=dict(
+                text=&#39;time (s)&#39;,
+                standoff=4,
+                ),
+            range=(54, 108),
+            ),
+        yaxis=dict(
+            title=dict(
+                text=&#39;z-score&#39;,
+                standoff=8,
+                ),
+            showgrid=False,
+            showline=False,
+            zeroline=False,
+            range=(-1, 7.5),
+            ),
+        )
+
+    return fig.update_layout(merge(LAYOUT, layout)), j</code></pre>
+</details>
+</dd>
 <dt id="fima.viz.paper.paper_plot_dataglove"><code class="name flex">
 <span>def <span class="ident">paper_plot_dataglove</span></span>(<span>parameters)</span>
 </code></dt>
@@ -118,9 +640,211 @@ def paper_plot_dataglove(parameters):
             showline=False,
             zeroline=False,
             ),
-    )
+        )
 
     return fig.update_layout(merge(LAYOUT, layout))</code></pre>
+</details>
+</dd>
+<dt id="fima.viz.paper.paper_plot_df_time"><code class="name flex">
+<span>def <span class="ident">paper_plot_df_time</span></span>(<span>df, param)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def paper_plot_df_time(df, param):
+    width = 0.05
+
+    markers = dict(
+        color=&#39;white&#39;,
+        line=dict(
+            width=2,
+            color=&#39;black&#39;,
+            ),
+        )
+
+    i_rsquared = df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt; 0.1
+    i_region = df[&#39;channel&#39;][&#39;DKTatlas&#39;].isin(REGIONS)
+    y = df[i_rsquared &amp; i_region][&#39;estimate&#39;][param]
+
+    min_val = floor(y.min() / 0.05) * 0.05
+    max_val = ceil(y.max() / 0.05) * 0.05
+    t_plot = arange(min_val, max_val, width)
+
+    traces = []
+    h_all = []
+
+    for region in REGIONS:
+        i_region = df[&#39;channel&#39;][&#39;DKTatlas&#39;] == region
+        y = df[i_rsquared &amp; i_region][&#39;estimate&#39;][param]
+        h0 = histogram(y, t_plot)[0]
+        h_all.append(h0)
+
+        if region == &#39;precentral&#39;:
+            scale = 1
+        else:
+            scale = -1
+
+        traces.append(
+            go.Bar(
+                x=t_plot,
+                y=h0 * scale,
+                name=region,
+                marker=markers,
+                width=width,
+                )
+            )
+
+    m = max(h_all) + 5
+    layout = dict(
+        showlegend=False,
+        width=400,
+        height=200,
+        barmode=&#39;relative&#39;,
+        yaxis=dict(
+            range=[-m, m],
+            title=dict(
+                text=&#39;&#39;
+                ),
+            ),
+        )
+
+    fig = go.Figure(
+        data=traces,
+        layout=merge(LAYOUT, layout),
+        )
+
+    return fig</code></pre>
+</details>
+</dd>
+<dt id="fima.viz.paper.paper_plot_prf"><code class="name flex">
+<span>def <span class="ident">paper_plot_prf</span></span>(<span>df)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def paper_plot_prf(df):
+
+    pick_finger = lambda v: int(floor(v + 0.5))
+    figs = []
+    i_rsquared = df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1  # TODO: in parameters
+
+    for region in REGIONS:
+        i_region = df[&#39;channel&#39;][&#39;DKTatlas&#39;] == region
+
+        m = {}
+        s = {}
+        traces = []
+        for movement_type in (&#39;ext&#39;, &#39;flex&#39;):
+            df_prf = df[&#39;prf_&#39; + movement_type]
+
+            i_prf = df_prf[&#39;rsquared&#39;] &gt;= 0.9  # TODO: in parameters
+            main_finger = df_prf[&#39;finger&#39;].apply(pick_finger)
+
+            i_row = i_region &amp; i_rsquared &amp; i_prf &amp; main_finger.isin(range(5))
+            m[movement_type] = df_prf[i_row].groupby(main_finger).mean()[&#39;spread&#39;]
+            s[movement_type] = df_prf[i_row].groupby(main_finger).std()[&#39;spread&#39;] / sqrt(i_row.sum())
+
+            traces.append(
+                go.Scatter(
+                    x=arange(5) + 1,
+                    y=m[movement_type],
+                    mode=&#39;markers&#39;,
+                    error_y=dict(
+                        type=&#39;data&#39;,
+                        array=s[movement_type],
+                        ),
+                    ),
+            )
+
+        layout = dict(
+            showlegend=False,
+            width=300,
+            height=250,
+            xaxis=dict(
+                tickmode=&#39;array&#39;,
+                tickvals=arange(len(FINGERS)) + 1,
+                ticktext=FINGERS,
+                showgrid=False,
+                tickangle=-45,
+                ),
+            yaxis=dict(
+                title=dict(
+                    text=&#39;Spread&#39;,
+                    standoff=10,
+                    ),
+                dtick=1,
+                range=(0, 4),
+                showgrid=False,
+                ),
+            )
+
+        figs.append(
+            go.Figure(
+                data=traces,
+                layout=merge(LAYOUT, layout))
+            )
+    return figs</code></pre>
+</details>
+</dd>
+<dt id="fima.viz.paper.paper_plot_rsquared"><code class="name flex">
+<span>def <span class="ident">paper_plot_rsquared</span></span>(<span>parameters)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def paper_plot_rsquared(parameters):
+    df = import_all_ols(parameters)
+
+    fig = plot_ols_rsquared(df, &#39;DKTatlas&#39;)
+    layout = dict(
+        showlegend=True,
+        width=400,
+        height=300,
+        title=dict(
+            text=&#39;&#39;,
+            ),
+        xaxis=dict(
+            title=dict(
+                text=&#39;&#39;,
+                ),
+            showgrid=False,
+            tickangle=-45,
+            ),
+        yaxis=dict(
+            title=dict(
+                text=&#39;# channels&#39;,
+                standoff=10,
+                ),
+            dtick=100,
+            showgrid=False,
+            ),
+        )
+
+    fig.update_layout(merge(LAYOUT, layout))
+
+    return fig</code></pre>
+</details>
+</dd>
+<dt id="fima.viz.paper.paper_plot_surf"><code class="name flex">
+<span>def <span class="ident">paper_plot_surf</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def paper_plot_surf():
+    pass</code></pre>
 </details>
 </dd>
 <dt id="fima.viz.paper.plot_papers"><code class="name flex">
@@ -133,10 +857,43 @@ def paper_plot_dataglove(parameters):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def plot_papers(parameters):
+
     plot_dir = name(parameters, &#39;paper&#39;)
+    try:
+        rmtree(plot_dir)
+    except OSError:
+        pass
+    plot_dir.mkdir(exist_ok=True, parents=True)
 
     fig = paper_plot_dataglove(parameters)
-    fig.write_image(str(plot_dir / &#39;dataglove.svg&#39;))</code></pre>
+    fig.write_image(str(plot_dir / &#39;dataglove.svg&#39;))
+
+    fig = paper_plot_rsquared(parameters)
+    fig.write_image(str(plot_dir / &#39;rsquared.svg&#39;))
+
+    df = import_all_ols(parameters)
+    fig = paper_plot_df_time(df, &#39;spread&#39;)
+    fig.write_image(str(plot_dir / &#39;time_spread.svg&#39;))
+    fig = paper_plot_df_time(df, &#39;onset&#39;)
+    fig.write_image(str(plot_dir / &#39;time_onset.svg&#39;))
+    fig = paper_plot_df_time(df, &#39;peak&#39;)
+    fig.write_image(str(plot_dir / &#39;time_peak.svg&#39;))
+
+    figs = paper_plot_prf(df)
+    for region, fig in zip(REGIONS, figs):
+        fig.write_image(str(plot_dir / f&#39;prf_{region}.svg&#39;))
+
+    fig = paper_plot_surf()
+    fig_name = str(plot_dir / &#39;surf_rsquared.png&#39;)
+    fig.write_image(fig_name)
+    run([&#39;convert&#39;, fig_name, &#39;-trim&#39;, fig_name])
+
+    # takes time
+    fig, j = paper_plot_data_prediction(parameters)
+    fig.write_image(str(plot_dir / &#39;prediction.svg&#39;))
+
+    fig = paper_plot_coefficients(parameters, j)
+    fig.write_image(str(plot_dir / &#39;coefficients.svg&#39;))</code></pre>
 </details>
 </dd>
 </dl>
@@ -157,7 +914,13 @@ def paper_plot_dataglove(parameters):
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="fima.viz.paper.paper_plot_coefficients" href="#fima.viz.paper.paper_plot_coefficients">paper_plot_coefficients</a></code></li>
+<li><code><a title="fima.viz.paper.paper_plot_data_prediction" href="#fima.viz.paper.paper_plot_data_prediction">paper_plot_data_prediction</a></code></li>
 <li><code><a title="fima.viz.paper.paper_plot_dataglove" href="#fima.viz.paper.paper_plot_dataglove">paper_plot_dataglove</a></code></li>
+<li><code><a title="fima.viz.paper.paper_plot_df_time" href="#fima.viz.paper.paper_plot_df_time">paper_plot_df_time</a></code></li>
+<li><code><a title="fima.viz.paper.paper_plot_prf" href="#fima.viz.paper.paper_plot_prf">paper_plot_prf</a></code></li>
+<li><code><a title="fima.viz.paper.paper_plot_rsquared" href="#fima.viz.paper.paper_plot_rsquared">paper_plot_rsquared</a></code></li>
+<li><code><a title="fima.viz.paper.paper_plot_surf" href="#fima.viz.paper.paper_plot_surf">paper_plot_surf</a></code></li>
 <li><code><a title="fima.viz.paper.plot_papers" href="#fima.viz.paper.plot_papers">plot_papers</a></code></li>
 </ul>
 </li>

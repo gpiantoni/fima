@@ -13,45 +13,8 @@ AXIS = dict(
 
 
 def plot_surf(parameters, data, elec, pial=None, info='activity', clim=None, colorscale=None):
-    if colorscale is None:
-        colorscale = parameters['viz']['colorscale']
 
-    if info == 'finger':
-        colorlim = (-1, 5)
-        colorbar = dict(
-            title="Main Finger",
-            titleside="top",
-            tickmode="array",
-            tickvals=[0, 1, 2, 3, 4],
-            ticktext=["Little", 'Ring', 'Middle', 'Index', 'Thumb'],
-            ticks="outside"
-            )
-
-    else:
-        colorbar = dict(
-            title=info,
-            titleside="top",
-            ticks="outside"
-            )
-
-        if info == 'rsquared':
-            colorlim = (0, 0.70)
-            colorscale = 'Hot'
-
-        elif info == 'open_v_close':
-            colorlim = (0, 1)
-
-        elif info == 'tstat':
-            colorlim = (-10, 10)
-
-        elif clim is not None:
-            colorlim = clim
-
-        else:
-            colorlim = (
-                parameters['viz']['tfr_mean']['max'] * -1,
-                parameters['viz']['tfr_mean']['max'],
-                )
+    colorbar, colorlim, colorscale = get_colorscale(parameters, info=info, clim=clim, colorscale=colorscale)
 
     right_or_left = sign((elec['x'] > 0).sum() / elec.shape[0] - .5)
 
@@ -94,9 +57,9 @@ def plot_surf(parameters, data, elec, pial=None, info='activity', clim=None, col
 
     traces.append(
         go.Scatter3d(
-            x=elec['x'], # + right_or_left,
+            x=elec['x'],
             y=elec['y'],
-            z=elec['z'], # + .5,
+            z=elec['z'],
             text=labels,
             mode='markers',
             hoverinfo='text',
@@ -134,3 +97,48 @@ def plot_surf(parameters, data, elec, pial=None, info='activity', clim=None, col
         )
 
     return fig
+
+
+def get_colorscale(parameters, info=None, clim=None, colorscale=None):
+    if colorscale is None:
+        colorscale = parameters['viz']['colorscale']
+
+    if info == 'finger':
+        colorlim = (-1, 5)
+        colorscale = 'Jet'
+        colorbar = dict(
+            title="Main Finger",
+            titleside="top",
+            tickmode="array",
+            tickvals=[0, 1, 2, 3, 4],
+            ticktext=["Thumb", 'Index', 'Middle', 'Ring', 'Index'],
+            ticks="outside"
+            )
+
+    else:
+        colorbar = dict(
+            title=info,
+            titleside="top",
+            ticks="outside"
+            )
+
+        if info == 'rsquared':
+            colorlim = (0, 0.70)
+            colorscale = 'Hot'
+
+        elif info == 'open_v_close':
+            colorlim = (0, 1)
+
+        elif info == 'tstat':
+            colorlim = (-10, 10)
+
+        else:
+            colorlim = (
+                parameters['viz']['tfr_mean']['max'] * -1,
+                parameters['viz']['tfr_mean']['max'],
+                )
+
+    if clim is not None:
+        colorlim = clim
+
+    return colorbar, colorlim, colorscale

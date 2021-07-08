@@ -16,9 +16,21 @@ from ..names import name
 from ..read import load
 from ..ols.prf import compute_prf_from_parameters
 from ..ols.summary import import_all_ols
+from ..pipelines.ols import import_ols
+from wonambi import Data
+from .surf import plot_surf, AXIS, get_colorscale
 
 
 REGIONS = 'precentral', 'postcentral'
+SCENE = dict(
+    scene=dict(
+        camera=dict(
+            dict(
+                up=dict(x=0, y=1, z=1),  # I cannot adjust more than this
+                center=dict(x=0, y=0, z=0),
+                eye=dict(x=0.3, y=0, z=0.3)
+                )
+            )))
 
 
 def plot_papers(parameters):
@@ -401,6 +413,82 @@ def paper_plot_prf(df):
             )
     return figs
 
+def paper_plot_surf(parameters):
+    plot_dir = name(parameters, 'paper')
+    ieeg_file = Path('/Fridge/users/giovanni/projects/finger_mapping/subjects/sub-ommen/ses-iemu1/ieeg/sub-ommen_ses-iemu1_task-fingermapping_acq-HDgrid_run-1_ieeg.eeg')
 
-def paper_plot_surf():
-    pass
+    df = import_ols(parameters, ieeg_file)
+    elec = load('electrodes', parameters, ieeg_file)
+    pial = load('surface', parameters, ieeg_file)
+
+    for param in ('rsquared', 'onset', 'scale', 'extension loc', 'flexion loc'):
+        param_name = param.replace(' ', '')
+        if param == 'rsquared':
+            colorbar, colorlim, colorscale = get_colorscale(
+                parameters,
+                info='rsquared',
+                clim=(0, 0.55),
+                )
+            dat = Data(array(df['rsquared']), chan=array(df['chan']))
+        else:
+
+            i_chan = (df['rsquared'] >= 0.1)
+            # TODO: include best fit for extension loc and flexion loc
+            dat = Data(array(df[param][i_chan]), chan=array(df['chan'][i_chan]))
+
+            if param.endswith(' loc'):
+                colorbar, colorlim, colorscale = get_colorscale(
+                    parameters,
+                    info='finger',
+                    )
+            elif param == 'onset':
+                colorbar, colorlim, colorscale = get_colorscale(
+                    parameters,
+                    clim=(-0.5, 0)
+                    )
+            elif param == 'scale':
+                colorbar, colorlim, colorscale = get_colorscale(
+                    parameters,
+                    clim=(0, 0.4)
+                    )
+
+        fig = plot_surf(parameters, dat, elec, pial=pial, clim=colorlim, colorscale=colorscale)
+
+        fig.update_layout(LAYOUT)
+        fig.update_layout(SCENE)
+        fig.data[1].marker.showscale = False
+        fig_name = str(plot_dir / f'surf_{param_name}.png')
+        fig.write_image(fig_name, scale=2)
+        run(['convert', fig_name, '-trim', fig_name])
+
+        colorbar = dict(
+            titleside="top",
+            ticks="outside",
+            thickness=15,
+            )
+
+        fig = go.Figure(
+            data=go.Scatter(
+                x=(0, ),
+                y=(1, ),
+                mode='markers',
+                hoverinfo='text',
+                marker=dict(
+                    size=0.00001,
+                    colorscale=colorscale,
+                    showscale=True,
+                    cmin=colorlim[0],
+                    cmax=colorlim[1],
+                    colorbar=colorbar,
+                ),
+            ),
+            layout=go.Layout(
+                height=300,
+                width=200,
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                xaxis=AXIS,
+                yaxis=AXIS,
+                )
+        )
+        fig.write_image(str(plot_dir / f'surf_{param_name}_colorbar.svg'))
