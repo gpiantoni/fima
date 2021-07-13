@@ -105,7 +105,7 @@ def get_colorscale(parameters, info=None, clim=None, colorscale=None):
 
     if info == 'finger':
         colorlim = (-1, 5)
-        colorscale = 'Jet'
+        colorscale = 'Jet_r'
         colorbar = dict(
             title="Main Finger",
             titleside="top",

@@ -60,10 +60,7 @@ def plot_papers(parameters):
     for region, fig in zip(REGIONS, figs):
         fig.write_image(str(plot_dir / f'prf_{region}.svg'))
 
-    fig = paper_plot_surf()
-    fig_name = str(plot_dir / 'surf_rsquared.png')
-    fig.write_image(fig_name)
-    run(['convert', fig_name, '-trim', fig_name])
+    paper_plot_surf(parameters)
 
     # takes time
     fig, j = paper_plot_data_prediction(parameters)
@@ -413,6 +410,7 @@ def paper_plot_prf(df):
             )
     return figs
 
+
 def paper_plot_surf(parameters):
     plot_dir = name(parameters, 'paper')
     ieeg_file = Path('/Fridge/users/giovanni/projects/finger_mapping/subjects/sub-ommen/ses-iemu1/ieeg/sub-ommen_ses-iemu1_task-fingermapping_acq-HDgrid_run-1_ieeg.eeg')
@@ -421,7 +419,12 @@ def paper_plot_surf(parameters):
     elec = load('electrodes', parameters, ieeg_file)
     pial = load('surface', parameters, ieeg_file)
 
-    for param in ('rsquared', 'onset', 'loc', 'scale', 'extension loc', 'flexion loc'):
+    cols = ['rsquared', 'onset', 'loc', 'scale', 'extension loc', 'flexion loc']
+    for finger in FINGERS:
+        for mov in ('flexion', 'extension'):
+            cols.append(finger + ' ' + mov)
+
+    for param in cols:
         param_name = param.replace(' ', '')
         if param == 'rsquared':
             colorbar, colorlim, colorscale = get_colorscale(
@@ -430,6 +433,7 @@ def paper_plot_surf(parameters):
                 clim=(0, 0.55),
                 )
             dat = Data(array(df['rsquared']), chan=array(df['chan']))
+
         else:
 
             i_chan = (df['rsquared'] >= 0.1)
@@ -440,6 +444,12 @@ def paper_plot_surf(parameters):
                 colorbar, colorlim, colorscale = get_colorscale(
                     parameters,
                     info='finger',
+                    )
+            if param.endswith(' extension') or param.endswith(' flexion'):
+                colorbar, colorlim, colorscale = get_colorscale(
+                    parameters,
+                    clim=(0, 3),
+                    colorscale='Hot',
                     )
             elif param == 'onset':
                 colorbar, colorlim, colorscale = get_colorscale(
@@ -454,7 +464,7 @@ def paper_plot_surf(parameters):
             elif param == 'loc':
                 colorbar, colorlim, colorscale = get_colorscale(
                     parameters,
-                    clim=(0, 0.3)
+                    clim=(0, 0.3),
                     )
 
         fig = plot_surf(parameters, dat, elec, pial=pial, clim=colorlim, colorscale=colorscale)
