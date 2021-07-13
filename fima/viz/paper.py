@@ -421,7 +421,7 @@ def paper_plot_surf(parameters):
     elec = load('electrodes', parameters, ieeg_file)
     pial = load('surface', parameters, ieeg_file)
 
-    for param in ('rsquared', 'onset', 'scale', 'extension loc', 'flexion loc'):
+    for param in ('rsquared', 'onset', 'loc', 'scale', 'extension loc', 'flexion loc'):
         param_name = param.replace(' ', '')
         if param == 'rsquared':
             colorbar, colorlim, colorscale = get_colorscale(
@@ -449,7 +449,12 @@ def paper_plot_surf(parameters):
             elif param == 'scale':
                 colorbar, colorlim, colorscale = get_colorscale(
                     parameters,
-                    clim=(0, 0.4)
+                    clim=(0, 0.3)
+                    )
+            elif param == 'loc':
+                colorbar, colorlim, colorscale = get_colorscale(
+                    parameters,
+                    clim=(0, 0.3)
                     )
 
         fig = plot_surf(parameters, dat, elec, pial=pial, clim=colorlim, colorscale=colorscale)
