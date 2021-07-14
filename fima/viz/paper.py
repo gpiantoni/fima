@@ -1,12 +1,12 @@
 from pathlib import Path
 from shutil import rmtree
-from numpy import arange, array, ceil, floor, histogram, max, sqrt
+from numpy import arange, array, ceil, floor, histogram, max, sqrt, zeros
 from scipy.stats import norm
 from subprocess import run
 import plotly.graph_objects as go
 
 from ..parameters import FINGER_COLOR, FINGERS_OPEN, FINGERS_CLOSED, FINGERS_EXTENSION, FINGERS_FLEXION, FINGERS
-from .utils import LAYOUT, merge
+from .utils import LAYOUT, merge, TICKFONT
 from .dataglove import plot_dataglove
 from .ols import plot_data_prediction
 from .ols_summary import plot_ols_rsquared
@@ -20,6 +20,8 @@ from ..pipelines.ols import import_ols
 from wonambi import Data
 from .surf import plot_surf, AXIS, get_colorscale
 
+DPmm = 96 / 25.4  # dot per mm
+CONVERT = ['-crop', '2000x2000+2400+1100']
 
 REGIONS = 'precentral', 'postcentral'
 SCENE = dict(
@@ -73,18 +75,17 @@ def plot_papers(parameters):
 def paper_plot_dataglove(parameters):
     ieeg_file = Path('/Fridge/users/giovanni/projects/finger_mapping/subjects/sub-drouwen/ses-iemu1/ieeg/sub-drouwen_ses-iemu1_task-fingermapping_acq-clinical_run-1_ieeg.eeg')
 
-    events = load('events', parameters, ieeg_file, 'cues')
     tsv = load('dataglove', parameters, ieeg_file)
     mov = load('events', parameters, ieeg_file, 'movements')
 
-    fig = plot_dataglove(tsv, events, mov)
+    fig = plot_dataglove(tsv, [], mov)
 
     layout = dict(
-        width=300,
-        height=200,
+        width=int(DPmm * 80),
+        height=int(DPmm * 55),
         xaxis=dict(
             showgrid=False,
-            showline=False,
+            showline=True,
             zerolinewidth=0.5,
             title=dict(
                 text='time (s)',
@@ -137,8 +138,8 @@ def paper_plot_data_prediction(parameters):
     fig = plot_data_prediction(t_plot, result, names)
 
     layout = dict(
-        width=300,
-        height=200,
+        width=int(DPmm * 80),
+        height=int(DPmm * 50),
         xaxis=dict(
             showgrid=False,
             showline=False,
@@ -155,7 +156,7 @@ def paper_plot_data_prediction(parameters):
                 standoff=8,
                 ),
             showgrid=False,
-            showline=False,
+            showline=True,
             zeroline=False,
             range=(-1, 7.5),
             ),
@@ -419,18 +420,27 @@ def paper_plot_surf(parameters):
     elec = load('electrodes', parameters, ieeg_file)
     pial = load('surface', parameters, ieeg_file)
 
-    cols = ['rsquared', 'onset', 'loc', 'scale', 'extension loc', 'flexion loc']
+    cols = ['empty', 'rsquared', 'onset', 'loc', 'scale', 'extension loc', 'flexion loc']
     for finger in FINGERS:
         for mov in ('flexion', 'extension'):
             cols.append(finger + ' ' + mov)
 
     for param in cols:
         param_name = param.replace(' ', '')
-        if param == 'rsquared':
+
+        if param == 'empty':
+            colorbar, colorlim, colorscale = get_colorscale(
+                parameters,
+                colorscale='Greys',
+                clim=(-1, 0),
+                )
+            dat = Data(zeros(len(df)), chan=array(df['chan']))
+
+        elif param == 'rsquared':
             colorbar, colorlim, colorscale = get_colorscale(
                 parameters,
                 info='rsquared',
-                clim=(0, 0.55),
+                clim=(0, 0.7),
                 )
             dat = Data(array(df['rsquared']), chan=array(df['chan']))
 
@@ -473,13 +483,18 @@ def paper_plot_surf(parameters):
         fig.update_layout(SCENE)
         fig.data[1].marker.showscale = False
         fig_name = str(plot_dir / f'surf_{param_name}.png')
-        fig.write_image(fig_name, scale=2)
-        run(['convert', fig_name, '-trim', fig_name])
+        fig.write_image(fig_name, scale=10)
+        if param == 'empty':
+            run(['convert', fig_name, '-trim', fig_name, ])
+        else:
+            run(['convert', fig_name, ] + CONVERT + [fig_name, ])
 
         colorbar = dict(
             titleside="top",
             ticks="outside",
             thickness=15,
+            dtick=0.1,
+            tickfont=TICKFONT,
             )
 
         fig = go.Figure(
