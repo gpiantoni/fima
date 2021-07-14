@@ -216,31 +216,30 @@ def paper_plot_coefficients(parameters, j):
             )
         offset += 5
 
+    col_names = ['constant', ]
+    col_names.extend(FINGERS * 2)
+
     layout = dict(
         showlegend=False,
-        width=300,
-        height=250,
+        width=int(DPmm * 80),
+        height=int(DPmm * 40),
         xaxis=dict(
             tickmode='array',
             tickvals=arange(len(COLS)) + 0.5,
-            ticktext=COLS,
+            ticktext=col_names,
             showgrid=False,
             showline=False,
-            tickangle=-45,
-            title=dict(
-                text='time (s)',
-                standoff=4,
-                ),
+            tickangle=-90,
             ),
         yaxis=dict(
             title=dict(
-                text='Coefficients',
+                text='Weights',
                 standoff=10,
                 ),
             dtick=1,
             showgrid=False,
             showline=False,
-            zeroline=False,
+            zeroline=True,
             ),
         )
 
@@ -329,13 +328,22 @@ def paper_plot_df_time(df, param):
     m = max(h_all) + 5
     layout = dict(
         showlegend=False,
-        width=400,
-        height=200,
+        width=int(DPmm * 80),
+        height=int(DPmm * 50),
         barmode='relative',
+        xaxis=dict(
+            dtick=0.1,
+            showgrid=False,
+            title=dict(
+                text='time (s, 0 = movement onset)',
+                ),
+            ),
         yaxis=dict(
             range=[-m, m],
+            dtick=10,
+            showgrid=False,
             title=dict(
-                text=''
+                text='# channels'
                 ),
             ),
         )
