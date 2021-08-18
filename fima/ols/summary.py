@@ -1,6 +1,7 @@
 from numpy import where
-from pandas import merge, read_csv, concat, MultiIndex, isnull
+from pandas import merge, read_csv, concat, MultiIndex, isnull, DataFrame
 from bidso import file_Core
+from json import load as json_load
 
 from .regressors import compute_canonical
 from ..names import name
@@ -137,3 +138,22 @@ def compute_onset(parameters, row):
 
     i_onset = where(resp >= thresh)[0][0]
     return t[i_onset]
+
+
+def import_ols(parameters, ieeg_file):
+
+    out_dir = name(parameters, 'ols_chan', ieeg_file)
+
+    df = []
+    for json_file in out_dir.glob('*.json'):
+        with json_file.open() as f:
+            j = json_load(f)
+            j['onset'] = compute_onset(parameters, j)
+            df.append(j)
+
+    if len(df) == 0:
+        return
+
+    df = DataFrame(df).sort_values('rsquared', ascending=False).reset_index(drop=True)
+
+    return df

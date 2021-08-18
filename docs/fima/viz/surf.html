@@ -39,45 +39,8 @@ AXIS = dict(
 
 
 def plot_surf(parameters, data, elec, pial=None, info=&#39;activity&#39;, clim=None, colorscale=None):
-    if colorscale is None:
-        colorscale = parameters[&#39;viz&#39;][&#39;colorscale&#39;]
 
-    if info == &#39;finger&#39;:
-        colorlim = (-1, 5)
-        colorbar = dict(
-            title=&#34;Main Finger&#34;,
-            titleside=&#34;top&#34;,
-            tickmode=&#34;array&#34;,
-            tickvals=[0, 1, 2, 3, 4],
-            ticktext=[&#34;Little&#34;, &#39;Ring&#39;, &#39;Middle&#39;, &#39;Index&#39;, &#39;Thumb&#39;],
-            ticks=&#34;outside&#34;
-            )
-
-    else:
-        colorbar = dict(
-            title=info,
-            titleside=&#34;top&#34;,
-            ticks=&#34;outside&#34;
-            )
-
-        if info == &#39;rsquared&#39;:
-            colorlim = (0, 0.70)
-            colorscale = &#39;Hot&#39;
-
-        elif info == &#39;open_v_close&#39;:
-            colorlim = (0, 1)
-
-        elif info == &#39;tstat&#39;:
-            colorlim = (-10, 10)
-
-        elif clim is not None:
-            colorlim = clim
-
-        else:
-            colorlim = (
-                parameters[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;] * -1,
-                parameters[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
-                )
+    colorbar, colorlim, colorscale = get_colorscale(parameters, info=info, clim=clim, colorscale=colorscale)
 
     right_or_left = sign((elec[&#39;x&#39;] &gt; 0).sum() / elec.shape[0] - .5)
 
@@ -120,9 +83,9 @@ def plot_surf(parameters, data, elec, pial=None, info=&#39;activity&#39;, clim=N
 
     traces.append(
         go.Scatter3d(
-            x=elec[&#39;x&#39;], # + right_or_left,
+            x=elec[&#39;x&#39;],
             y=elec[&#39;y&#39;],
-            z=elec[&#39;z&#39;], # + .5,
+            z=elec[&#39;z&#39;],
             text=labels,
             mode=&#39;markers&#39;,
             hoverinfo=&#39;text&#39;,
@@ -159,37 +122,22 @@ def plot_surf(parameters, data, elec, pial=None, info=&#39;activity&#39;, clim=N
             ),
         )
 
-    return fig</code></pre>
-</details>
-</section>
-<section>
-</section>
-<section>
-</section>
-<section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="fima.viz.surf.plot_surf"><code class="name flex">
-<span>def <span class="ident">plot_surf</span></span>(<span>parameters, data, elec, pial=None, info='activity', clim=None, colorscale=None)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def plot_surf(parameters, data, elec, pial=None, info=&#39;activity&#39;, clim=None, colorscale=None):
+    return fig
+
+
+def get_colorscale(parameters, info=None, clim=None, colorscale=None):
     if colorscale is None:
         colorscale = parameters[&#39;viz&#39;][&#39;colorscale&#39;]
 
     if info == &#39;finger&#39;:
         colorlim = (-1, 5)
+        colorscale = &#39;Jet_r&#39;
         colorbar = dict(
             title=&#34;Main Finger&#34;,
             titleside=&#34;top&#34;,
             tickmode=&#34;array&#34;,
             tickvals=[0, 1, 2, 3, 4],
-            ticktext=[&#34;Little&#34;, &#39;Ring&#39;, &#39;Middle&#39;, &#39;Index&#39;, &#39;Thumb&#39;],
+            ticktext=[&#34;Thumb&#34;, &#39;Index&#39;, &#39;Middle&#39;, &#39;Ring&#39;, &#39;Index&#39;],
             ticks=&#34;outside&#34;
             )
 
@@ -210,14 +158,91 @@ def plot_surf(parameters, data, elec, pial=None, info=&#39;activity&#39;, clim=N
         elif info == &#39;tstat&#39;:
             colorlim = (-10, 10)
 
-        elif clim is not None:
-            colorlim = clim
+        else:
+            colorlim = (
+                parameters[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;] * -1,
+                parameters[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
+                )
+
+    if clim is not None:
+        colorlim = clim
+
+    return colorbar, colorlim, colorscale</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="fima.viz.surf.get_colorscale"><code class="name flex">
+<span>def <span class="ident">get_colorscale</span></span>(<span>parameters, info=None, clim=None, colorscale=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_colorscale(parameters, info=None, clim=None, colorscale=None):
+    if colorscale is None:
+        colorscale = parameters[&#39;viz&#39;][&#39;colorscale&#39;]
+
+    if info == &#39;finger&#39;:
+        colorlim = (-1, 5)
+        colorscale = &#39;Jet_r&#39;
+        colorbar = dict(
+            title=&#34;Main Finger&#34;,
+            titleside=&#34;top&#34;,
+            tickmode=&#34;array&#34;,
+            tickvals=[0, 1, 2, 3, 4],
+            ticktext=[&#34;Thumb&#34;, &#39;Index&#39;, &#39;Middle&#39;, &#39;Ring&#39;, &#39;Index&#39;],
+            ticks=&#34;outside&#34;
+            )
+
+    else:
+        colorbar = dict(
+            title=info,
+            titleside=&#34;top&#34;,
+            ticks=&#34;outside&#34;
+            )
+
+        if info == &#39;rsquared&#39;:
+            colorlim = (0, 0.70)
+            colorscale = &#39;Hot&#39;
+
+        elif info == &#39;open_v_close&#39;:
+            colorlim = (0, 1)
+
+        elif info == &#39;tstat&#39;:
+            colorlim = (-10, 10)
 
         else:
             colorlim = (
                 parameters[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;] * -1,
                 parameters[&#39;viz&#39;][&#39;tfr_mean&#39;][&#39;max&#39;],
                 )
+
+    if clim is not None:
+        colorlim = clim
+
+    return colorbar, colorlim, colorscale</code></pre>
+</details>
+</dd>
+<dt id="fima.viz.surf.plot_surf"><code class="name flex">
+<span>def <span class="ident">plot_surf</span></span>(<span>parameters, data, elec, pial=None, info='activity', clim=None, colorscale=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_surf(parameters, data, elec, pial=None, info=&#39;activity&#39;, clim=None, colorscale=None):
+
+    colorbar, colorlim, colorscale = get_colorscale(parameters, info=info, clim=clim, colorscale=colorscale)
 
     right_or_left = sign((elec[&#39;x&#39;] &gt; 0).sum() / elec.shape[0] - .5)
 
@@ -260,9 +285,9 @@ def plot_surf(parameters, data, elec, pial=None, info=&#39;activity&#39;, clim=N
 
     traces.append(
         go.Scatter3d(
-            x=elec[&#39;x&#39;], # + right_or_left,
+            x=elec[&#39;x&#39;],
             y=elec[&#39;y&#39;],
-            z=elec[&#39;z&#39;], # + .5,
+            z=elec[&#39;z&#39;],
             text=labels,
             mode=&#39;markers&#39;,
             hoverinfo=&#39;text&#39;,
@@ -320,6 +345,7 @@ def plot_surf(parameters, data, elec, pial=None, info=&#39;activity&#39;, clim=N
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="fima.viz.surf.get_colorscale" href="#fima.viz.surf.get_colorscale">get_colorscale</a></code></li>
 <li><code><a title="fima.viz.surf.plot_surf" href="#fima.viz.surf.plot_surf">plot_surf</a></code></li>
 </ul>
 </li>

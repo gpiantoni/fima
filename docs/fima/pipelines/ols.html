@@ -26,17 +26,15 @@
 </summary>
 <pre><code class="python">from shutil import rmtree
 from json import dump
-from json import load as json_load
 from logging import getLogger
 from wonambi import Data
-from pandas import DataFrame
 from numpy import nanmin, nanmax, array, arange
 
 from ..read import load
 from ..spectrum.compute import compute_timefreq, get_chantime
 from ..ols.fit import get_max, fit_one_channel
 from ..ols.prf import add_prf_estimates
-from ..ols.summary import import_all_ols, compute_onset
+from ..ols.summary import import_all_ols, compute_onset, import_ols
 from ..viz import to_div, to_html
 from ..viz.surf import plot_surf
 from ..viz.ols import plot_coefficient, plot_data_prediction
@@ -185,37 +183,17 @@ def pipeline_ols_summary(parameters, ieeg_file):
         lg.warning(f&#39;No channels had a fit better than threshold {parameters[&#34;ols&#34;][&#34;threshold&#34;]}&#39;)
         return
 
-    i_chan = (df[&#39;rsquared&#39;] &gt;= 0.1)
     params = set(df) - {&#39;rsquared&#39;, &#39;chan&#39;}
     for param in params:
-        x = df[param][i_chan]
+        x = df[param]
 
-        dat = Data(array(x), chan=array(df[&#39;chan&#39;][i_chan]))
+        dat = Data(array(x), chan=array(df[&#39;chan&#39;]))
         if param.endswith(&#39; loc&#39;):
             info = &#39;finger&#39;
         else:
             info = None
         fig = plot_surf(parameters, dat, elec, pial=pial, info=info, clim=(nanmin(x), nanmax(x)), colorscale=&#39;Hot&#39;)
         to_html([to_div(fig), ], plots_dir / f&#39;{param.replace(&#34; &#34;, &#34;_&#34;)}.html&#39;)
-
-
-def import_ols(parameters, ieeg_file):
-
-    out_dir = name(parameters, &#39;ols_chan&#39;, ieeg_file)
-
-    df = []
-    for json_file in out_dir.glob(&#39;*.json&#39;):
-        with json_file.open() as f:
-            j = json_load(f)
-            j[&#39;onset&#39;] = compute_onset(parameters, j)
-            df.append(j)
-
-    if len(df) == 0:
-        return
-
-    df = DataFrame(df).sort_values(&#39;rsquared&#39;, ascending=False).reset_index(drop=True)
-
-    return df
 
 
 def pipeline_ols_prf(parameters, ieeg_file):
@@ -233,34 +211,6 @@ def pipeline_ols_prf(parameters, ieeg_file):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="fima.pipelines.ols.import_ols"><code class="name flex">
-<span>def <span class="ident">import_ols</span></span>(<span>parameters, ieeg_file)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def import_ols(parameters, ieeg_file):
-
-    out_dir = name(parameters, &#39;ols_chan&#39;, ieeg_file)
-
-    df = []
-    for json_file in out_dir.glob(&#39;*.json&#39;):
-        with json_file.open() as f:
-            j = json_load(f)
-            j[&#39;onset&#39;] = compute_onset(parameters, j)
-            df.append(j)
-
-    if len(df) == 0:
-        return
-
-    df = DataFrame(df).sort_values(&#39;rsquared&#39;, ascending=False).reset_index(drop=True)
-
-    return df</code></pre>
-</details>
-</dd>
 <dt id="fima.pipelines.ols.pipeline_ols"><code class="name flex">
 <span>def <span class="ident">pipeline_ols</span></span>(<span>parameters, ieeg_file)</span>
 </code></dt>
@@ -453,12 +403,11 @@ def pipeline_ols_prf(parameters, ieeg_file):
         lg.warning(f&#39;No channels had a fit better than threshold {parameters[&#34;ols&#34;][&#34;threshold&#34;]}&#39;)
         return
 
-    i_chan = (df[&#39;rsquared&#39;] &gt;= 0.1)
     params = set(df) - {&#39;rsquared&#39;, &#39;chan&#39;}
     for param in params:
-        x = df[param][i_chan]
+        x = df[param]
 
-        dat = Data(array(x), chan=array(df[&#39;chan&#39;][i_chan]))
+        dat = Data(array(x), chan=array(df[&#39;chan&#39;]))
         if param.endswith(&#39; loc&#39;):
             info = &#39;finger&#39;
         else:
@@ -485,7 +434,6 @@ def pipeline_ols_prf(parameters, ieeg_file):
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="fima.pipelines.ols.import_ols" href="#fima.pipelines.ols.import_ols">import_ols</a></code></li>
 <li><code><a title="fima.pipelines.ols.pipeline_ols" href="#fima.pipelines.ols.pipeline_ols">pipeline_ols</a></code></li>
 <li><code><a title="fima.pipelines.ols.pipeline_ols_all" href="#fima.pipelines.ols.pipeline_ols_all">pipeline_ols_all</a></code></li>
 <li><code><a title="fima.pipelines.ols.pipeline_ols_allchan" href="#fima.pipelines.ols.pipeline_ols_allchan">pipeline_ols_allchan</a></code></li>

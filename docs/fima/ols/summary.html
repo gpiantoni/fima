@@ -25,8 +25,9 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from numpy import where
-from pandas import merge, read_csv, concat, MultiIndex, isnull
+from pandas import merge, read_csv, concat, MultiIndex, isnull, DataFrame
 from bidso import file_Core
+from json import load as json_load
 
 from .regressors import compute_canonical
 from ..names import name
@@ -162,7 +163,26 @@ def compute_onset(parameters, row):
     thresh = resp.max() * parameters[&#39;ols&#39;][&#39;results&#39;][&#39;onset_percent&#39;]
 
     i_onset = where(resp &gt;= thresh)[0][0]
-    return t[i_onset]</code></pre>
+    return t[i_onset]
+
+
+def import_ols(parameters, ieeg_file):
+
+    out_dir = name(parameters, &#39;ols_chan&#39;, ieeg_file)
+
+    df = []
+    for json_file in out_dir.glob(&#39;*.json&#39;):
+        with json_file.open() as f:
+            j = json_load(f)
+            j[&#39;onset&#39;] = compute_onset(parameters, j)
+            df.append(j)
+
+    if len(df) == 0:
+        return
+
+    df = DataFrame(df).sort_values(&#39;rsquared&#39;, ascending=False).reset_index(drop=True)
+
+    return df</code></pre>
 </details>
 </section>
 <section>
@@ -315,6 +335,34 @@ certain threshold (percent of the max)</p>
     return regions</code></pre>
 </details>
 </dd>
+<dt id="fima.ols.summary.import_ols"><code class="name flex">
+<span>def <span class="ident">import_ols</span></span>(<span>parameters, ieeg_file)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def import_ols(parameters, ieeg_file):
+
+    out_dir = name(parameters, &#39;ols_chan&#39;, ieeg_file)
+
+    df = []
+    for json_file in out_dir.glob(&#39;*.json&#39;):
+        with json_file.open() as f:
+            j = json_load(f)
+            j[&#39;onset&#39;] = compute_onset(parameters, j)
+            df.append(j)
+
+    if len(df) == 0:
+        return
+
+    df = DataFrame(df).sort_values(&#39;rsquared&#39;, ascending=False).reset_index(drop=True)
+
+    return df</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
@@ -337,6 +385,7 @@ certain threshold (percent of the max)</p>
 <li><code><a title="fima.ols.summary.import_all_ols" href="#fima.ols.summary.import_all_ols">import_all_ols</a></code></li>
 <li><code><a title="fima.ols.summary.import_df_ols" href="#fima.ols.summary.import_df_ols">import_df_ols</a></code></li>
 <li><code><a title="fima.ols.summary.import_df_regions" href="#fima.ols.summary.import_df_regions">import_df_regions</a></code></li>
+<li><code><a title="fima.ols.summary.import_ols" href="#fima.ols.summary.import_ols">import_ols</a></code></li>
 </ul>
 </li>
 </ul>

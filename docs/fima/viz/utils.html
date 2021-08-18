@@ -36,6 +36,17 @@ from collections import Mapping
 
 lg = getLogger(__name__)
 
+FONT = dict(
+    family=&#39;verdana&#39;,
+    size=9.34,
+    color=&#39;#000&#39;,
+    )
+
+TICKFONT = dict(
+    family=&#39;verdana&#39;,
+    size=9.34,
+    color=&#39;#000&#39;,
+    )
 
 LIGHT_COLOR = &#39;lightGray&#39;
 
@@ -50,35 +61,28 @@ LAYOUT = dict(
         pad=0,
         ),
     title=dict(
-        font=dict(
-            size=14,
-            ),
+        font=FONT,
+        ),
+    legend=dict(
+        font=TICKFONT,
         ),
     xaxis=dict(
         title=dict(
-            font=dict(
-                size=14,
-                ),
+            font=FONT,
             ),
         zerolinecolor=&#39;black&#39;,
         linecolor=&#39;black&#39;,
         gridcolor=LIGHT_COLOR,
-        tickfont=dict(
-            size=11,
-            ),
+        tickfont=TICKFONT,
         ),
     yaxis=dict(
         title=dict(
-            font=dict(
-                size=14,
-                ),
+            font=FONT,
             ),
         zerolinecolor=&#39;black&#39;,
         linecolor=&#39;black&#39;,
         gridcolor=LIGHT_COLOR,
-        tickfont=dict(
-            size=11,
-            ),
+        tickfont=TICKFONT
         ),
     )
 

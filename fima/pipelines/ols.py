@@ -1,16 +1,14 @@
 from shutil import rmtree
 from json import dump
-from json import load as json_load
 from logging import getLogger
 from wonambi import Data
-from pandas import DataFrame
 from numpy import nanmin, nanmax, array, arange
 
 from ..read import load
 from ..spectrum.compute import compute_timefreq, get_chantime
 from ..ols.fit import get_max, fit_one_channel
 from ..ols.prf import add_prf_estimates
-from ..ols.summary import import_all_ols, compute_onset
+from ..ols.summary import import_all_ols, compute_onset, import_ols
 from ..viz import to_div, to_html
 from ..viz.surf import plot_surf
 from ..viz.ols import plot_coefficient, plot_data_prediction
@@ -170,25 +168,6 @@ def pipeline_ols_summary(parameters, ieeg_file):
             info = None
         fig = plot_surf(parameters, dat, elec, pial=pial, info=info, clim=(nanmin(x), nanmax(x)), colorscale='Hot')
         to_html([to_div(fig), ], plots_dir / f'{param.replace(" ", "_")}.html')
-
-
-def import_ols(parameters, ieeg_file):
-
-    out_dir = name(parameters, 'ols_chan', ieeg_file)
-
-    df = []
-    for json_file in out_dir.glob('*.json'):
-        with json_file.open() as f:
-            j = json_load(f)
-            j['onset'] = compute_onset(parameters, j)
-            df.append(j)
-
-    if len(df) == 0:
-        return
-
-    df = DataFrame(df).sort_values('rsquared', ascending=False).reset_index(drop=True)
-
-    return df
 
 
 def pipeline_ols_prf(parameters, ieeg_file):

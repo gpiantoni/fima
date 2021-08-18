@@ -26,13 +26,13 @@
 </summary>
 <pre><code class="python">from pathlib import Path
 from shutil import rmtree
-from numpy import arange, array, ceil, floor, histogram, max, sqrt
+from numpy import arange, array, ceil, floor, histogram, max, sqrt, zeros
 from scipy.stats import norm
 from subprocess import run
 import plotly.graph_objects as go
 
 from ..parameters import FINGER_COLOR, FINGERS_OPEN, FINGERS_CLOSED, FINGERS_EXTENSION, FINGERS_FLEXION, FINGERS
-from .utils import LAYOUT, merge
+from .utils import LAYOUT, merge, TICKFONT
 from .dataglove import plot_dataglove
 from .ols import plot_data_prediction
 from .ols_summary import plot_ols_rsquared
@@ -41,10 +41,23 @@ from ..spectrum import compute_timefreq, get_chantime
 from ..names import name
 from ..read import load
 from ..ols.prf import compute_prf_from_parameters
-from ..ols.summary import import_all_ols
+from ..ols.summary import import_all_ols, import_ols
+from wonambi import Data
+from .surf import plot_surf, AXIS, get_colorscale
 
+DPmm = 96 / 25.4  # dot per mm
+CONVERT = [&#39;-crop&#39;, &#39;2000x2000+2400+1100&#39;]
 
 REGIONS = &#39;precentral&#39;, &#39;postcentral&#39;
+SCENE = dict(
+    scene=dict(
+        camera=dict(
+            dict(
+                up=dict(x=0, y=1, z=1),  # I cannot adjust more than this
+                center=dict(x=0, y=0, z=0),
+                eye=dict(x=0.3, y=0, z=0.3)
+                )
+            )))
 
 
 def plot_papers(parameters):
@@ -74,10 +87,7 @@ def plot_papers(parameters):
     for region, fig in zip(REGIONS, figs):
         fig.write_image(str(plot_dir / f&#39;prf_{region}.svg&#39;))
 
-    fig = paper_plot_surf()
-    fig_name = str(plot_dir / &#39;surf_rsquared.png&#39;)
-    fig.write_image(fig_name)
-    run([&#39;convert&#39;, fig_name, &#39;-trim&#39;, fig_name])
+    paper_plot_surf(parameters)
 
     # takes time
     fig, j = paper_plot_data_prediction(parameters)
@@ -90,18 +100,17 @@ def plot_papers(parameters):
 def paper_plot_dataglove(parameters):
     ieeg_file = Path(&#39;/Fridge/users/giovanni/projects/finger_mapping/subjects/sub-drouwen/ses-iemu1/ieeg/sub-drouwen_ses-iemu1_task-fingermapping_acq-clinical_run-1_ieeg.eeg&#39;)
 
-    events = load(&#39;events&#39;, parameters, ieeg_file, &#39;cues&#39;)
     tsv = load(&#39;dataglove&#39;, parameters, ieeg_file)
     mov = load(&#39;events&#39;, parameters, ieeg_file, &#39;movements&#39;)
 
-    fig = plot_dataglove(tsv, events, mov)
+    fig = plot_dataglove(tsv, [], mov)
 
     layout = dict(
-        width=300,
-        height=200,
+        width=int(DPmm * 80),
+        height=int(DPmm * 55),
         xaxis=dict(
             showgrid=False,
-            showline=False,
+            showline=True,
             zerolinewidth=0.5,
             title=dict(
                 text=&#39;time (s)&#39;,
@@ -154,8 +163,8 @@ def paper_plot_data_prediction(parameters):
     fig = plot_data_prediction(t_plot, result, names)
 
     layout = dict(
-        width=300,
-        height=200,
+        width=int(DPmm * 80),
+        height=int(DPmm * 50),
         xaxis=dict(
             showgrid=False,
             showline=False,
@@ -172,7 +181,7 @@ def paper_plot_data_prediction(parameters):
                 standoff=8,
                 ),
             showgrid=False,
-            showline=False,
+            showline=True,
             zeroline=False,
             range=(-1, 7.5),
             ),
@@ -232,31 +241,30 @@ def paper_plot_coefficients(parameters, j):
             )
         offset += 5
 
+    col_names = [&#39;constant&#39;, ]
+    col_names.extend(FINGERS * 2)
+
     layout = dict(
         showlegend=False,
-        width=300,
-        height=250,
+        width=int(DPmm * 80),
+        height=int(DPmm * 40),
         xaxis=dict(
             tickmode=&#39;array&#39;,
             tickvals=arange(len(COLS)) + 0.5,
-            ticktext=COLS,
+            ticktext=col_names,
             showgrid=False,
             showline=False,
-            tickangle=-45,
-            title=dict(
-                text=&#39;time (s)&#39;,
-                standoff=4,
-                ),
+            tickangle=-90,
             ),
         yaxis=dict(
             title=dict(
-                text=&#39;Coefficients&#39;,
+                text=&#39;Weights&#39;,
                 standoff=10,
                 ),
             dtick=1,
             showgrid=False,
             showline=False,
-            zeroline=False,
+            zeroline=True,
             ),
         )
 
@@ -310,7 +318,7 @@ def paper_plot_df_time(df, param):
             ),
         )
 
-    i_rsquared = df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt; 0.1
+    i_rsquared = df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt; param[&#39;ols&#39;][&#39;results&#39;][&#39;min_rsquared&#39;]
     i_region = df[&#39;channel&#39;][&#39;DKTatlas&#39;].isin(REGIONS)
     y = df[i_rsquared &amp; i_region][&#39;estimate&#39;][param]
 
@@ -345,13 +353,22 @@ def paper_plot_df_time(df, param):
     m = max(h_all) + 5
     layout = dict(
         showlegend=False,
-        width=400,
-        height=200,
+        width=int(DPmm * 80),
+        height=int(DPmm * 50),
         barmode=&#39;relative&#39;,
+        xaxis=dict(
+            dtick=0.1,
+            showgrid=False,
+            title=dict(
+                text=&#39;time (s, 0 = movement onset)&#39;,
+                ),
+            ),
         yaxis=dict(
             range=[-m, m],
+            dtick=10,
+            showgrid=False,
             title=dict(
-                text=&#39;&#39;
+                text=&#39;# channels&#39;
                 ),
             ),
         )
@@ -364,11 +381,11 @@ def paper_plot_df_time(df, param):
     return fig
 
 
-def paper_plot_prf(df):
+def paper_plot_prf(df, param):
 
     pick_finger = lambda v: int(floor(v + 0.5))
     figs = []
-    i_rsquared = df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1  # TODO: in parameters
+    i_rsquared = df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= param[&#39;ols&#39;][&#39;results&#39;][&#39;min_rsquared&#39;]
 
     for region in REGIONS:
         i_region = df[&#39;channel&#39;][&#39;DKTatlas&#39;] == region
@@ -428,8 +445,116 @@ def paper_plot_prf(df):
     return figs
 
 
-def paper_plot_surf():
-    pass</code></pre>
+def paper_plot_surf(parameters):
+    plot_dir = name(parameters, &#39;paper&#39;)
+    ieeg_file = Path(&#39;/Fridge/users/giovanni/projects/finger_mapping/subjects/sub-ommen/ses-iemu1/ieeg/sub-ommen_ses-iemu1_task-fingermapping_acq-HDgrid_run-1_ieeg.eeg&#39;)
+
+    df = import_ols(parameters, ieeg_file)
+    elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
+    pial = load(&#39;surface&#39;, parameters, ieeg_file)
+
+    cols = [&#39;empty&#39;, &#39;rsquared&#39;, &#39;onset&#39;, &#39;loc&#39;, &#39;scale&#39;, &#39;extension loc&#39;, &#39;flexion loc&#39;]
+    for finger in FINGERS:
+        for mov in (&#39;flexion&#39;, &#39;extension&#39;):
+            cols.append(finger + &#39; &#39; + mov)
+
+    for param in cols:
+        param_name = param.replace(&#39; &#39;, &#39;&#39;)
+
+        if param == &#39;empty&#39;:
+            colorbar, colorlim, colorscale = get_colorscale(
+                parameters,
+                colorscale=&#39;Greys&#39;,
+                clim=(-1, 0),
+                )
+            dat = Data(zeros(len(df)), chan=array(df[&#39;chan&#39;]))
+
+        elif param == &#39;rsquared&#39;:
+            colorbar, colorlim, colorscale = get_colorscale(
+                parameters,
+                info=&#39;rsquared&#39;,
+                clim=(0, 0.7),
+                )
+            dat = Data(array(df[&#39;rsquared&#39;]), chan=array(df[&#39;chan&#39;]))
+
+        else:
+
+            i_chan = (df[&#39;rsquared&#39;] &gt;= param[&#39;ols&#39;][&#39;results&#39;][&#39;min_rsquared&#39;])
+            # TODO: include best fit for extension loc and flexion loc
+            dat = Data(array(df[param][i_chan]), chan=array(df[&#39;chan&#39;][i_chan]))
+
+            if param.endswith(&#39; loc&#39;):
+                colorbar, colorlim, colorscale = get_colorscale(
+                    parameters,
+                    info=&#39;finger&#39;,
+                    )
+            if param.endswith(&#39; extension&#39;) or param.endswith(&#39; flexion&#39;):
+                colorbar, colorlim, colorscale = get_colorscale(
+                    parameters,
+                    clim=(0, 3),
+                    colorscale=&#39;Hot&#39;,
+                    )
+            elif param == &#39;onset&#39;:
+                colorbar, colorlim, colorscale = get_colorscale(
+                    parameters,
+                    clim=(-0.5, 0)
+                    )
+            elif param == &#39;scale&#39;:
+                colorbar, colorlim, colorscale = get_colorscale(
+                    parameters,
+                    clim=(0, 0.3)
+                    )
+            elif param == &#39;loc&#39;:
+                colorbar, colorlim, colorscale = get_colorscale(
+                    parameters,
+                    clim=(0, 0.3),
+                    )
+
+        fig = plot_surf(parameters, dat, elec, pial=pial, clim=colorlim, colorscale=colorscale)
+
+        fig.update_layout(LAYOUT)
+        fig.update_layout(SCENE)
+        fig.data[1].marker.showscale = False
+        fig_name = str(plot_dir / f&#39;surf_{param_name}.png&#39;)
+        fig.write_image(fig_name, scale=10)
+        if param == &#39;empty&#39;:
+            run([&#39;convert&#39;, fig_name, &#39;-trim&#39;, fig_name, ])
+        else:
+            run([&#39;convert&#39;, fig_name, ] + CONVERT + [fig_name, ])
+
+        colorbar = dict(
+            titleside=&#34;top&#34;,
+            ticks=&#34;outside&#34;,
+            thickness=15,
+            dtick=0.1,
+            tickfont=TICKFONT,
+            )
+
+        fig = go.Figure(
+            data=go.Scatter(
+                x=(0, ),
+                y=(1, ),
+                mode=&#39;markers&#39;,
+                hoverinfo=&#39;text&#39;,
+                marker=dict(
+                    size=0.00001,
+                    colorscale=colorscale,
+                    showscale=True,
+                    cmin=colorlim[0],
+                    cmax=colorlim[1],
+                    colorbar=colorbar,
+                ),
+            ),
+            layout=go.Layout(
+                height=300,
+                width=200,
+                paper_bgcolor=&#39;rgba(0,0,0,0)&#39;,
+                plot_bgcolor=&#39;rgba(0,0,0,0)&#39;,
+                xaxis=AXIS,
+                yaxis=AXIS,
+                )
+        )
+        fig.write_image(str(plot_dir / f&#39;surf_{param_name}_colorbar.svg&#39;))</code></pre>
 </details>
 </section>
 <section>
@@ -499,31 +624,30 @@ def paper_plot_surf():
             )
         offset += 5
 
+    col_names = [&#39;constant&#39;, ]
+    col_names.extend(FINGERS * 2)
+
     layout = dict(
         showlegend=False,
-        width=300,
-        height=250,
+        width=int(DPmm * 80),
+        height=int(DPmm * 40),
         xaxis=dict(
             tickmode=&#39;array&#39;,
             tickvals=arange(len(COLS)) + 0.5,
-            ticktext=COLS,
+            ticktext=col_names,
             showgrid=False,
             showline=False,
-            tickangle=-45,
-            title=dict(
-                text=&#39;time (s)&#39;,
-                standoff=4,
-                ),
+            tickangle=-90,
             ),
         yaxis=dict(
             title=dict(
-                text=&#39;Coefficients&#39;,
+                text=&#39;Weights&#39;,
                 standoff=10,
                 ),
             dtick=1,
             showgrid=False,
             showline=False,
-            zeroline=False,
+            zeroline=True,
             ),
         )
 
@@ -575,8 +699,8 @@ def paper_plot_surf():
     fig = plot_data_prediction(t_plot, result, names)
 
     layout = dict(
-        width=300,
-        height=200,
+        width=int(DPmm * 80),
+        height=int(DPmm * 50),
         xaxis=dict(
             showgrid=False,
             showline=False,
@@ -593,7 +717,7 @@ def paper_plot_surf():
                 standoff=8,
                 ),
             showgrid=False,
-            showline=False,
+            showline=True,
             zeroline=False,
             range=(-1, 7.5),
             ),
@@ -614,18 +738,17 @@ def paper_plot_surf():
 <pre><code class="python">def paper_plot_dataglove(parameters):
     ieeg_file = Path(&#39;/Fridge/users/giovanni/projects/finger_mapping/subjects/sub-drouwen/ses-iemu1/ieeg/sub-drouwen_ses-iemu1_task-fingermapping_acq-clinical_run-1_ieeg.eeg&#39;)
 
-    events = load(&#39;events&#39;, parameters, ieeg_file, &#39;cues&#39;)
     tsv = load(&#39;dataglove&#39;, parameters, ieeg_file)
     mov = load(&#39;events&#39;, parameters, ieeg_file, &#39;movements&#39;)
 
-    fig = plot_dataglove(tsv, events, mov)
+    fig = plot_dataglove(tsv, [], mov)
 
     layout = dict(
-        width=300,
-        height=200,
+        width=int(DPmm * 80),
+        height=int(DPmm * 55),
         xaxis=dict(
             showgrid=False,
-            showline=False,
+            showline=True,
             zerolinewidth=0.5,
             title=dict(
                 text=&#39;time (s)&#39;,
@@ -665,7 +788,7 @@ def paper_plot_surf():
             ),
         )
 
-    i_rsquared = df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt; 0.1
+    i_rsquared = df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt; param[&#39;ols&#39;][&#39;results&#39;][&#39;min_rsquared&#39;]
     i_region = df[&#39;channel&#39;][&#39;DKTatlas&#39;].isin(REGIONS)
     y = df[i_rsquared &amp; i_region][&#39;estimate&#39;][param]
 
@@ -700,13 +823,22 @@ def paper_plot_surf():
     m = max(h_all) + 5
     layout = dict(
         showlegend=False,
-        width=400,
-        height=200,
+        width=int(DPmm * 80),
+        height=int(DPmm * 50),
         barmode=&#39;relative&#39;,
+        xaxis=dict(
+            dtick=0.1,
+            showgrid=False,
+            title=dict(
+                text=&#39;time (s, 0 = movement onset)&#39;,
+                ),
+            ),
         yaxis=dict(
             range=[-m, m],
+            dtick=10,
+            showgrid=False,
             title=dict(
-                text=&#39;&#39;
+                text=&#39;# channels&#39;
                 ),
             ),
         )
@@ -720,7 +852,7 @@ def paper_plot_surf():
 </details>
 </dd>
 <dt id="fima.viz.paper.paper_plot_prf"><code class="name flex">
-<span>def <span class="ident">paper_plot_prf</span></span>(<span>df)</span>
+<span>def <span class="ident">paper_plot_prf</span></span>(<span>df, param)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -728,11 +860,11 @@ def paper_plot_surf():
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def paper_plot_prf(df):
+<pre><code class="python">def paper_plot_prf(df, param):
 
     pick_finger = lambda v: int(floor(v + 0.5))
     figs = []
-    i_rsquared = df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= 0.1  # TODO: in parameters
+    i_rsquared = df[&#39;estimate&#39;][&#39;rsquared&#39;] &gt;= param[&#39;ols&#39;][&#39;results&#39;][&#39;min_rsquared&#39;]
 
     for region in REGIONS:
         i_region = df[&#39;channel&#39;][&#39;DKTatlas&#39;] == region
@@ -835,7 +967,7 @@ def paper_plot_surf():
 </details>
 </dd>
 <dt id="fima.viz.paper.paper_plot_surf"><code class="name flex">
-<span>def <span class="ident">paper_plot_surf</span></span>(<span>)</span>
+<span>def <span class="ident">paper_plot_surf</span></span>(<span>parameters)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -843,8 +975,116 @@ def paper_plot_surf():
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def paper_plot_surf():
-    pass</code></pre>
+<pre><code class="python">def paper_plot_surf(parameters):
+    plot_dir = name(parameters, &#39;paper&#39;)
+    ieeg_file = Path(&#39;/Fridge/users/giovanni/projects/finger_mapping/subjects/sub-ommen/ses-iemu1/ieeg/sub-ommen_ses-iemu1_task-fingermapping_acq-HDgrid_run-1_ieeg.eeg&#39;)
+
+    df = import_ols(parameters, ieeg_file)
+    elec = load(&#39;electrodes&#39;, parameters, ieeg_file)
+    pial = load(&#39;surface&#39;, parameters, ieeg_file)
+
+    cols = [&#39;empty&#39;, &#39;rsquared&#39;, &#39;onset&#39;, &#39;loc&#39;, &#39;scale&#39;, &#39;extension loc&#39;, &#39;flexion loc&#39;]
+    for finger in FINGERS:
+        for mov in (&#39;flexion&#39;, &#39;extension&#39;):
+            cols.append(finger + &#39; &#39; + mov)
+
+    for param in cols:
+        param_name = param.replace(&#39; &#39;, &#39;&#39;)
+
+        if param == &#39;empty&#39;:
+            colorbar, colorlim, colorscale = get_colorscale(
+                parameters,
+                colorscale=&#39;Greys&#39;,
+                clim=(-1, 0),
+                )
+            dat = Data(zeros(len(df)), chan=array(df[&#39;chan&#39;]))
+
+        elif param == &#39;rsquared&#39;:
+            colorbar, colorlim, colorscale = get_colorscale(
+                parameters,
+                info=&#39;rsquared&#39;,
+                clim=(0, 0.7),
+                )
+            dat = Data(array(df[&#39;rsquared&#39;]), chan=array(df[&#39;chan&#39;]))
+
+        else:
+
+            i_chan = (df[&#39;rsquared&#39;] &gt;= param[&#39;ols&#39;][&#39;results&#39;][&#39;min_rsquared&#39;])
+            # TODO: include best fit for extension loc and flexion loc
+            dat = Data(array(df[param][i_chan]), chan=array(df[&#39;chan&#39;][i_chan]))
+
+            if param.endswith(&#39; loc&#39;):
+                colorbar, colorlim, colorscale = get_colorscale(
+                    parameters,
+                    info=&#39;finger&#39;,
+                    )
+            if param.endswith(&#39; extension&#39;) or param.endswith(&#39; flexion&#39;):
+                colorbar, colorlim, colorscale = get_colorscale(
+                    parameters,
+                    clim=(0, 3),
+                    colorscale=&#39;Hot&#39;,
+                    )
+            elif param == &#39;onset&#39;:
+                colorbar, colorlim, colorscale = get_colorscale(
+                    parameters,
+                    clim=(-0.5, 0)
+                    )
+            elif param == &#39;scale&#39;:
+                colorbar, colorlim, colorscale = get_colorscale(
+                    parameters,
+                    clim=(0, 0.3)
+                    )
+            elif param == &#39;loc&#39;:
+                colorbar, colorlim, colorscale = get_colorscale(
+                    parameters,
+                    clim=(0, 0.3),
+                    )
+
+        fig = plot_surf(parameters, dat, elec, pial=pial, clim=colorlim, colorscale=colorscale)
+
+        fig.update_layout(LAYOUT)
+        fig.update_layout(SCENE)
+        fig.data[1].marker.showscale = False
+        fig_name = str(plot_dir / f&#39;surf_{param_name}.png&#39;)
+        fig.write_image(fig_name, scale=10)
+        if param == &#39;empty&#39;:
+            run([&#39;convert&#39;, fig_name, &#39;-trim&#39;, fig_name, ])
+        else:
+            run([&#39;convert&#39;, fig_name, ] + CONVERT + [fig_name, ])
+
+        colorbar = dict(
+            titleside=&#34;top&#34;,
+            ticks=&#34;outside&#34;,
+            thickness=15,
+            dtick=0.1,
+            tickfont=TICKFONT,
+            )
+
+        fig = go.Figure(
+            data=go.Scatter(
+                x=(0, ),
+                y=(1, ),
+                mode=&#39;markers&#39;,
+                hoverinfo=&#39;text&#39;,
+                marker=dict(
+                    size=0.00001,
+                    colorscale=colorscale,
+                    showscale=True,
+                    cmin=colorlim[0],
+                    cmax=colorlim[1],
+                    colorbar=colorbar,
+                ),
+            ),
+            layout=go.Layout(
+                height=300,
+                width=200,
+                paper_bgcolor=&#39;rgba(0,0,0,0)&#39;,
+                plot_bgcolor=&#39;rgba(0,0,0,0)&#39;,
+                xaxis=AXIS,
+                yaxis=AXIS,
+                )
+        )
+        fig.write_image(str(plot_dir / f&#39;surf_{param_name}_colorbar.svg&#39;))</code></pre>
 </details>
 </dd>
 <dt id="fima.viz.paper.plot_papers"><code class="name flex">
@@ -883,10 +1123,7 @@ def paper_plot_surf():
     for region, fig in zip(REGIONS, figs):
         fig.write_image(str(plot_dir / f&#39;prf_{region}.svg&#39;))
 
-    fig = paper_plot_surf()
-    fig_name = str(plot_dir / &#39;surf_rsquared.png&#39;)
-    fig.write_image(fig_name)
-    run([&#39;convert&#39;, fig_name, &#39;-trim&#39;, fig_name])
+    paper_plot_surf(parameters)
 
     # takes time
     fig, j = paper_plot_data_prediction(parameters)

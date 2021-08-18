@@ -15,8 +15,7 @@ from ..spectrum import compute_timefreq, get_chantime
 from ..names import name
 from ..read import load
 from ..ols.prf import compute_prf_from_parameters
-from ..ols.summary import import_all_ols
-from ..pipelines.ols import import_ols
+from ..ols.summary import import_all_ols, import_ols
 from wonambi import Data
 from .surf import plot_surf, AXIS, get_colorscale
 
@@ -356,7 +355,7 @@ def paper_plot_df_time(df, param):
     return fig
 
 
-def paper_plot_prf(df):
+def paper_plot_prf(df, param):
 
     pick_finger = lambda v: int(floor(v + 0.5))
     figs = []
