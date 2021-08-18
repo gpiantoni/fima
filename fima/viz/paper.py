@@ -293,7 +293,7 @@ def paper_plot_df_time(df, param):
             ),
         )
 
-    i_rsquared = df['estimate']['rsquared'] > 0.1
+    i_rsquared = df['estimate']['rsquared'] > param['ols']['results']['min_rsquared']
     i_region = df['channel']['DKTatlas'].isin(REGIONS)
     y = df[i_rsquared & i_region]['estimate'][param]
 
@@ -360,7 +360,7 @@ def paper_plot_prf(df):
 
     pick_finger = lambda v: int(floor(v + 0.5))
     figs = []
-    i_rsquared = df['estimate']['rsquared'] >= 0.1  # TODO: in parameters
+    i_rsquared = df['estimate']['rsquared'] >= param['ols']['results']['min_rsquared']
 
     for region in REGIONS:
         i_region = df['channel']['DKTatlas'] == region
@@ -454,7 +454,7 @@ def paper_plot_surf(parameters):
 
         else:
 
-            i_chan = (df['rsquared'] >= 0.1)
+            i_chan = (df['rsquared'] >= param['ols']['results']['min_rsquared'])
             # TODO: include best fit for extension loc and flexion loc
             dat = Data(array(df[param][i_chan]), chan=array(df['chan'][i_chan]))
 

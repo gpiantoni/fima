@@ -41,6 +41,7 @@ Information to store in `parameters.json` file.
     - results:
       - onset_percent: float, value between 0 and 1 to calculate onset of the gaussian or gamma window
       - atlas: str, atlas to use for the plots ('a2009s', 'BA', 'DKTatlas')
+      - min_rsquared: float, value between 0 and 1, minimal value to include channels in further analyses
   - viz:
     - colorscale: str, 'Jet'
     - continuous:
