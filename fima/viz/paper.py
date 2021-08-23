@@ -18,6 +18,7 @@ from ..ols.prf import compute_prf_from_parameters
 from ..ols.summary import import_all_ols, import_ols
 from wonambi import Data
 from .surf import plot_surf, AXIS, get_colorscale
+from .finger_channels import plot_coefs_cc
 
 DPmm = 96 / 25.4  # dot per mm
 CONVERT = ['-crop', '2000x2000+2400+1100']
@@ -53,6 +54,8 @@ def plot_papers(parameters):
 
     i_rsquared = df['estimate']['rsquared'] >= parameters['ols']['results']['min_rsquared']
     df = df[i_rsquared].reset_index(drop=True)
+
+    fig = paper_plot_cc(parameters, df, plot_dir)
 
     fig = paper_plot_df_time(df, 'spread')
     fig.write_image(str(plot_dir / 'time_spread.svg'))
@@ -530,3 +533,34 @@ def paper_plot_surf(parameters):
                 )
         )
         fig.write_image(str(plot_dir / f'surf_{param_name}_colorbar.svg'))
+
+
+def paper_plot_cc(parameters, df, plot_dir):
+
+    layout = dict(
+        width=int(DPmm * 80),
+        height=int(DPmm * 50),
+        xaxis=dict(
+            zeroline=False,
+            tickmode='array',
+            tickvals=arange(len(FINGERS)),
+            ticktext=FINGERS,
+            showgrid=False,
+            tickangle=-45,
+        ),
+        yaxis=dict(
+            zeroline=False,
+            autorange='reversed',
+            tickmode='array',
+            tickvals=arange(len(FINGERS)),
+            ticktext=FINGERS,
+            showgrid=False,
+            tickangle=0,
+        ))
+
+    MOVEMENTS = ('flexion', 'extension', 'compare')
+    for region in REGIONS:
+        for movements in MOVEMENTS:
+            fig = plot_coefs_cc(parameters, df, region, movements)
+            fig.update_layout(merge(LAYOUT, layout))
+            fig.write_image(str(plot_dir / f'coef_cc_{region}_{movements}.svg'))
