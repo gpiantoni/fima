@@ -28,7 +28,7 @@ def read_data(parameters, filename, event_onsets, opts, continuous=False):
             post=opts['post'],
             chan=list(chans['name']))
 
-    if parameters['artifacts']['remove']:
+    if parameters['artifacts']['remove'] == "raw":
         data, bad_smp_per_chan = hide_artifacts(parameters, data)
         lg.info(f'{filename.stem} bad points {mean(bad_smp_per_chan):.3f}s, s.d. {std(bad_smp_per_chan):.3f}s [{min(bad_smp_per_chan):.3f}-{max(bad_smp_per_chan):.3f}s]')
 
@@ -43,10 +43,10 @@ def hide_artifacts(parameters, data):
 
     count_samples = []
 
-    bad_smp = int(data.s_freq * parameters['read']['artifacts']['window'] / 2)
+    bad_smp = int(data.s_freq * parameters['artifacts']['window'] / 2)
 
     for i_trl in range(data.number_of('trial')):
-        i_bad = abs(data_comparison.data[i_trl]) > parameters['read']['artifacts']['threshold']
+        i_bad = abs(data_comparison.data[i_trl]) > parameters['artifacts']['threshold']
 
         # before
         padded_bad = i_bad.copy()

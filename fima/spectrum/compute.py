@@ -1,4 +1,4 @@
-from numpy import arange, zeros
+from numpy import arange, zeros, median, diff, pad, NaN
 from wonambi.trans import apply_baseline, timefrequency, concatenate, math, select, filter_
 
 from .baseline import apply_common_baseline
@@ -71,6 +71,9 @@ def get_chantime(parameters, tf, freq=None, baseline=False, freq_operator='nanme
         operator_name=freq_operator,
         axis='freq')
 
+    if parameters['artifacts']['remove'] == "chantime":
+        out = hide_artifacts(parameters, out)
+
     if baseline:
         if parameters['spectrum']['baseline']['common']:
             out = apply_common_baseline(
@@ -98,3 +101,22 @@ def get_chan(parameters, tf, freq=None, baseline=False, time=None, operator_name
             ),
         operator_name=operator_name,
         axis='time')
+
+
+def hide_artifacts(parameters, tf):
+    t = tf.time[0]
+    bad_smp = int(round((parameters['artifacts']['window'] / 2) / median(diff(t))))
+
+    i_bad = tf.data[0] >= parameters['artifacts']['threshold']
+
+    padded_bad = i_bad.copy()
+    for i_roll in range(1, bad_smp):
+        padded_bad |= pad(i_bad, ((0, 0), (i_roll, 0), (0, 0), ), mode='constant', constant_values=False)[:, :-i_roll, :]
+
+    # after
+    for i_roll in range(bad_smp):
+        padded_bad |= pad(i_bad, ((0, 0), (0, i_roll), (0, 0), ), mode='constant', constant_values=False)[:, i_roll:, :]
+
+    tf.data[0][padded_bad] = NaN
+
+    return tf

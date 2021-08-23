@@ -10,10 +10,10 @@ Information to store in `parameters.json` file.
   - read:
     - pre: float, time in s to include before the events
     - post: float, time in s to include after the event
-    - artifacts:
-        - remove: bool, whether to actually remove artifacts or not
-        - threshold: float, threshold in units of the original data to consider it an artifact (done separately for each channel)
-        - window: float, window in s to hide when one point is above the threshold
+  - artifacts:
+    - remove: str, empty (no artifact rejection), "raw" when applied to raw data, "chantime" when applied to time-freq data
+    - threshold: float, threshold in units of the original data to consider it an artifact (done separately for each channel)
+    - window: float, window in s to hide when one point is above the threshold
   - realign:
     - event_type : str, one of 'cues', 'open', 'close', 'movements', 'extension', 'flexion'
   - timepoints:

@@ -18,7 +18,7 @@ function thicken_pial(ribbon, hemi, sm_par, isoparm)
 
 addpath('/home/giovanni/tools/spm12')
 addpath('/home/giovanni/tools/juniper/m-files/CTMR/MATLAB_scripts/Hermes2009/')
-addpath('/home/giovanni/tools/freesurfer/matlab')
+addpath('/usr/local/freesurfer_7.1.1/matlab')
 
 disp(ribbon)
 
