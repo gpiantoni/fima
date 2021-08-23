@@ -33,9 +33,17 @@ def pipeline_ols(parameters, ieeg_file):
 
 def pipeline_ols_all(parameters):
 
-    summary_dir = name(parameters, 'ols_plot')
-
     df = import_all_ols(parameters)
+
+    for acq in df['recording']['acquisition'].unique():
+        pipe_ols_all(parameters, df, acq)
+
+
+def pipe_ols_all(parameters, df, acq):
+    i_acq = df['recording']['acquisition'] == acq
+    df = df[i_acq].reset_index(drop=False)
+
+    summary_dir = name(parameters, 'ols_plot') / acq
 
     REGIONS = ['DKTatlas']
     divs = []

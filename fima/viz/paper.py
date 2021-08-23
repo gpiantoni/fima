@@ -50,6 +50,10 @@ def plot_papers(parameters):
     fig.write_image(str(plot_dir / 'rsquared.svg'))
 
     df = import_all_ols(parameters)
+
+    i_rsquared = df['estimate']['rsquared'] >= parameters['ols']['results']['min_rsquared']
+    df = df[i_rsquared].reset_index(drop=True)
+
     fig = paper_plot_df_time(df, 'spread')
     fig.write_image(str(plot_dir / 'time_spread.svg'))
     fig = paper_plot_df_time(df, 'onset')
@@ -282,19 +286,18 @@ def paper_plot_rsquared(parameters):
 
 
 def paper_plot_df_time(df, param):
-    width = 0.05
+    width = 0.02
 
     markers = dict(
-        color='white',
+        color='grey',
         line=dict(
-            width=2,
+            width=0,
             color='black',
             ),
         )
 
-    i_rsquared = df['estimate']['rsquared'] > param['ols']['results']['min_rsquared']
     i_region = df['channel']['DKTatlas'].isin(REGIONS)
-    y = df[i_rsquared & i_region]['estimate'][param]
+    y = df[i_region]['estimate'][param]
 
     min_val = floor(y.min() / 0.05) * 0.05
     max_val = ceil(y.max() / 0.05) * 0.05
@@ -305,7 +308,7 @@ def paper_plot_df_time(df, param):
 
     for region in REGIONS:
         i_region = df['channel']['DKTatlas'] == region
-        y = df[i_rsquared & i_region]['estimate'][param]
+        y = df[i_region]['estimate'][param]
         h0 = histogram(y, t_plot)[0]
         h_all.append(h0)
 
@@ -355,11 +358,10 @@ def paper_plot_df_time(df, param):
     return fig
 
 
-def paper_plot_prf(df, param):
+def paper_plot_prf(df):
 
     pick_finger = lambda v: int(floor(v + 0.5))
     figs = []
-    i_rsquared = df['estimate']['rsquared'] >= param['ols']['results']['min_rsquared']
 
     for region in REGIONS:
         i_region = df['channel']['DKTatlas'] == region
@@ -373,7 +375,7 @@ def paper_plot_prf(df, param):
             i_prf = df_prf['rsquared'] >= 0.9  # TODO: in parameters
             main_finger = df_prf['finger'].apply(pick_finger)
 
-            i_row = i_region & i_rsquared & i_prf & main_finger.isin(range(5))
+            i_row = i_region & i_prf & main_finger.isin(range(5))
             m[movement_type] = df_prf[i_row].groupby(main_finger).mean()['spread']
             s[movement_type] = df_prf[i_row].groupby(main_finger).std()['spread'] / sqrt(i_row.sum())
 
@@ -453,9 +455,8 @@ def paper_plot_surf(parameters):
 
         else:
 
-            i_chan = (df['rsquared'] >= param['ols']['results']['min_rsquared'])
             # TODO: include best fit for extension loc and flexion loc
-            dat = Data(array(df[param][i_chan]), chan=array(df['chan'][i_chan]))
+            dat = Data(array(df[param]), chan=array(df['chan']))
 
             if param.endswith(' loc'):
                 colorbar, colorlim, colorscale = get_colorscale(

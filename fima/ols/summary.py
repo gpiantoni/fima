@@ -70,6 +70,9 @@ def import_all_ols(parameters):
     df1.loc[isnull(df1['channel']['a2009s']), ('channel', 'a2009s')] = 'unknown'
     df1.loc[isnull(df1['channel']['BA']), ('channel', 'BA')] = 'unknown'
 
+    i_df = df1['recording']['acquisition'] == parameters['ols']['acquisition']
+    df1 = df1[i_df].reset_index(drop=True)
+
     return df1
 
 

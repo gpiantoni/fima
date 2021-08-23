@@ -35,6 +35,7 @@ Information to store in `parameters.json` file.
       - peak: str, 'positive' or 'negative', look for the highest and lowest peak
       - timeinterval: float, center of the time window
   - ols:
+    - acquisition: str, type of electrodes to use, but only for paper, 'HDgrid' or 'clinical' 
     - threshold: float
     - window:
       - method: str, 'gaussian' or 'gamma'
