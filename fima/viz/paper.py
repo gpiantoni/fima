@@ -1,7 +1,7 @@
 from pathlib import Path
 from shutil import rmtree
 from numpy import arange, array, ceil, floor, histogram, max, sqrt, zeros
-from scipy.stats import norm
+from scipy.stats import norm, linregress
 from subprocess import run
 import plotly.graph_objects as go
 
@@ -23,7 +23,11 @@ from .finger_channels import plot_coefs_cc
 DPmm = 96 / 25.4  # dot per mm
 CONVERT = ['-crop', '2000x2000+2400+1100']
 
-REGIONS = 'precentral', 'postcentral'
+REGIONS = {
+    'precentral': 'blue',
+    'postcentral': 'red',
+    }
+
 SCENE = dict(
     scene=dict(
         camera=dict(
@@ -54,6 +58,8 @@ def plot_papers(parameters):
 
     i_rsquared = df['estimate']['rsquared'] >= parameters['ols']['results']['min_rsquared']
     df = df[i_rsquared].reset_index(drop=True)
+
+    fig = paper_finger_spread(parameters, df, plot_dir)
 
     fig = paper_plot_cc(parameters, df, plot_dir)
 
@@ -564,3 +570,73 @@ def paper_plot_cc(parameters, df, plot_dir):
             fig = plot_coefs_cc(parameters, df, region, movements)
             fig.update_layout(merge(LAYOUT, layout))
             fig.write_image(str(plot_dir / f'coef_cc_{region}_{movements}.svg'))
+
+
+def paper_finger_spread(parameters, df, plot_dir):
+
+    region_type = parameters['ols']['results']['atlas']
+
+    for mov in ('prf_ext', 'prf_flex'):
+
+        traces = []
+        for region in REGIONS:
+
+            i_region = df['channel'][region_type] == region
+            i_prf = df[mov]['rsquared'] > parameters['ols']['results']['prf_rsquared']
+            i = i_prf & i_region
+            res = linregress(
+                df[mov]['finger'][i],
+                df[mov]['spread'][i],
+                )
+
+            traces.append(
+                go.Scatter(
+                    x=df[mov]['finger'][i],
+                    y=df[mov]['spread'][i],
+                    mode='markers',
+                    name=region,
+                    text=df[mov]['rsquared'][i],
+                    marker=dict(
+                        color=REGIONS[region],
+                        )
+                    ),
+                )
+
+            traces.append(
+                go.Scatter(
+                    x=[-1, 5],
+                    y=[-1 * res.slope + res.intercept, 5 * res.slope + res.intercept],
+                    mode='lines',
+                    name=f'{region} (fitted)',
+                    line=dict(
+                        color=REGIONS[region],
+                        )
+                    )
+                )
+
+        layout = dict(
+            width=int(DPmm * 100),
+            height=int(DPmm * 60),
+            xaxis=dict(
+                zeroline=False,
+                tickmode='array',
+                tickvals=arange(len(FINGERS)),
+                ticktext=FINGERS,
+                showgrid=False,
+                tickangle=-45,
+            ),
+            yaxis=dict(
+                zeroline=False,
+                showgrid=True,
+                tickangle=0,
+                dtick=1,
+                title=dict(
+                    text='spread (sigma)',
+                )
+            ))
+
+        fig = go.Figure(
+            data=traces,
+            layout=merge(LAYOUT, layout),
+            )
+        fig.write_image(str(plot_dir / f'fingerspread_{mov}.svg'))

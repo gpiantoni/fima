@@ -1,8 +1,8 @@
 """Compute PRF on the parameter estimate, not the raw data
 """
-from scipy.stats import norm
 from scipy.optimize import least_squares
-from numpy import arange, array, corrcoef, argmax
+from scipy.stats import linregress
+from numpy import arange, array, corrcoef, argmax, exp, Inf
 from json import load as json_load
 from json import dump
 
@@ -39,22 +39,31 @@ def compute_prf_from_parameters(j, finger_group):
     j[movement_type + ' mode'] = int(argmax(data))
 
     result = least_squares(
-        gaussian,
-        x0=[2, 0.5],
+        penalty,
+        x0=[0, 1, 2, 0.5],
         bounds=(
-            [-1, 0.01],
-            [5, 10]),
+            [-Inf, 0, -1, 0.01],
+            [Inf, Inf, 5, 5],
+        ),
         args=[data, ],
-        max_nfev=1e4,
+        method='trf',
+        loss='soft_l1',
         )
 
-    j[movement_type + ' loc'] = result.x[0]
-    j[movement_type + ' scale'] = result.x[1]
-    # from 1 - cc to rsquared
-    j[movement_type + ' rsquared'] = (1 - result.fun[0]) ** 2
+    j[movement_type + ' const'] = result.x[0]
+    j[movement_type + ' ampl'] = result.x[1]
+    j[movement_type + ' loc'] = result.x[2]
+    j[movement_type + ' scale'] = result.x[3]
+    j[movement_type + ' rsquared'] = linregress(data, gaussian(result.x))[2] ** 2
 
 
-def gaussian(x0, y):
-    loc, scale = x0
-    y1 = norm.pdf(arange(5), loc=loc, scale=scale)
-    return 1 - corrcoef(y, y1)[0, 1]
+def penalty(x0, y):
+    return gaussian(x0) - y
+
+
+def gaussian(x0):
+    const, ampl, loc, scale = x0
+    x = arange(5)
+    # y1 = norm.pdf(x, loc=loc, scale=scale)
+    y1 = exp(-(x - loc) ** 2. / (2 * scale ** 2.))
+    return y1 * ampl + const

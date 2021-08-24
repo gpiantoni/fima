@@ -58,9 +58,9 @@ def plot_coefs_cc(parameters, df, region, movements):
     traces = [
         go.Heatmap(
             z=cc,
-            zmin=0,
+            zmin=-1,
             zmax=1,
-            colorscale=parameters['viz']['colorscale'],
+            colorscale=parameters['viz']['diverging'],
             ),
         ]
 
