@@ -183,4 +183,4 @@ def pipeline_ols_prf(parameters, ieeg_file):
     out_dir = name(parameters, 'ols_chan', ieeg_file)
 
     for json_file in out_dir.glob('*.json'):
-        add_prf_estimates(json_file)
+        add_prf_estimates(parameters, json_file)

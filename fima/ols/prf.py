@@ -9,7 +9,7 @@ from json import dump
 from ..parameters import FINGERS_EXTENSION, FINGERS_FLEXION, FINGERS_OPEN, FINGERS_CLOSED
 
 
-def add_prf_estimates(json_file):
+def add_prf_estimates(parameters, json_file):
     with json_file.open() as f:
         j = json_load(f)
 
@@ -20,8 +20,8 @@ def add_prf_estimates(json_file):
         columns_open = FINGERS_EXTENSION
         columns_closed = FINGERS_FLEXION
 
-    compute_prf_from_parameters(j, columns_open)
-    compute_prf_from_parameters(j, columns_closed)
+    compute_prf_from_parameters(parameters, j, columns_open)
+    compute_prf_from_parameters(parameters, j, columns_closed)
 
     y_ext = [j[k] for k in columns_open]
     y_flex = [j[k] for k in columns_closed]
@@ -32,7 +32,7 @@ def add_prf_estimates(json_file):
         dump(j, f, indent=2)
 
 
-def compute_prf_from_parameters(j, finger_group):
+def compute_prf_from_parameters(parameters, j, finger_group):
     movement_type = finger_group[0].split()[1]
     data = [j[k] for k in finger_group]
 
@@ -42,8 +42,18 @@ def compute_prf_from_parameters(j, finger_group):
         penalty,
         x0=[0, 1, 2, 0.5],
         bounds=(
-            [-Inf, 0, -1, 0.01],
-            [Inf, Inf, 5, 5],
+            [
+                -Inf,
+                -Inf,
+                parameters['ols']['ranges']['finger'][0],
+                parameters['ols']['ranges']['spread'][0],
+            ],
+            [
+                Inf,
+                Inf,
+                parameters['ols']['ranges']['finger'][1],
+                parameters['ols']['ranges']['spread'][1],
+            ],
         ),
         args=[data, ],
         method='trf',

@@ -39,6 +39,9 @@ Information to store in `parameters.json` file.
     - threshold: float
     - window:
       - method: str, 'gaussian' or 'gamma'
+    - ranges:
+      - finger: [float, float], low and high ranges for fingers (0 is thumb, 4 is little)
+      - spread: [float, float], low and high ranges for spread
     - results:
       - onset_percent: float, value between 0 and 1 to calculate onset of the gaussian or gamma window
       - atlas: str, atlas to use for the plots ('a2009s', 'BA', 'DKTatlas')

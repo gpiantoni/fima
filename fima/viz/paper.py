@@ -28,6 +28,15 @@ REGIONS = {
     'postcentral': 'red',
     }
 
+
+COLORS_PARAM = {
+    'onset': (-0.5, 0),
+    'scale': (0, 0.3),
+    'loc': (0, 0.3),
+    }
+COLORS_PARAM['spread'] = COLORS_PARAM['scale']
+COLORS_PARAM['peak'] = COLORS_PARAM['loc']
+
 SCENE = dict(
     scene=dict(
         camera=dict(
@@ -144,8 +153,8 @@ def paper_plot_data_prediction(parameters):
         columns_open = FINGERS_EXTENSION
         columns_closed = FINGERS_FLEXION
 
-    compute_prf_from_parameters(j, columns_open)
-    compute_prf_from_parameters(j, columns_closed)
+    compute_prf_from_parameters(parameters, j, columns_open)
+    compute_prf_from_parameters(parameters, j, columns_closed)
 
     fig = plot_data_prediction(t_plot, result, names)
 
@@ -297,14 +306,6 @@ def paper_plot_rsquared(parameters):
 def paper_plot_df_time(df, param):
     width = 0.02
 
-    markers = dict(
-        color='grey',
-        line=dict(
-            width=0,
-            color='black',
-            ),
-        )
-
     i_region = df['channel']['DKTatlas'].isin(REGIONS)
     y = df[i_region]['estimate'][param]
 
@@ -314,6 +315,17 @@ def paper_plot_df_time(df, param):
 
     traces = []
     h_all = []
+
+    markers = dict(
+        color=t_plot,
+        colorscale='jet',
+        cmin=COLORS_PARAM[param][0],
+        cmax=COLORS_PARAM[param][1],
+        line=dict(
+            width=0,
+            color='black',
+            ),
+        )
 
     for region in REGIONS:
         i_region = df['channel']['DKTatlas'] == region
@@ -478,20 +490,10 @@ def paper_plot_surf(parameters):
                     clim=(0, 3),
                     colorscale='Hot',
                     )
-            elif param == 'onset':
+            elif param in ('onset', 'scale', 'loc'):
                 colorbar, colorlim, colorscale = get_colorscale(
                     parameters,
-                    clim=(-0.5, 0)
-                    )
-            elif param == 'scale':
-                colorbar, colorlim, colorscale = get_colorscale(
-                    parameters,
-                    clim=(0, 0.3)
-                    )
-            elif param == 'loc':
-                colorbar, colorlim, colorscale = get_colorscale(
-                    parameters,
-                    clim=(0, 0.3),
+                    clim=COLORS_PARAM[param],
                     )
 
         fig = plot_surf(parameters, dat, elec, pial=pial, clim=colorlim, colorscale=colorscale)
@@ -576,6 +578,10 @@ def paper_finger_spread(parameters, df, plot_dir):
 
     region_type = parameters['ols']['results']['atlas']
 
+    results = [
+        'movement\tregion\tintercept\tslope\trsquared\tpvalue',
+        ]
+
     for mov in ('prf_ext', 'prf_flex'):
 
         traces = []
@@ -583,10 +589,18 @@ def paper_finger_spread(parameters, df, plot_dir):
 
             i_region = df['channel'][region_type] == region
             i_prf = df[mov]['rsquared'] > parameters['ols']['results']['prf_rsquared']
+            i_prf &= df[mov]['finger'] > (parameters['ols']['ranges']['finger'][0] + 0.001)
+            i_prf &= df[mov]['finger'] < (parameters['ols']['ranges']['finger'][1] - 0.001)
+            i_prf &= df[mov]['spread'] > (parameters['ols']['ranges']['spread'][0] + 0.001)
+            i_prf &= df[mov]['spread'] < (parameters['ols']['ranges']['spread'][1] - 0.001)
+
             i = i_prf & i_region
             res = linregress(
                 df[mov]['finger'][i],
                 df[mov]['spread'][i],
+                )
+            results.append(
+                f'{mov}\t{region}\t{res.intercept:.3f}\t{res.slope:0.3f}\t{res.rvalue ** 2:0.3f}\t{res.pvalue:0.3f}'
                 )
 
             traces.append(
@@ -626,6 +640,7 @@ def paper_finger_spread(parameters, df, plot_dir):
                 tickangle=-45,
             ),
             yaxis=dict(
+                range=(0, parameters['ols']['ranges']['spread'][1]),
                 zeroline=False,
                 showgrid=True,
                 tickangle=0,
@@ -640,3 +655,7 @@ def paper_finger_spread(parameters, df, plot_dir):
             layout=merge(LAYOUT, layout),
             )
         fig.write_image(str(plot_dir / f'fingerspread_{mov}.svg'))
+
+    res_file = plot_dir / 'fingerspread.tsv'
+    with res_file.open('w') as f:
+        f.write('\n'.join(results))
