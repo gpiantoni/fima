@@ -9,6 +9,7 @@ from numpy import (
     )
 
 from ..fingers.max_activity import FINGERS
+from .utils import TICKFONT
 
 
 def plot_finger_chan(v, chans):
@@ -40,6 +41,7 @@ def plot_coefs_cc(parameters, df, region, movements):
 
     cc = zeros((5, 5))
     cc.fill(NaN)
+    annots = []
     for i0, f0 in enumerate(FINGERS):
         for i1, f1 in enumerate(FINGERS):
             mov0 = mov1 = movements
@@ -53,7 +55,17 @@ def plot_coefs_cc(parameters, df, region, movements):
                 else:
                     mov0 = 'flexion'
                     mov1 = 'extension'
-            cc[i0, i1] = fisher_corrcoef(df[mov0][f0][i_region], df[mov1][f1][i_region])
+            val = fisher_corrcoef(df[mov0][f0][i_region], df[mov1][f1][i_region])
+            cc[i0, i1] = val
+            annots.append({
+                'x': i1,
+                'y': i0,
+                'showarrow': False,
+                'text': f'{val:0.2f}',
+                'xref': 'x',
+                'yref': 'y',
+                'font': TICKFONT,
+                })
 
     traces = [
         go.Heatmap(
@@ -66,6 +78,7 @@ def plot_coefs_cc(parameters, df, region, movements):
 
     fig = go.Figure(
         data=traces,
+        layout=go.Layout(annotations=annots),
         )
     return fig
 
